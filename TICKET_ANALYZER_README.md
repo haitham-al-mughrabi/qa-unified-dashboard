@@ -38,21 +38,38 @@ A web-based tool to analyze ticket resolution times from Excel files.
 
 ## Excel File Requirements
 
-Your Excel file should contain the following columns:
+Your Excel file should contain one of the following column formats:
+
+**Format 1 (Tickets):**
 - **Ticket created - Date**: The date when the ticket was created (Required)
 - **Ticket solved - Date**: The date when the ticket was solved (Required)
-- **Tickets**: Ticket identifier or count (Optional)
+
+**Format 2 (Issues):**
+- **Issue created date**: The date when the issue was created (Required)
+- **Issue resolution date**: The date when the issue was resolved (Required)
 
 ### Note
 - Column names are case-insensitive
 - The application can work with partial matches (e.g., "ticket created" will match)
 - Each sheet in the Excel file will be treated as a separate month/period
+- Works with single-sheet or multi-sheet Excel files
+
+## Supported Date Formats
+
+The application automatically detects and parses multiple date formats:
+- **ISO Date**: `2025-09-26`
+- **DateTime**: `2025-08-12 13:46:04`
+- **Text Format**: `Aug 03 2025`, `August 03 2025`
+- **Slash Format**: `08/12/2025`, `12/08/2025`
+- **Dash Format**: `12-08-2025`
+
+The parser is flexible and will automatically detect which format your dates are in.
 
 ## Calculation Method
 
-The application calculates the time difference between "Ticket created - Date" and "Ticket solved - Date".
+The application calculates the time difference between created date and resolved/solved date.
 
-A ticket is considered "resolved in 2 or less days" if the time difference is ≤ 48 hours (2 days).
+A ticket/issue is considered "resolved in 2 or less days" if the time difference is ≤ 48 hours (2 days).
 
 **Formula:**
 - # of total tickets = Count of all rows with valid created and solved dates
@@ -61,14 +78,17 @@ A ticket is considered "resolved in 2 or less days" if the time difference is �
 
 ## Quarter Detection
 
-The application automatically detects which quarter each sheet belongs to based on the sheet name:
+The application automatically detects which quarter each sheet belongs to based on:
+1. **Sheet name** (e.g., "January 2025", "Feb", "Q2 Report")
+2. **File name** (e.g., "Q2_2025.xlsx", "April_tickets.xlsx") - used when sheet name doesn't contain month info
 
-- **Q1 (January - March)**: Sheet names containing "January", "Jan", "February", "Feb", "March", "Mar", or "Q1"
-- **Q2 (April - June)**: Sheet names containing "April", "Apr", "May", "June", "Jun", or "Q2"
-- **Q3 (July - September)**: Sheet names containing "July", "Jul", "August", "Aug", "September", "Sep", or "Q3"
-- **Q4 (October - December)**: Sheet names containing "October", "Oct", "November", "Nov", "December", "Dec", or "Q4"
+**Quarter Mapping:**
+- **Q1 (January - March)**: "January", "Jan", "February", "Feb", "March", "Mar", or "Q1"
+- **Q2 (April - June)**: "April", "Apr", "May", "June", "Jun", or "Q2"
+- **Q3 (July - September)**: "July", "Jul", "August", "Aug", "September", "Sep", or "Q3"
+- **Q4 (October - December)**: "October", "Oct", "November", "Nov", "December", "Dec", or "Q4"
 
-The quarter cards will only appear if at least one month from that quarter is detected in your Excel file.
+The quarter cards will only appear if at least one month from that quarter is detected. This is especially useful for single-sheet Excel files where the month is in the filename.
 
 ## Browser Compatibility
 

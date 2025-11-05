@@ -153,13 +153,28 @@
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 40px;
             color: white;
             font-size: 1.2em;
         }
 
         .loading.active {
             display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .error {
@@ -303,7 +318,8 @@
         </div>
 
         <div class="loading" id="loading">
-            Processing your file...
+            <div class="spinner"></div>
+            <div>Processing your file...</div>
         </div>
 
         <div class="error" id="error"></div>
@@ -321,12 +337,15 @@
     </div>
 
     <script>
+        let currentFileName = '';
+
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
+            currentFileName = file.name;
             document.getElementById('fileName').textContent = file.name;
             document.getElementById('loading').classList.add('active');
             document.getElementById('error').classList.remove('active');
@@ -385,7 +404,7 @@
             });
 
             if (results.length === 0) {
-                showError('No valid data found in the Excel file. Please ensure the file contains the required headers: "Ticket created - Date" and "Ticket solved - Date"');
+                showError('No valid data found in the Excel file. Please ensure the file contains one of these header formats:\n- "Ticket created - Date" and "Ticket solved - Date"\n- "Issue created date" and "Issue resolution date"');
                 return;
             }
 
@@ -395,7 +414,11 @@
         }
 
         function getQuarterFromSheetName(sheetName) {
-            const lowerName = sheetName.toLowerCase();
+            // Try sheet name first, then filename
+            const searchStrings = [sheetName.toLowerCase()];
+            if (currentFileName) {
+                searchStrings.push(currentFileName.toLowerCase());
+            }
 
             // Month mapping to quarters
             const monthToQuarter = {
@@ -413,18 +436,20 @@
                 'december': 'Q4', 'dec': 'Q4'
             };
 
-            // Check if sheet name contains month name
-            for (const [month, quarter] of Object.entries(monthToQuarter)) {
-                if (lowerName.includes(month)) {
-                    return quarter;
+            for (const searchStr of searchStrings) {
+                // Check if contains month name
+                for (const [month, quarter] of Object.entries(monthToQuarter)) {
+                    if (searchStr.includes(month)) {
+                        return quarter;
+                    }
                 }
-            }
 
-            // Check if sheet name contains Q1, Q2, Q3, Q4
-            if (lowerName.includes('q1') || lowerName.includes('quarter 1')) return 'Q1';
-            if (lowerName.includes('q2') || lowerName.includes('quarter 2')) return 'Q2';
-            if (lowerName.includes('q3') || lowerName.includes('quarter 3')) return 'Q3';
-            if (lowerName.includes('q4') || lowerName.includes('quarter 4')) return 'Q4';
+                // Check if contains Q1, Q2, Q3, Q4
+                if (searchStr.includes('q1') || searchStr.includes('quarter 1')) return 'Q1';
+                if (searchStr.includes('q2') || searchStr.includes('quarter 2')) return 'Q2';
+                if (searchStr.includes('q3') || searchStr.includes('quarter 3')) return 'Q3';
+                if (searchStr.includes('q4') || searchStr.includes('quarter 4')) return 'Q4';
+            }
 
             return null;
         }
@@ -521,11 +546,22 @@
 
             // Find the correct column headers (case-insensitive)
             const headers = Object.keys(data[0] || {});
-            const createdDateCol = headers.find(h => h.toLowerCase().includes('ticket created'));
-            const solvedDateCol = headers.find(h => h.toLowerCase().includes('ticket solved'));
+
+            // Support multiple header formats
+            // Format 1: "Ticket created - Date", "Ticket solved - Date"
+            // Format 2: "Issue created date", "Issue resolution date"
+            let createdDateCol = headers.find(h =>
+                h.toLowerCase().includes('ticket created') ||
+                h.toLowerCase().includes('issue created')
+            );
+            let solvedDateCol = headers.find(h =>
+                h.toLowerCase().includes('ticket solved') ||
+                h.toLowerCase().includes('issue resolution') ||
+                h.toLowerCase().includes('issue resolved')
+            );
 
             if (!createdDateCol || !solvedDateCol) {
-                console.warn(`Sheet "${sheetName}" doesn't have the expected columns (Ticket created - Date, Ticket solved - Date)`);
+                console.warn(`Sheet "${sheetName}" doesn't have the expected columns. Looking for created/solved date columns.`);
                 return null;
             }
 
@@ -569,23 +605,69 @@
                 return dateStr;
             }
 
-            // Try parsing as ISO date
-            const date = new Date(dateStr);
+            // Convert to string if it's not
+            const str = String(dateStr).trim();
+            if (!str) return null;
+
+            // Try parsing as is (handles ISO dates and datetime)
+            // Examples: "2025-08-12 13:46:04", "2025-09-26", "Aug 03 2025"
+            let date = new Date(str);
             if (!isNaN(date.getTime())) {
                 return date;
             }
 
-            // Try parsing common date formats
+            // Try parsing common date formats with regex
             const formats = [
-                /(\d{4})-(\d{2})-(\d{2})/, // YYYY-MM-DD
-                /(\d{2})\/(\d{2})\/(\d{4})/, // MM/DD/YYYY
-                /(\d{2})-(\d{2})-(\d{4})/, // DD-MM-YYYY
+                // YYYY-MM-DD HH:MM:SS
+                /(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/,
+                // YYYY-MM-DD
+                /(\d{4})-(\d{2})-(\d{2})/,
+                // DD/MM/YYYY
+                /(\d{2})\/(\d{2})\/(\d{4})/,
+                // MM/DD/YYYY
+                /(\d{1,2})\/(\d{1,2})\/(\d{4})/,
+                // DD-MM-YYYY
+                /(\d{2})-(\d{2})-(\d{4})/,
             ];
 
             for (const format of formats) {
-                const match = dateStr.match(format);
+                const match = str.match(format);
                 if (match) {
-                    return new Date(dateStr);
+                    date = new Date(str);
+                    if (!isNaN(date.getTime())) {
+                        return date;
+                    }
+                }
+            }
+
+            // Try parsing month name formats like "Aug 03 2025"
+            // Month abbreviations
+            const monthAbbr = {
+                'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+                'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11,
+                'january': 0, 'february': 1, 'march': 2, 'april': 3, 'june': 6,
+                'july': 6, 'august': 7, 'september': 8, 'october': 9, 'november': 10, 'december': 11
+            };
+
+            // Try: "Aug 03 2025" or "August 03 2025"
+            const monthDayYear = str.match(/([a-z]+)\s+(\d{1,2})[,\s]+(\d{4})/i);
+            if (monthDayYear) {
+                const month = monthAbbr[monthDayYear[1].toLowerCase()];
+                if (month !== undefined) {
+                    const day = parseInt(monthDayYear[2]);
+                    const year = parseInt(monthDayYear[3]);
+                    return new Date(year, month, day);
+                }
+            }
+
+            // Try: "03 Aug 2025"
+            const dayMonthYear = str.match(/(\d{1,2})\s+([a-z]+)[,\s]+(\d{4})/i);
+            if (dayMonthYear) {
+                const month = monthAbbr[dayMonthYear[2].toLowerCase()];
+                if (month !== undefined) {
+                    const day = parseInt(dayMonthYear[1]);
+                    const year = parseInt(dayMonthYear[3]);
+                    return new Date(year, month, day);
                 }
             }
 
