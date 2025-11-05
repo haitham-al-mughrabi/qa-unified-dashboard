@@ -212,6 +212,77 @@
             color: #666;
             font-size: 0.9em;
         }
+
+        .quarter-section {
+            margin-bottom: 30px;
+        }
+
+        .quarter-section h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .quarter-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            color: white;
+        }
+
+        .quarter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .quarter-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .quarter-card .metric {
+            margin-bottom: 15px;
+        }
+
+        .quarter-card .metric-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .quarter-card .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .quarter-card .percentage {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 1em;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .quarter-card .progress-bar {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .quarter-card .progress-fill {
+            background: white;
+        }
+
+        .month-section h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
     </style>
 </head>
 <body>
@@ -239,7 +310,14 @@
 
         <div id="summaryContainer"></div>
 
-        <div class="results-container" id="results"></div>
+        <div id="quarterSection" class="quarter-section">
+            <div class="results-container" id="quarterResults"></div>
+        </div>
+
+        <div class="month-section">
+            <h2 id="monthSectionTitle" style="display: none;">📅 Monthly Breakdown</h2>
+            <div class="results-container" id="results"></div>
+        </div>
     </div>
 
     <script>
@@ -253,7 +331,16 @@
             document.getElementById('loading').classList.add('active');
             document.getElementById('error').classList.remove('active');
             document.getElementById('results').innerHTML = '';
+            document.getElementById('quarterResults').innerHTML = '';
             document.getElementById('summaryContainer').innerHTML = '';
+            document.getElementById('monthSectionTitle').style.display = 'none';
+
+            // Clear quarter section title if it exists
+            const quarterSection = document.getElementById('quarterSection');
+            const existingTitle = quarterSection.querySelector('h2');
+            if (existingTitle) {
+                existingTitle.remove();
+            }
 
             const reader = new FileReader();
 
@@ -298,12 +385,134 @@
             });
 
             if (results.length === 0) {
-                showError('No valid data found in the Excel file. Please ensure the file contains the required headers: "Ticket created - Date", "Ticket solved - Date", "Full resolution time (mins)", "Tickets"');
+                showError('No valid data found in the Excel file. Please ensure the file contains the required headers: "Ticket created - Date" and "Ticket solved - Date"');
                 return;
             }
 
             displaySummary(totalTickets, totalResolvedIn2Days);
+            displayQuarterResults(results);
             displayResults(results);
+        }
+
+        function getQuarterFromSheetName(sheetName) {
+            const lowerName = sheetName.toLowerCase();
+
+            // Month mapping to quarters
+            const monthToQuarter = {
+                'january': 'Q1', 'jan': 'Q1',
+                'february': 'Q1', 'feb': 'Q1',
+                'march': 'Q1', 'mar': 'Q1',
+                'april': 'Q2', 'apr': 'Q2',
+                'may': 'Q2',
+                'june': 'Q2', 'jun': 'Q2',
+                'july': 'Q3', 'jul': 'Q3',
+                'august': 'Q3', 'aug': 'Q3',
+                'september': 'Q3', 'sep': 'Q3', 'sept': 'Q3',
+                'october': 'Q4', 'oct': 'Q4',
+                'november': 'Q4', 'nov': 'Q4',
+                'december': 'Q4', 'dec': 'Q4'
+            };
+
+            // Check if sheet name contains month name
+            for (const [month, quarter] of Object.entries(monthToQuarter)) {
+                if (lowerName.includes(month)) {
+                    return quarter;
+                }
+            }
+
+            // Check if sheet name contains Q1, Q2, Q3, Q4
+            if (lowerName.includes('q1') || lowerName.includes('quarter 1')) return 'Q1';
+            if (lowerName.includes('q2') || lowerName.includes('quarter 2')) return 'Q2';
+            if (lowerName.includes('q3') || lowerName.includes('quarter 3')) return 'Q3';
+            if (lowerName.includes('q4') || lowerName.includes('quarter 4')) return 'Q4';
+
+            return null;
+        }
+
+        function calculateQuarterStats(results) {
+            const quarters = {
+                'Q1': { totalTickets: 0, resolvedIn2Days: 0, months: [] },
+                'Q2': { totalTickets: 0, resolvedIn2Days: 0, months: [] },
+                'Q3': { totalTickets: 0, resolvedIn2Days: 0, months: [] },
+                'Q4': { totalTickets: 0, resolvedIn2Days: 0, months: [] }
+            };
+
+            results.forEach(result => {
+                const quarter = getQuarterFromSheetName(result.sheetName);
+                if (quarter && quarters[quarter]) {
+                    quarters[quarter].totalTickets += result.totalTickets;
+                    quarters[quarter].resolvedIn2Days += result.resolvedIn2Days;
+                    quarters[quarter].months.push(result.sheetName);
+                }
+            });
+
+            // Calculate percentages and filter out empty quarters
+            const quarterResults = [];
+            for (const [quarterName, data] of Object.entries(quarters)) {
+                if (data.totalTickets > 0) {
+                    const percentage = ((data.resolvedIn2Days / data.totalTickets) * 100).toFixed(2);
+                    quarterResults.push({
+                        quarterName,
+                        totalTickets: data.totalTickets,
+                        resolvedIn2Days: data.resolvedIn2Days,
+                        percentage,
+                        months: data.months
+                    });
+                }
+            }
+
+            return quarterResults;
+        }
+
+        function displayQuarterResults(results) {
+            const quarterResults = calculateQuarterStats(results);
+
+            if (quarterResults.length === 0) return;
+
+            const quarterContainer = document.getElementById('quarterResults');
+            const quarterSection = document.getElementById('quarterSection');
+
+            // Add title
+            const title = document.createElement('h2');
+            title.textContent = '📊 Quarterly Summary';
+            title.style.color = 'white';
+            title.style.marginBottom = '20px';
+            title.style.fontSize = '1.8em';
+            quarterSection.insertBefore(title, quarterContainer);
+
+            quarterResults.forEach(quarter => {
+                const card = document.createElement('div');
+                card.className = 'quarter-card';
+
+                const monthsList = quarter.months.join(', ');
+
+                card.innerHTML = `
+                    <div class="quarter-title">📈 ${quarter.quarterName}</div>
+                    <div class="metric">
+                        <div class="metric-label">Months: ${monthsList}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Total Tickets</div>
+                        <div class="metric-value">${quarter.totalTickets}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Resolved in ≤2 Days</div>
+                        <div class="metric-value">${quarter.resolvedIn2Days}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Success Rate</div>
+                        <div class="percentage">${quarter.percentage}%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${quarter.percentage}%"></div>
+                    </div>
+                `;
+
+                quarterContainer.appendChild(card);
+            });
+
+            // Show monthly section title
+            document.getElementById('monthSectionTitle').style.display = 'block';
         }
 
         function analyzeSheet(sheetName, data) {
@@ -314,45 +523,30 @@
             const headers = Object.keys(data[0] || {});
             const createdDateCol = headers.find(h => h.toLowerCase().includes('ticket created'));
             const solvedDateCol = headers.find(h => h.toLowerCase().includes('ticket solved'));
-            const resolutionTimeCol = headers.find(h => h.toLowerCase().includes('full resolution time'));
 
-            if (!createdDateCol && !solvedDateCol && !resolutionTimeCol) {
-                console.warn(`Sheet "${sheetName}" doesn't have the expected columns`);
+            if (!createdDateCol || !solvedDateCol) {
+                console.warn(`Sheet "${sheetName}" doesn't have the expected columns (Ticket created - Date, Ticket solved - Date)`);
                 return null;
             }
 
             data.forEach(row => {
                 // Skip empty rows
-                if (!row[createdDateCol] && !row[solvedDateCol]) {
+                if (!row[createdDateCol] || !row[solvedDateCol]) {
                     return;
                 }
 
                 totalTickets++;
 
-                // Method 1: Use resolution time in minutes if available
-                if (resolutionTimeCol && row[resolutionTimeCol]) {
-                    const resolutionMinutes = parseFloat(row[resolutionTimeCol]);
-                    if (!isNaN(resolutionMinutes)) {
-                        const resolutionDays = resolutionMinutes / (60 * 24);
-                        if (resolutionDays <= 2) {
-                            resolvedIn2Days++;
-                        }
-                        return;
-                    }
-                }
+                // Calculate from created and solved dates
+                const createdDate = parseDate(row[createdDateCol]);
+                const solvedDate = parseDate(row[solvedDateCol]);
 
-                // Method 2: Calculate from created and solved dates
-                if (createdDateCol && solvedDateCol && row[createdDateCol] && row[solvedDateCol]) {
-                    const createdDate = parseDate(row[createdDateCol]);
-                    const solvedDate = parseDate(row[solvedDateCol]);
+                if (createdDate && solvedDate) {
+                    const diffTime = Math.abs(solvedDate - createdDate);
+                    const diffDays = diffTime / (1000 * 60 * 60 * 24);
 
-                    if (createdDate && solvedDate) {
-                        const diffTime = Math.abs(solvedDate - createdDate);
-                        const diffDays = diffTime / (1000 * 60 * 60 * 24);
-
-                        if (diffDays <= 2) {
-                            resolvedIn2Days++;
-                        }
+                    if (diffDays <= 2) {
+                        resolvedIn2Days++;
                     }
                 }
             });

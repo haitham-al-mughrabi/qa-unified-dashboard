@@ -6,10 +6,11 @@ A web-based tool to analyze ticket resolution times from Excel files.
 
 - Upload Excel files with ticket data
 - Automatically analyzes all sheets (months) in the workbook
+- **Quarterly Summary**: Automatically groups months into quarters (Q1-Q4) and displays aggregated statistics
 - Calculates tickets resolved in 2 or less days
-- Shows percentage success rate for each month
+- Shows percentage success rate for each quarter and month
 - Displays overall summary statistics
-- Beautiful, responsive UI with visual progress bars
+- Beautiful, responsive UI with visual progress bars and gradient cards
 
 ## How to Use
 
@@ -23,8 +24,13 @@ A web-based tool to analyze ticket resolution times from Excel files.
 
 3. **View Results**
    - The application will automatically process all sheets in your workbook
-   - Each sheet (representing a month) will be displayed as a card
-   - You'll see:
+   - **Overall Summary**: Total statistics across all months
+   - **Quarterly Summary**: Aggregated data for each quarter (Q1, Q2, Q3, Q4)
+     - Automatically detects which quarter each month belongs to
+     - Shows combined statistics for all months in that quarter
+     - Lists the months included in each quarter
+   - **Monthly Breakdown**: Individual cards for each sheet/month
+   - Each card displays:
      - Total number of tickets
      - Number of tickets resolved in ≤2 days
      - Success rate percentage
@@ -33,10 +39,9 @@ A web-based tool to analyze ticket resolution times from Excel files.
 ## Excel File Requirements
 
 Your Excel file should contain the following columns:
-- **Ticket created - Date**: The date when the ticket was created
-- **Ticket solved - Date**: The date when the ticket was solved
-- **Full resolution time (mins)**: The resolution time in minutes (optional)
-- **Tickets**: Ticket identifier or count
+- **Ticket created - Date**: The date when the ticket was created (Required)
+- **Ticket solved - Date**: The date when the ticket was solved (Required)
+- **Tickets**: Ticket identifier or count (Optional)
 
 ### Note
 - Column names are case-insensitive
@@ -45,12 +50,25 @@ Your Excel file should contain the following columns:
 
 ## Calculation Method
 
-The application uses two methods to calculate resolution time:
+The application calculates the time difference between "Ticket created - Date" and "Ticket solved - Date".
 
-1. **Primary Method**: If "Full resolution time (mins)" is available, it converts minutes to days and checks if ≤ 2 days
-2. **Fallback Method**: If resolution time is not available, it calculates the difference between "Ticket created - Date" and "Ticket solved - Date"
+A ticket is considered "resolved in 2 or less days" if the time difference is ≤ 48 hours (2 days).
 
-A ticket is considered "resolved in 2 or less days" if the resolution time is ≤ 48 hours.
+**Formula:**
+- # of total tickets = Count of all rows with valid created and solved dates
+- # of tickets closed in 2 days = Count of tickets where (Solved Date - Created Date) ≤ 2 days
+- Percentage = (# tickets closed in 2 days / # total tickets) × 100
+
+## Quarter Detection
+
+The application automatically detects which quarter each sheet belongs to based on the sheet name:
+
+- **Q1 (January - March)**: Sheet names containing "January", "Jan", "February", "Feb", "March", "Mar", or "Q1"
+- **Q2 (April - June)**: Sheet names containing "April", "Apr", "May", "June", "Jun", or "Q2"
+- **Q3 (July - September)**: Sheet names containing "July", "Jul", "August", "Aug", "September", "Sep", or "Q3"
+- **Q4 (October - December)**: Sheet names containing "October", "Oct", "November", "Nov", "December", "Dec", or "Q4"
+
+The quarter cards will only appear if at least one month from that quarter is detected in your Excel file.
 
 ## Browser Compatibility
 

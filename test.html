@@ -1,0 +1,268 @@
+import React, { useState, ChangeEvent } from "react";
+import * as XLSX from "xlsx";
+
+// Types
+interface MonthlyStats {
+  sheetName: string;
+  totalTickets: number;
+  closedWithin2Days: number;
+  percentageClosedWithin2Days: number; // 0-100
+}
+
+const HEADER_CREATED = "Ticket created - Date";
+const HEADER_SOLVED = "Ticket solved - Date";
+const HEADER_TICKETS = "Tickets";
+
+// Helper to normalize various Excel cell date types into JS Date
+function normalizeToDate(value: unknown): Date | null {
+  if (!value) return null;
+
+  // Already a Date
+  if (value instanceof Date) {
+    if (!isNaN(value.getTime())) return value;
+    return null;
+  }
+
+  // Excel serial number
+  if (typeof value === "number") {
+    const parsed = XLSX.SSF.parse_date_code(value);
+    if (!parsed) return null;
+    const d = new Date(
+      parsed.y,
+      (parsed.m || 1) - 1,
+      parsed.d || 1,
+      parsed.H || 0,
+      parsed.M || 0,
+      parsed.S || 0
+    );
+    if (!isNaN(d.getTime())) return d;
+    return null;
+  }
+
+  // String date
+  if (typeof value === "string") {
+    const d = new Date(value);
+    if (!isNaN(d.getTime())) return d;
+    return null;
+  }
+
+  return null;
+}
+
+const HomePage: React.FC = () => {
+  const [stats, setStats] = useState<MonthlyStats[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+    setError(null);
+    setStats(null);
+    setFileName(file.name);
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, {
+        type: "array",
+        cellDates: true,
+      });
+
+      const sheetNames = workbook.SheetNames;
+      if (!sheetNames || sheetNames.length === 0) {
+        throw new Error("The workbook has no sheets.");
+      }
+
+      const newStats: MonthlyStats[] = [];
+
+      sheetNames.forEach((sheetName) => {
+        const sheet = workbook.Sheets[sheetName];
+        if (!sheet) return;
+
+        const rows: any[] = XLSX.utils.sheet_to_json(sheet, {
+          defval: null,
+        });
+
+        let totalTickets = 0;
+        let closedWithin2Days = 0;
+
+        rows.forEach((row) => {
+          const createdRaw = row[HEADER_CREATED];
+          const solvedRaw = row[HEADER_SOLVED];
+          const ticketsRaw = row[HEADER_TICKETS];
+
+          // Require all three fields
+          if (createdRaw == null || solvedRaw == null || ticketsRaw == null) return;
+
+          const createdDate = normalizeToDate(createdRaw);
+          const solvedDate = normalizeToDate(solvedRaw);
+
+          if (!createdDate || !solvedDate) return;
+
+          totalTickets += 1;
+
+          const diffMs = solvedDate.getTime() - createdDate.getTime();
+          const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+          if (diffDays >= 0 && diffDays <= 2) {
+            closedWithin2Days += 1;
+          }
+        });
+
+        if (totalTickets > 0) {
+          const percentageClosedWithin2Days = (closedWithin2Days / totalTickets) * 100;
+          newStats.push({
+            sheetName,
+            totalTickets,
+            closedWithin2Days,
+            percentageClosedWithin2Days,
+          });
+        }
+      });
+
+      if (newStats.length === 0) {
+        throw new Error(
+          "No valid ticket data found. Please ensure the sheet has the headers: 'Ticket created - Date', 'Ticket solved - Date', and 'Tickets'."
+        );
+      }
+
+      setStats(newStats);
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.message || "Failed to process the Excel file.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-4xl bg-white rounded-xl shadow-md p-6 md:p-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+              Ticket Closure Insights
+            </h1>
+            <p className="text-sm text-gray-600">
+              Upload an Excel file with monthly sheets to see how many tickets are closed within two days.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+            <div className="text-xs text-gray-500">
+              Expected headers:
+              <div className="font-medium text-gray-700">
+                Ticket created - Date
+              </div>
+              <div className="font-medium text-gray-700">
+                Ticket solved - Date
+              </div>
+              <div className="font-medium text-gray-700">Tickets</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="border border-gray-200 rounded-lg p-4 mb-6 bg-gray-50">
+          <label className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 cursor-pointer">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-gray-800 mb-1">
+                Upload Excel file
+              </span>
+              <span className="text-xs text-gray-500">
+                Supported formats: .xlsx, .xls. Each sheet will be treated as a month.
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Choose file
+              </span>
+              <span className="text-xs text-gray-600 truncate max-w-xs">
+                {fileName || "No file selected"}
+              </span>
+            </div>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </label>
+        </div>
+
+        {isLoading && (
+          <div className="flex items-center gap-3 text-sm text-gray-700 mb-4">
+            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <span>Processing your file...</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+            {error}
+          </div>
+        )}
+
+        {!isLoading && !error && !stats && (
+          <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-4">
+            Upload an Excel workbook where each sheet represents a month. The sheet should contain columns named:
+            <span className="font-medium text-gray-700">
+              {" "}
+              "Ticket created - Date", "Ticket solved - Date", and "Tickets".
+            </span>
+          </div>
+        )}
+
+        {stats && stats.length > 0 && (
+          <div className="mt-2">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+              Monthly performance
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-medium text-gray-700 border-b border-gray-200">
+                      Sheet / Month
+                    </th>
+                    <th className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                      Total tickets
+                    </th>
+                    <th className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                      Closed 6le 2 days
+                    </th>
+                    <th className="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
+                      % closed 6le 2 days
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.map((item) => (
+                    <tr key={item.sheetName} className="odd:bg-white even:bg-gray-50">
+                      <td className="px-4 py-2 text-gray-900 border-b border-gray-200">
+                        {item.sheetName}
+                      </td>
+                      <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                        {item.totalTickets}
+                      </td>
+                      <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                        {item.closedWithin2Days}
+                      </td>
+                      <td className="px-4 py-2 text-right text-gray-900 border-b border-gray-200">
+                        {item.percentageClosedWithin2Days.toFixed(1)}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;
