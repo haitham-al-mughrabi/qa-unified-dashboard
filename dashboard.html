@@ -470,6 +470,10 @@
 
                 dashboardData = data.aggregated;
 
+                // Clear existing data before repopulating
+                allProjects = [];
+                allYears = new Set();
+
                 // Collect all projects and years for filters
                 Object.keys(dashboardData).forEach(projectKey => {
                     const project = dashboardData[projectKey];
