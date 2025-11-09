@@ -53,6 +53,8 @@ Your Excel file should contain one of the following column formats:
 - The application can work with partial matches (e.g., "ticket created" will match)
 - Each sheet in the Excel file will be treated as a separate month/period
 - Works with single-sheet or multi-sheet Excel files
+- **Smart Month Detection**: If your sheet name is generic (like "sheet1"), the app will automatically extract the month name from your filename
+  - Example: File `Ticket Resolution - SLA -Aug- Quality KPIs 2.xlsx` with sheet "sheet1" → Will display as "August"
 
 ## Supported Date Formats
 
