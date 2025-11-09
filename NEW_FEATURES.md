@@ -1,6 +1,59 @@
 # New Features Added
 
-## 1. Dashboard Filtering System
+## 1. Individual Record Management in Dashboard
+
+### Record Selection
+Each record in the dashboard now has a checkbox that allows you to include or exclude it from quarter calculations:
+
+**Features:**
+- **Checkbox per Record**: Each record within an expanded quarter has a checkbox
+- **Visual Feedback**: Excluded records appear dimmed (50% opacity) with a gray background
+- **Real-time Recalculation**: When you check/uncheck a record, the quarter metrics update instantly:
+  - Total Tickets
+  - Resolved in ≤2 Days
+  - Success Rate
+  - Resolved in >2 Days
+  - Progress bar
+
+**How to Use:**
+1. Navigate to the Dashboard
+2. Click on any quarter to expand it and view records
+3. Uncheck any record you want to exclude from the quarter totals
+4. Watch the quarter metrics update automatically
+5. Check the record again to include it back in the calculations
+
+**Use Cases:**
+- **Exclude outliers**: Remove abnormal data points from your analysis
+- **Compare scenarios**: See metrics with/without specific uploads
+- **Data validation**: Temporarily exclude records you suspect have errors
+- **Custom analysis**: Create custom views by selecting only relevant records
+
+### Record Deletion
+You can now permanently delete individual records from the database:
+
+**Features:**
+- **Delete Button**: Each record has a red "Delete" button
+- **Confirmation Dialog**: Prevents accidental deletion
+- **Instant Removal**: Record is removed from the DOM immediately
+- **Data Refresh**: Dashboard reloads to ensure all totals are accurate
+- **Cascade Update**: Quarter metrics automatically update after deletion
+
+**How to Use:**
+1. Navigate to the Dashboard
+2. Expand the quarter containing the record you want to delete
+3. Click the "Delete" button next to the record
+4. Confirm the deletion in the popup dialog
+5. The record is permanently removed from the database
+
+**Important Notes:**
+- **Permanent Action**: Deletion cannot be undone
+- **Database Update**: The record is removed from the SQLite database
+- **Automatic Refresh**: All quarter totals recalculate after deletion
+- **Confirmation Required**: You must confirm before deletion proceeds
+
+---
+
+## 2. Dashboard Filtering System
 
 ### Filter Controls
 The dashboard now includes comprehensive filtering options to view exactly the data you want:

@@ -69,35 +69,47 @@
 - Save button appears only after successful analysis
 
 #### B. Dashboard (/dashboard)
-**View Options**
-- View all saved analysis records
-- Filter by specific project
-- Record count display
-- Refresh functionality
+**Hierarchical Structure**
+- Project → Year → Quarter organization
+- Color-coded by project
+- Year navigation with arrow buttons
+- Expandable quarter cards
+
+**Advanced Filtering**
+- Filter by specific project or view all
+- Filter by year or view all years
+- Filter by quarter (Q1, Q2, Q3, Q4) or view all
+- Toggle to include/exclude newest uploads in calculations
+- Real-time client-side filtering for instant response
+
+**Quarter Metrics Display**
+- Total Tickets
+- Resolved in ≤2 Days
+- Success Rate (with visual progress bar)
+- Resolved in >2 Days
+- Click to expand and view detailed records
+
+**Individual Record Management**
+- ✅ **Checkbox per Record**: Include/exclude records from calculations
+- ✅ **Visual Feedback**: Excluded records appear dimmed (50% opacity)
+- ✅ **Real-time Recalculation**: Metrics update instantly when toggling records
+- ✅ **Delete Individual Records**: Permanently remove records with confirmation
+- ✅ **Smart Metrics**: Quarter totals recalculate based on selected records
 
 **Record Display**
 - Beautiful gradient cards
 - Project color-coded borders
-- Project name badges with custom colors
-- File name as title
-- Year and save date metadata
-
-**Statistics Per Record**
-- Total tickets
-- Resolved in ≤2 days
-- Success rate percentage
-- Resolved in >2 days
-
-**Monthly Breakdown**
-- Shows included months as tags
-- Individual month performance cards
-- Ticket counts per month
-- Success rate per month
+- File name display
+- Month names included in each record
+- Ticket statistics per record
+- Created date metadata
 
 **Actions**
-- Delete individual records
-- Clear all records (with confirmation)
-- Auto-refresh after actions
+- Toggle individual record inclusion (checkbox)
+- Delete individual records (with confirmation)
+- Expand/collapse quarter details
+- Navigate between years per project
+- Filter across multiple dimensions
 
 #### C. Projects (/projects)
 **Create Projects**
