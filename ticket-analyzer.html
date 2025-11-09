@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket Resolution Analyzer</title>
+    <title>Ticket Analyzer - QA Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,142 +15,485 @@
             box-sizing: border-box;
         }
 
+        :root {
+            /* Colors */
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #a5b4fc;
+            --success: #10b981;
+            --success-dark: #059669;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-full: 9999px;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            color: var(--gray-900);
+            line-height: 1.6;
         }
 
-        .container {
-            max-width: 1200px;
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1400px;
             margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .nav-bar {
-            background: white;
-            border-radius: 15px;
-            padding: 15px 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: var(--spacing-lg) var(--spacing-xl);
             display: flex;
-            gap: 15px;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             flex-wrap: wrap;
+            gap: var(--spacing-md);
         }
 
-        .nav-links {
+        .navbar-brand {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .navbar-brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
         }
 
         .nav-btn {
-            padding: 10px 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            padding: 0.625rem 1.25rem;
+            background: transparent;
+            color: var(--gray-700);
             border: none;
-            border-radius: 25px;
+            border-radius: var(--radius-full);
             cursor: pointer;
-            font-size: 1em;
+            font-size: 0.9375rem;
+            font-weight: 500;
             text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: inline-block;
+            transition: all 0.2s ease;
         }
 
         .nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: var(--gray-100);
+            color: var(--primary);
         }
 
-        .save-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        .nav-btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
             color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1.1em;
-            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .nav-btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #7c3aed 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .nav-btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+            color: white;
             display: none;
         }
 
-        .save-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
-        }
-
-        .save-btn.active {
+        .nav-btn-success.active {
             display: inline-block;
         }
 
-        .upload-section {
+        .nav-btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-2xl) var(--spacing-xl);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            color: white;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: var(--spacing-md);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        /* Upload Card */
+        .upload-card {
             background: white;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-bottom: 30px;
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-xl);
+            margin-bottom: var(--spacing-xl);
             text-align: center;
         }
 
-        .file-input-wrapper {
-            position: relative;
-            display: inline-block;
+        .upload-area {
+            border: 3px dashed var(--gray-300);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .file-input-wrapper input[type="file"] {
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .upload-area.drag-over {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            background-opacity: 0.1;
+        }
+
+        .upload-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--spacing-lg);
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .upload-text h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--gray-900);
+        }
+
+        .upload-text p {
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .file-input {
             display: none;
         }
 
-        .file-input-label {
-            display: inline-block;
-            padding: 15px 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .upload-btn {
+            padding: 0.875rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
             color: white;
-            border-radius: 25px;
+            border: none;
+            border-radius: var(--radius-full);
             cursor: pointer;
-            font-size: 1.1em;
-            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
 
-        .file-input-label:hover {
+        .upload-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
         }
 
         .file-name {
-            margin-top: 15px;
-            color: #666;
+            margin-top: var(--spacing-lg);
+            color: var(--gray-600);
             font-style: italic;
+            font-size: 0.9375rem;
+        }
+
+        /* Loading State */
+        .loading {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--gray-200);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto var(--spacing-lg);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Messages */
+        .message {
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.active {
+            display: block;
+        }
+
+        .message-success {
+            background: #d1fae5;
+            color: var(--success-dark);
+            border-left: 4px solid var(--success);
+        }
+
+        .message-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .summary-header {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .summary-header h2 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .summary-item {
+            background: var(--gray-50);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-xl);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .summary-item:hover {
+            transform: translateY(-4px);
+        }
+
+        .summary-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .summary-label {
+            color: var(--gray-600);
+            font-size: 0.9375rem;
+            font-weight: 500;
+        }
+
+        /* Results Grid */
+        .results-section {
+            margin-top: var(--spacing-2xl);
+        }
+
+        .section-header {
+            color: white;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--spacing-xl);
+        }
+
+        .result-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .result-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .result-badge {
+            padding: 0.375rem 0.875rem;
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+            color: white;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .result-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-label {
+            color: var(--gray-600);
+            font-size: 0.9375rem;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-top: var(--spacing-md);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success) 0%, var(--success-dark) 100%);
+            border-radius: var(--radius-full);
+            transition: width 0.6s ease;
         }
 
         /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
+            z-index: 2000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             animation: fadeIn 0.3s;
         }
 
@@ -159,13 +505,13 @@
 
         .modal-content {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            max-width: 700px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow-xl);
             animation: slideUp 0.3s;
         }
 
@@ -175,418 +521,274 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--gray-100);
         }
 
         .modal-header h2 {
-            color: #667eea;
-            font-size: 1.8em;
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--gray-900);
         }
 
         .close-btn {
-            font-size: 2em;
-            color: #999;
-            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-100);
+            color: var(--gray-600);
             border: none;
-            background: none;
-            transition: color 0.2s;
+            border-radius: var(--radius-full);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .close-btn:hover {
-            color: #333;
+            background: var(--gray-200);
+            color: var(--gray-900);
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: var(--spacing-xl);
         }
 
-        .form-group label {
+        .form-label {
             display: block;
-            color: #333;
             font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-sm);
+            font-size: 0.9375rem;
         }
 
-        .form-group select,
-        .form-group input {
+        .form-input,
+        .form-select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #f0f0f0;
-            border-radius: 10px;
-            font-size: 1em;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
             font-family: inherit;
-            transition: border-color 0.2s;
+            transition: all 0.2s ease;
         }
 
-        .form-group select:focus,
-        .form-group input:focus {
+        .form-input:focus,
+        .form-select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .months-selection {
+        .months-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .month-item {
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            transition: all 0.2s ease;
+        }
+
+        .month-item:hover {
+            background: var(--gray-100);
+        }
+
+        .month-checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
         }
 
         .month-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .month-label {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--gray-900);
+            cursor: pointer;
+        }
+
+        .month-select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .month-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+        }
+
+        .btn-group {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .btn-select-all {
+            padding: 0.625rem 1.25rem;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
             cursor: pointer;
-            transition: background 0.2s;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
-        .month-checkbox:hover {
-            background: #e9ecef;
-        }
-
-        .month-checkbox input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .month-checkbox label {
-            cursor: pointer;
-            margin: 0 !important;
-            font-weight: normal !important;
-        }
-
-        .month-name-input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-
-        .month-quick-select {
-            width: 100%;
-            padding: 6px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 0.85em;
-            margin-top: 3px;
-            background: white;
-        }
-
-        .select-all-months {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95em;
-            transition: background 0.2s;
-        }
-
-        .select-all-months:hover {
-            background: #5568d3;
+        .btn-select-all:hover {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
         }
 
         .btn-primary {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: var(--radius-lg);
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1.0625rem;
             font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s ease;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
         }
 
         .btn-primary:disabled {
-            background: #ccc;
+            background: var(--gray-300);
             cursor: not-allowed;
             transform: none;
         }
 
-        .results-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
 
-        .month-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+            .hero p {
+                font-size: 1rem;
+            }
 
-        .month-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
 
-        .month-title {
-            font-size: 1.5em;
-            color: #667eea;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
 
-        .metric {
-            margin-bottom: 15px;
-        }
+            .navbar-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
 
-        .metric-label {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 5px;
-        }
-
-        .metric-value {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .percentage {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background: #f0f0f0;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            border-radius: 5px;
-            transition: width 0.5s ease;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: white;
-            font-size: 1.2em;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error {
-            background: #ff4444;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            display: none;
-        }
-
-        .error.active {
-            display: block;
-        }
-
-        .success-message {
-            background: #38ef7d;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            display: none;
-            text-align: center;
-        }
-
-        .success-message.active {
-            display: block;
-        }
-
-        .summary {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .summary h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .summary-item {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-
-        .summary-item .value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-
-        .summary-item .label {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .quarter-section {
-            margin-bottom: 30px;
-        }
-
-        .quarter-section h2 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-
-        .quarter-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
-            color: white;
-        }
-
-        .quarter-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .quarter-title {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .quarter-card .metric-label {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .quarter-card .metric-value {
-            color: white;
-        }
-
-        .quarter-card .percentage {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .quarter-card .progress-bar {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .quarter-card .progress-fill {
-            background: white;
-        }
-
-        .month-section h2 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 1.8em;
+            .navbar-links {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Ticket Resolution Analyzer</h1>
-            <p>Upload your Excel file to analyze ticket resolution times</p>
-        </div>
-
-        <div class="nav-bar">
-            <div class="nav-links">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <div class="navbar-brand-icon">📊</div>
+                <span>QA Dashboard</span>
+            </a>
+            <div class="navbar-links">
                 <a href="/dashboard" class="nav-btn">Dashboard</a>
                 <a href="/projects" class="nav-btn">Projects</a>
+                <button class="nav-btn nav-btn-success" id="saveBtn" onclick="openSaveModal()">💾 Save Analysis</button>
             </div>
-            <button class="save-btn" id="saveBtn" onclick="openSaveModal()">Save Analysis</button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Ticket Resolution Analyzer</h1>
+            <p>Upload your Excel file to analyze ticket resolution performance</p>
         </div>
 
-        <div class="upload-section">
-            <div class="file-input-wrapper">
-                <input type="file" id="fileInput" accept=".xlsx, .xls">
-                <label for="fileInput" class="file-input-label">
-                    Choose Excel File
-                </label>
+        <!-- Upload Card -->
+        <div class="upload-card">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">
+                    <h3>Upload Excel File</h3>
+                    <p>Drag and drop your file here or click to browse</p>
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx, .xls">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Choose File
+                </button>
             </div>
-            <div class="file-name" id="fileName">No file selected</div>
+            <div class="file-name" id="fileName"></div>
         </div>
 
+        <!-- Loading State -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <div>Processing your file...</div>
+            <h3>Processing your file...</h3>
+            <p>This may take a moment</p>
         </div>
 
-        <div class="error" id="error"></div>
-        <div class="success-message" id="successMessage"></div>
+        <!-- Messages -->
+        <div class="message message-success" id="successMessage"></div>
+        <div class="message message-error" id="errorMessage"></div>
 
+        <!-- Summary Section -->
         <div id="summaryContainer"></div>
 
-        <div id="quarterSection" class="quarter-section">
-            <div class="results-container" id="quarterResults"></div>
-        </div>
-
-        <div class="month-section">
-            <h2 id="monthSectionTitle" style="display: none;">Monthly Breakdown</h2>
-            <div class="results-container" id="results"></div>
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <div class="section-header">
+                <h2>Monthly Breakdown</h2>
+            </div>
+            <div class="results-grid" id="resultsGrid"></div>
         </div>
     </div>
 
@@ -600,21 +802,23 @@
 
             <form id="saveForm">
                 <div class="form-group">
-                    <label>Project *</label>
-                    <select id="projectSelect" required>
+                    <label class="form-label">Project *</label>
+                    <select id="projectSelect" class="form-select" required>
                         <option value="">Select a project...</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>Year *</label>
-                    <input type="number" id="yearInput" min="2000" max="2100" required placeholder="e.g., 2025">
+                    <label class="form-label">Year *</label>
+                    <input type="number" id="yearInput" class="form-input" min="2000" max="2100" required placeholder="e.g., 2025">
                 </div>
 
                 <div class="form-group">
-                    <label>Select Months to Save *</label>
-                    <button type="button" class="select-all-months" onclick="toggleAllMonths()">Select All</button>
-                    <div class="months-selection" id="monthsSelection"></div>
+                    <label class="form-label">Select Months to Save *</label>
+                    <div class="btn-group">
+                        <button type="button" class="btn-select-all" onclick="toggleAllMonths()">Toggle All</button>
+                    </div>
+                    <div class="months-grid" id="monthsGrid"></div>
                 </div>
 
                 <button type="submit" class="btn-primary" id="saveSubmitBtn">Save to Database</button>
@@ -627,29 +831,46 @@
         let currentFileName = '';
         let currentAnalysisData = null;
 
+        // File input event listener
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+        // Drag and drop functionality
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                handleFileUpload({ target: { files } });
+            }
+        });
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             currentFileName = file.name;
-            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileName').textContent = `Selected: ${file.name}`;
             document.getElementById('loading').classList.add('active');
-            document.getElementById('error').classList.remove('active');
-            document.getElementById('results').innerHTML = '';
-            document.getElementById('quarterResults').innerHTML = '';
-            document.getElementById('summaryContainer').innerHTML = '';
-            document.getElementById('monthSectionTitle').style.display = 'none';
-            document.getElementById('saveBtn').classList.remove('active');
+            document.getElementById('errorMessage').classList.remove('active');
             document.getElementById('successMessage').classList.remove('active');
+            document.getElementById('summaryContainer').innerHTML = '';
+            document.getElementById('resultsGrid').innerHTML = '';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('saveBtn').classList.remove('active');
             currentAnalysisData = null;
-
-            const quarterSection = document.getElementById('quarterSection');
-            const existingTitle = quarterSection.querySelector('h2');
-            if (existingTitle) {
-                existingTitle.remove();
-            }
 
             const reader = new FileReader();
 
@@ -665,11 +886,6 @@
                 }
             };
 
-            reader.onerror = function() {
-                showError('Error reading file');
-                document.getElementById('loading').classList.remove('active');
-            };
-
             reader.readAsArrayBuffer(file);
         }
 
@@ -679,12 +895,10 @@
             let totalResolvedIn2Days = 0;
 
             workbook.SheetNames.forEach(sheetName => {
-                const worksheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false, dateNF: 'yyyy-mm-dd' });
+                const sheet = workbook.Sheets[sheetName];
+                const data = XLSX.utils.sheet_to_json(sheet);
 
-                if (jsonData.length === 0) return;
-
-                const result = analyzeSheet(sheetName, jsonData);
+                const result = analyzeSheet(sheetName, data);
                 if (result) {
                     results.push(result);
                     totalTickets += result.totalTickets;
@@ -693,12 +907,11 @@
             });
 
             if (results.length === 0) {
-                showError('No valid data found in the Excel file. Please ensure the file contains one of these header formats:\\n- "Ticket created - Date" and "Ticket solved - Date"\\n- "Issue created date" and "Issue resolution date"');
+                showError('No valid data found in the Excel file. Please ensure the file contains the required columns.');
                 return;
             }
 
             displaySummary(totalTickets, totalResolvedIn2Days);
-            displayQuarterResults(results);
             displayResults(results);
 
             currentAnalysisData = {
@@ -710,10 +923,9 @@
             document.getElementById('saveBtn').classList.add('active');
         }
 
-        // (Analysis functions remain the same as before - extractMonthName, getDisplayName, etc.)
-        // I'll include the essential ones here:
-
         function analyzeSheet(sheetName, data) {
+            if (!data || data.length === 0) return null;
+
             let resolvedIn2Days = 0;
             let totalTickets = 0;
 
@@ -780,26 +992,29 @@
 
         function displaySummary(totalTickets, totalResolvedIn2Days) {
             const percentage = totalTickets > 0 ? ((totalResolvedIn2Days / totalTickets) * 100).toFixed(2) : 0;
+            const resolvedInMore = totalTickets - totalResolvedIn2Days;
 
             const summaryHTML = `
-                <div class="summary">
-                    <h2>Overall Summary</h2>
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <h2>Overall Performance</h2>
+                    </div>
                     <div class="summary-grid">
                         <div class="summary-item">
-                            <div class="value">${totalTickets}</div>
-                            <div class="label">Total Tickets</div>
+                            <div class="summary-value">${totalTickets}</div>
+                            <div class="summary-label">Total Tickets</div>
                         </div>
                         <div class="summary-item">
-                            <div class="value">${totalResolvedIn2Days}</div>
-                            <div class="label">Resolved in ≤2 Days</div>
+                            <div class="summary-value">${totalResolvedIn2Days}</div>
+                            <div class="summary-label">Resolved in ≤2 Days</div>
                         </div>
                         <div class="summary-item">
-                            <div class="value">${percentage}%</div>
-                            <div class="label">Success Rate</div>
+                            <div class="summary-value">${percentage}%</div>
+                            <div class="summary-label">Success Rate</div>
                         </div>
                         <div class="summary-item">
-                            <div class="value">${totalTickets - totalResolvedIn2Days}</div>
-                            <div class="label">Resolved in >2 Days</div>
+                            <div class="summary-value">${resolvedInMore}</div>
+                            <div class="summary-label">Resolved in >2 Days</div>
                         </div>
                     </div>
                 </div>
@@ -808,51 +1023,69 @@
             document.getElementById('summaryContainer').innerHTML = summaryHTML;
         }
 
-        function displayQuarterResults(results) {
-            // Simplified - just show monthly for now
-        }
-
         function displayResults(results) {
-            const resultsContainer = document.getElementById('results');
-            document.getElementById('monthSectionTitle').style.display = 'block';
+            const resultsGrid = document.getElementById('resultsGrid');
+            const resultsSection = document.getElementById('resultsSection');
+
+            resultsGrid.innerHTML = '';
+            resultsSection.style.display = 'block';
 
             results.forEach(result => {
                 const card = document.createElement('div');
-                card.className = 'month-card';
+                card.className = 'result-card';
 
                 card.innerHTML = `
-                    <div class="month-title">${result.displayName}</div>
-                    <div class="metric">
-                        <div class="metric-label">Total Tickets</div>
-                        <div class="metric-value">${result.totalTickets}</div>
+                    <div class="result-header">
+                        <div class="result-title">${result.displayName}</div>
+                        <div class="result-badge">${result.percentage}%</div>
                     </div>
-                    <div class="metric">
-                        <div class="metric-label">Resolved in ≤2 Days</div>
-                        <div class="metric-value">${result.resolvedIn2Days}</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Success Rate</div>
-                        <div class="percentage">${result.percentage}%</div>
+                    <div class="result-metrics">
+                        <div class="metric-row">
+                            <span class="metric-label">Total Tickets</span>
+                            <span class="metric-value">${result.totalTickets}</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Resolved in ≤2 Days</span>
+                            <span class="metric-value">${result.resolvedIn2Days}</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Resolved in >2 Days</span>
+                            <span class="metric-value">${result.totalTickets - result.resolvedIn2Days}</span>
+                        </div>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${result.percentage}%"></div>
                     </div>
                 `;
 
-                resultsContainer.appendChild(card);
+                resultsGrid.appendChild(card);
             });
         }
 
         function showError(message) {
-            const errorElement = document.getElementById('error');
+            const errorElement = document.getElementById('errorMessage');
             errorElement.textContent = message;
             errorElement.classList.add('active');
+
+            setTimeout(() => {
+                errorElement.classList.remove('active');
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successElement = document.getElementById('successMessage');
+            successElement.textContent = message;
+            successElement.classList.add('active');
+
+            setTimeout(() => {
+                successElement.classList.remove('active');
+            }, 3000);
         }
 
         // Save Modal Functions
         async function openSaveModal() {
             if (!currentAnalysisData) {
-                alert('No analysis data to save. Please upload and analyze a file first.');
+                showError('No analysis data to save. Please upload and analyze a file first.');
                 return;
             }
 
@@ -862,34 +1095,39 @@
             // Set default year to current year
             document.getElementById('yearInput').value = new Date().getFullYear();
 
-            // Create month checkboxes from analysis data
-            const monthsContainer = document.getElementById('monthsSelection');
-            monthsContainer.innerHTML = '';
+            // Create month items from analysis data
+            const monthsGrid = document.getElementById('monthsGrid');
+            monthsGrid.innerHTML = '';
 
             currentAnalysisData.results.forEach((result, index) => {
-                const monthDiv = document.createElement('div');
-                monthDiv.className = 'month-checkbox';
-                monthDiv.style.flexDirection = 'column';
-                monthDiv.style.alignItems = 'flex-start';
-
                 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                                    'July', 'August', 'September', 'October', 'November', 'December'];
 
-                monthDiv.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                        <input type="checkbox" id="month_${index}" value="${result.sheetName}" data-index="${index}" checked>
-                        <label for="month_${index}" style="flex: 1;">${result.displayName}</label>
+                const monthItem = document.createElement('div');
+                monthItem.className = 'month-item';
+
+                monthItem.innerHTML = `
+                    <div class="month-checkbox-wrapper">
+                        <input type="checkbox"
+                               id="month_${index}"
+                               class="month-checkbox"
+                               value="${result.sheetName}"
+                               data-index="${index}"
+                               checked>
+                        <label for="month_${index}" class="month-label">${result.displayName}</label>
                     </div>
-                    <select class="month-quick-select" onchange="updateMonthName(${index}, this.value)">
-                        <option value="">Quick select month...</option>
+                    <select class="month-select" onchange="updateMonthName(${index}, this.value)">
+                        <option value="">Quick select...</option>
                         ${monthNames.map(m => `<option value="${m}">${m}</option>`).join('')}
                     </select>
-                    <input type="text" class="month-name-input" id="monthName_${index}"
+                    <input type="text"
+                           class="month-input"
+                           id="monthName_${index}"
                            value="${result.displayName}"
-                           placeholder="Custom month name"
+                           placeholder="Custom name"
                            onchange="updateMonthNameCustom(${index}, this.value)">
                 `;
-                monthsContainer.appendChild(monthDiv);
+                monthsGrid.appendChild(monthItem);
             });
 
             document.getElementById('saveModal').classList.add('active');
@@ -939,7 +1177,7 @@
         }
 
         function toggleAllMonths() {
-            const checkboxes = document.querySelectorAll('#monthsSelection input[type="checkbox"]');
+            const checkboxes = document.querySelectorAll('.month-checkbox');
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
 
             checkboxes.forEach(cb => {
@@ -952,15 +1190,15 @@
 
             const projectId = document.getElementById('projectSelect').value;
             const year = document.getElementById('yearInput').value;
-            const checkboxes = document.querySelectorAll('#monthsSelection input[type="checkbox"]:checked');
+            const checkboxes = document.querySelectorAll('.month-checkbox:checked');
 
             if (!projectId) {
-                alert('Please select a project');
+                showError('Please select a project');
                 return;
             }
 
             if (checkboxes.length === 0) {
-                alert('Please select at least one month');
+                showError('Please select at least one month');
                 return;
             }
 
@@ -1010,16 +1248,10 @@
                 }
 
                 closeSaveModal();
-                const successMsg = document.getElementById('successMessage');
-                successMsg.textContent = 'Analysis saved successfully!';
-                successMsg.classList.add('active');
-
-                setTimeout(() => {
-                    successMsg.classList.remove('active');
-                }, 3000);
+                showSuccess('✓ Analysis saved successfully!');
 
             } catch (error) {
-                alert('Error saving analysis: ' + error.message);
+                showError('Error saving analysis: ' + error.message);
             }
         });
 
