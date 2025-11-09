@@ -266,6 +266,25 @@
             font-weight: normal !important;
         }
 
+        .month-name-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .month-quick-select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.85em;
+            margin-top: 3px;
+            background: white;
+        }
+
         .select-all-months {
             margin-bottom: 15px;
             padding: 10px;
@@ -850,9 +869,25 @@
             currentAnalysisData.results.forEach((result, index) => {
                 const monthDiv = document.createElement('div');
                 monthDiv.className = 'month-checkbox';
+                monthDiv.style.flexDirection = 'column';
+                monthDiv.style.alignItems = 'flex-start';
+
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                   'July', 'August', 'September', 'October', 'November', 'December'];
+
                 monthDiv.innerHTML = `
-                    <input type="checkbox" id="month_${index}" value="${result.sheetName}" checked>
-                    <label for="month_${index}">${result.displayName}</label>
+                    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                        <input type="checkbox" id="month_${index}" value="${result.sheetName}" data-index="${index}" checked>
+                        <label for="month_${index}" style="flex: 1;">${result.displayName}</label>
+                    </div>
+                    <select class="month-quick-select" onchange="updateMonthName(${index}, this.value)">
+                        <option value="">Quick select month...</option>
+                        ${monthNames.map(m => `<option value="${m}">${m}</option>`).join('')}
+                    </select>
+                    <input type="text" class="month-name-input" id="monthName_${index}"
+                           value="${result.displayName}"
+                           placeholder="Custom month name"
+                           onchange="updateMonthNameCustom(${index}, this.value)">
                 `;
                 monthsContainer.appendChild(monthDiv);
             });
@@ -887,6 +922,22 @@
             }
         }
 
+        function updateMonthName(index, monthName) {
+            if (monthName) {
+                const input = document.getElementById(`monthName_${index}`);
+                if (input) {
+                    input.value = monthName;
+                    currentAnalysisData.results[index].displayName = monthName;
+                }
+            }
+        }
+
+        function updateMonthNameCustom(index, monthName) {
+            if (monthName) {
+                currentAnalysisData.results[index].displayName = monthName;
+            }
+        }
+
         function toggleAllMonths() {
             const checkboxes = document.querySelectorAll('#monthsSelection input[type="checkbox"]');
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
@@ -913,12 +964,22 @@
                 return;
             }
 
-            const selectedMonths = Array.from(checkboxes).map(cb => cb.value);
+            const selectedMonths = [];
+            const filteredResults = [];
 
-            // Filter analysis data for selected months
-            const filteredResults = currentAnalysisData.results.filter(r =>
-                selectedMonths.includes(r.sheetName)
-            );
+            // Get selected months with their custom names
+            checkboxes.forEach(cb => {
+                const index = parseInt(cb.dataset.index);
+                const monthNameInput = document.getElementById(`monthName_${index}`);
+                const customName = monthNameInput ? monthNameInput.value : currentAnalysisData.results[index].displayName;
+
+                selectedMonths.push(customName);
+
+                // Add the result with the custom display name
+                const result = {...currentAnalysisData.results[index]};
+                result.displayName = customName;
+                filteredResults.push(result);
+            });
 
             const totalTickets = filteredResults.reduce((sum, r) => sum + r.totalTickets, 0);
             const totalResolvedIn2Days = filteredResults.reduce((sum, r) => sum + r.resolvedIn2Days, 0);
