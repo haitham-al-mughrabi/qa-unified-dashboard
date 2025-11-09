@@ -411,37 +411,7 @@
             min-height: 90px;
         }
 
-        .color-picker-group {
-            display: grid;
-            grid-template-columns: 70px 1fr;
-            gap: 0.875rem;
-            align-items: center;
-        }
 
-        .color-picker {
-            width: 70px;
-            height: 70px;
-            border: 3px solid var(--gray-200);
-            border-radius: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .color-picker:hover {
-            border-color: var(--primary);
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .color-preview {
-            padding: 1.25rem;
-            border-radius: 0.625rem;
-            text-align: center;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
 
         .btn-primary {
             width: 100%;
@@ -532,14 +502,14 @@
             left: 0;
             right: 0;
             height: 5px;
-            background: linear-gradient(90deg, var(--project-color, var(--primary)), var(--project-color-light, var(--primary)));
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
             opacity: 0.8;
         }
 
         .project-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 16px 20px -5px rgba(0, 0, 0, 0.15), 0 8px 8px -5px rgba(0, 0, 0, 0.1);
-            border-color: var(--project-color, var(--primary));
+            border-color: var(--primary);
         }
 
         .project-header {
@@ -567,7 +537,7 @@
         }
 
         .project-name i {
-            color: var(--project-color, var(--primary));
+            color: var(--primary);
             font-size: 1.625rem;
         }
 
@@ -903,19 +873,6 @@
                     <textarea id="projectDescription" class="form-textarea" placeholder="Brief description of the project (optional)"></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-palette"></i>
-                        Project Color
-                    </label>
-                    <div class="color-picker-group">
-                        <input type="color" id="projectColor" class="color-picker" value="#6366f1">
-                        <div class="color-preview" id="colorPreview" style="background-color: #6366f1; color: white;">
-                            Preview
-                        </div>
-                    </div>
-                </div>
-
                 <button type="submit" class="btn-primary" id="submitBtn">
                     <i class="fas fa-plus"></i>
                     Create Project
@@ -956,29 +913,12 @@
     <script>
         const API_URL = 'http://localhost:3000/api';
 
-        // Color picker change handler
-        document.getElementById('projectColor').addEventListener('input', (e) => {
-            const preview = document.getElementById('colorPreview');
-            preview.style.backgroundColor = e.target.value;
-            preview.style.color = getContrastColor(e.target.value);
-        });
-
-        // Function to get contrasting text color
-        function getContrastColor(hexcolor) {
-            const r = parseInt(hexcolor.substr(1, 2), 16);
-            const g = parseInt(hexcolor.substr(3, 2), 16);
-            const b = parseInt(hexcolor.substr(5, 2), 16);
-            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-            return (yiq >= 128) ? '#000000' : '#ffffff';
-        }
-
         // Form submission
         document.getElementById('projectForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const name = document.getElementById('projectName').value.trim();
             const description = document.getElementById('projectDescription').value.trim();
-            const color = document.getElementById('projectColor').value;
 
             if (!name) {
                 showError('Project name is required');
@@ -991,7 +931,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name, description, color })
+                    body: JSON.stringify({ name, description })
                 });
 
                 const data = await response.json();
@@ -1002,10 +942,6 @@
 
                 showSuccess('Project created successfully!');
                 document.getElementById('projectForm').reset();
-                document.getElementById('projectColor').value = '#6366f1';
-                const preview = document.getElementById('colorPreview');
-                preview.style.backgroundColor = '#6366f1';
-                preview.style.color = 'white';
                 closeModal();
                 loadProjects();
             } catch (error) {
@@ -1046,7 +982,7 @@
                 let html = '';
                 data.projects.forEach(project => {
                     html += `
-                        <div class="project-card" style="--project-color: ${project.color}; --project-color-light: ${project.color}cc;">
+                        <div class="project-card">
                             <div class="project-header">
                                 <div class="project-title-section">
                                     <div class="project-name">
@@ -1060,10 +996,6 @@
                                 <div class="meta-item">
                                     <i class="fas fa-calendar-plus"></i>
                                     Created: ${new Date(project.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                                </div>
-                                <div class="meta-item">
-                                    <i class="fas fa-palette"></i>
-                                    Color: ${project.color}
                                 </div>
                             </div>
                             <div class="project-actions">

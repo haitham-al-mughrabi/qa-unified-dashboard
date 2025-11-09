@@ -32,7 +32,6 @@ function initDatabase() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE,
                 description TEXT,
-                color TEXT DEFAULT '#667eea',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
@@ -88,7 +87,7 @@ app.get('/api/projects/:id', (req, res) => {
 
 // Create project
 app.post('/api/projects', (req, res) => {
-    const { name, description, color } = req.body;
+    const { name, description } = req.body;
 
     if (!name) {
         res.status(400).json({ error: 'Project name is required' });
@@ -96,8 +95,8 @@ app.post('/api/projects', (req, res) => {
     }
 
     db.run(
-        'INSERT INTO projects (name, description, color) VALUES (?, ?, ?)',
-        [name, description, color || '#667eea'],
+        'INSERT INTO projects (name, description) VALUES (?, ?)',
+        [name, description],
         function(err) {
             if (err) {
                 if (err.message.includes('UNIQUE')) {

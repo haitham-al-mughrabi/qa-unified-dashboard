@@ -357,7 +357,7 @@
             left: 0;
             right: 0;
             height: 8px;
-            background: linear-gradient(90deg, var(--project-color, var(--primary)), var(--project-color-light, var(--primary-light)));
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
         }
 
         .project-header {
@@ -366,7 +366,7 @@
             justify-content: space-between;
             margin-bottom: var(--spacing-xl);
             padding-bottom: var(--spacing-xl);
-            border-bottom: 3px solid;
+            border-bottom: 3px solid var(--primary);
             position: relative;
         }
 
@@ -377,6 +377,7 @@
             align-items: center;
             gap: var(--spacing-md);
             letter-spacing: -0.5px;
+            color: var(--primary);
         }
 
         .project-name i {
@@ -414,8 +415,8 @@
         }
 
         .year-nav-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, var(--project-color, var(--primary)), var(--project-color-light, var(--primary-light)));
-            border-color: var(--project-color, var(--primary));
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-color: var(--primary);
             color: white;
             transform: scale(1.15);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -431,7 +432,7 @@
             font-weight: 900;
             min-width: 120px;
             text-align: center;
-            background: linear-gradient(135deg, var(--project-color, var(--primary)), var(--project-color-light, var(--primary-light)));
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -464,7 +465,7 @@
             left: 0;
             right: 0;
             height: 6px;
-            background: linear-gradient(90deg, var(--card-color, var(--primary)), var(--card-color-light, var(--primary-light)));
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
             opacity: 0.8;
         }
 
@@ -581,7 +582,7 @@
             height: 100%;
             border-radius: var(--radius-full);
             transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            background: linear-gradient(90deg, var(--progress-color, var(--primary)), var(--progress-color-light, var(--primary-light)));
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
             position: relative;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
@@ -621,7 +622,7 @@
         }
 
         .records-header:hover {
-            border-color: var(--card-color, var(--primary));
+            border-color: var(--primary);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transform: translateY(-2px);
         }
@@ -633,6 +634,7 @@
             align-items: center;
             gap: var(--spacing-sm);
             margin: 0;
+            color: var(--primary);
         }
 
         .records-toggle-icon {
@@ -649,8 +651,8 @@
         }
 
         .records-header:hover .records-toggle-icon {
-            background: var(--card-color, var(--primary));
-            border-color: var(--card-color, var(--primary));
+            background: var(--primary);
+            border-color: var(--primary);
             color: white;
         }
 
@@ -1038,8 +1040,7 @@
                     const project = dashboardData[projectKey];
                     allProjects.push({
                         id: projectKey,
-                        name: project.project_name,
-                        color: project.project_color
+                        name: project.project_name
                     });
 
                     const years = Object.keys(project.years).map(Number);
@@ -1176,9 +1177,9 @@
                 const quarters = Object.keys(yearData.quarters).sort();
 
                 html += `
-                    <div class="project-section" style="--project-color: ${project.project_color}; --project-color-light: ${project.project_color}cc;">
-                        <div class="project-header" style="border-bottom-color: ${project.project_color}">
-                            <div class="project-name" style="color: ${project.project_color}">
+                    <div class="project-section">
+                        <div class="project-header">
+                            <div class="project-name">
                                 <i class="fas fa-project-diagram"></i>
                                 ${project.project_name}
                             </div>
@@ -1188,7 +1189,7 @@
                             <button class="year-nav-btn" onclick="changeYear('${projectKey}', -1)" ${years.indexOf(currentYear) >= years.length - 1 ? 'disabled' : ''}>
                                 <i class="fas fa-chevron-left"></i>
                             </button>
-                            <div class="year-display" style="color: ${project.project_color}">
+                            <div class="year-display">
                                 ${currentYear}
                             </div>
                             <button class="year-nav-btn" onclick="changeYear('${projectKey}', 1)" ${years.indexOf(currentYear) <= 0 ? 'disabled' : ''}>
@@ -1202,8 +1203,8 @@
                                 const successRate = quarterData.success_rate;
 
                                 return `
-                                    <div class="quarter-card" id="quarter-${projectKey}-${currentYear}-${quarter}" style="--card-color: ${project.project_color}; --card-color-light: ${project.project_color}cc;">
-                                        <div class="quarter-title" style="color: ${project.project_color}">
+                                    <div class="quarter-card" id="quarter-${projectKey}-${currentYear}-${quarter}">
+                                        <div class="quarter-title">
                                             <i class="fas fa-calendar-alt"></i>
                                             ${quarter}
                                         </div>
@@ -1243,13 +1244,13 @@
                                         </div>
 
                                         <div class="progress-bar">
-                                            <div class="progress-fill" style="width: ${successRate}%; --progress-color: ${project.project_color}; --progress-color-light: ${project.project_color}cc;"></div>
+                                            <div class="progress-fill" style="width: ${successRate}%;"></div>
                                         </div>
 
                                         <div class="details-section" id="details-${projectKey}-${currentYear}-${quarter}">
                                             ${quarterData.months && Object.keys(quarterData.months).length > 0 ? `
                                                 <div class="monthly-breakdown">
-                                                    <h4 style="margin-bottom: 15px; color: ${project.project_color}"><i class="fas fa-calendar-week"></i> Monthly Breakdown:</h4>
+                                                    <h4 style="margin-bottom: 15px;"><i class="fas fa-calendar-week"></i> Monthly Breakdown:</h4>
                                                     <div class="months-grid">
                                                         ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                                                             .filter(month => quarterData.months[month])
@@ -1288,8 +1289,8 @@
                                                 </div>
                                             ` : ''}
 
-                                            <div class="records-header" onclick="toggleRecordsSection('${projectKey}', '${currentYear}', '${quarter}')" style="--card-color: ${project.project_color};">
-                                                <h4 style="color: ${project.project_color}">
+                                            <div class="records-header" onclick="toggleRecordsSection('${projectKey}', '${currentYear}', '${quarter}')">
+                                                <h4>
                                                     <i class="fas fa-database"></i> Records in this quarter (${quarterData.records.length})
                                                 </h4>
                                                 <span class="records-toggle-icon" id="records-toggle-${projectKey}-${currentYear}-${quarter}">
