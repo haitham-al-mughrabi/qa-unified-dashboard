@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -95,7 +96,7 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.25rem;
+            font-size: 1.125rem;
         }
 
         .navbar-links {
@@ -153,8 +154,21 @@
             background: white;
             border-radius: var(--radius-2xl);
             padding: var(--spacing-2xl);
-            box-shadow: var(--shadow-xl);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--gray-100);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .create-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
         }
 
         .create-header {
@@ -163,11 +177,15 @@
 
         .create-header h2 {
             font-size: 1.875rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--gray-900);
             display: flex;
             align-items: center;
             gap: var(--spacing-sm);
+        }
+
+        .create-header h2 i {
+            color: var(--primary);
         }
 
         .form-group {
@@ -282,14 +300,28 @@
             background: white;
             border-radius: var(--radius-xl);
             padding: var(--spacing-xl);
-            box-shadow: var(--shadow-lg);
-            border-left: 6px solid;
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 2px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--project-color, var(--primary)), var(--project-color-light, var(--primary-light)));
+            opacity: 0.8;
         }
 
         .project-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-xl);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            border-color: var(--project-color, var(--primary));
         }
 
         .project-card-header {
@@ -303,8 +335,15 @@
 
         .project-title {
             font-size: 1.5rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .project-title i {
+            color: var(--project-color, var(--primary));
         }
 
         .project-meta {
@@ -320,6 +359,12 @@
             gap: var(--spacing-sm);
             font-size: 0.9375rem;
             color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        .meta-item i {
+            color: var(--primary);
+            font-size: 0.875rem;
         }
 
         .project-description {
@@ -336,19 +381,32 @@
 
         .btn-delete {
             padding: 0.625rem 1.25rem;
-            background: linear-gradient(135deg, var(--danger) 0%, #f87171 100%);
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
             color: white;
             border: none;
             border-radius: var(--radius-lg);
             cursor: pointer;
             font-size: 0.9375rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .btn-delete i {
+            font-size: 1rem;
         }
 
         .btn-delete:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .btn-delete:active {
+            transform: translateY(0);
         }
 
         /* Messages */
@@ -391,31 +449,42 @@
         .empty-state {
             background: white;
             border-radius: var(--radius-2xl);
-            padding: var(--spacing-2xl);
-            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-2xl) var(--spacing-xl);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             text-align: center;
+            border: 2px solid var(--gray-100);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: var(--spacing-lg);
+            opacity: 0.5;
+            color: var(--primary);
         }
 
         .empty-state h3 {
-            font-size: 1.875rem;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 800;
             color: var(--gray-900);
-            margin-bottom: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
         }
 
         .empty-state p {
             color: var(--gray-600);
             font-size: 1.125rem;
+            font-weight: 500;
         }
 
         /* Loading */
         .loading {
             background: white;
             border-radius: var(--radius-2xl);
-            padding: var(--spacing-2xl);
-            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-2xl) var(--spacing-xl);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             text-align: center;
             display: none;
+            border: 2px solid var(--gray-100);
         }
 
         .loading.active {
@@ -423,13 +492,39 @@
         }
 
         .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid var(--gray-200);
-            border-top: 4px solid var(--primary);
+            width: 64px;
+            height: 64px;
+            border: 5px solid var(--gray-200);
+            border-top: 5px solid transparent;
             border-radius: 50%;
-            margin: 0 auto var(--spacing-lg);
-            animation: spin 1s linear infinite;
+            margin: 0 auto var(--spacing-xl);
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            position: relative;
+        }
+
+        .spinner::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 5px solid transparent;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite reverse;
+        }
+
+        .loading h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .loading p {
+            color: var(--gray-600);
+            font-size: 1rem;
         }
 
         @keyframes spin {
@@ -454,12 +549,12 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="/" class="navbar-brand">
-                <div class="navbar-brand-icon">📊</div>
+                <div class="navbar-brand-icon"><i class="fas fa-chart-line"></i></div>
                 <span>QA Dashboard</span>
             </a>
             <div class="navbar-links">
-                <a href="/" class="nav-btn">Ticket Analyzer</a>
-                <a href="/dashboard" class="nav-btn">Dashboard</a>
+                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                <a href="/dashboard" class="nav-btn"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
             </div>
         </div>
     </nav>
@@ -479,7 +574,7 @@
         <!-- Create Project Card -->
         <div class="create-card">
             <div class="create-header">
-                <h2>➕ Create New Project</h2>
+                <h2><i class="fas fa-plus-circle"></i> Create New Project</h2>
             </div>
 
             <form id="projectForm">
@@ -503,7 +598,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary">Create Project</button>
+                <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Create Project</button>
             </form>
         </div>
 
@@ -516,7 +611,7 @@
         <!-- Projects Section -->
         <div class="projects-section">
             <div class="section-header">
-                <h2>📁 Your Projects</h2>
+                <h2><i class="fas fa-folder-open"></i> Your Projects</h2>
                 <p>Manage all your QA analysis projects</p>
             </div>
             <div class="projects-grid" id="projectsGrid"></div>
@@ -580,6 +675,7 @@
                 if (!data.projects || data.projects.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
+                            <i class="fas fa-folder-plus empty-state-icon"></i>
                             <h3>No projects yet</h3>
                             <p>Create your first project above</p>
                         </div>
@@ -590,14 +686,24 @@
                 let html = '';
                 data.projects.forEach(project => {
                     html += `
-                        <div class="project-card" style="border-left-color: ${project.color}">
-                            <div class="project-info">
-                                <div class="project-name" style="color: ${project.color}">${project.name}</div>
-                                ${project.description ? `<div class="project-description">${project.description}</div>` : ''}
-                                <div class="project-meta">Created: ${new Date(project.created_at).toLocaleDateString()}</div>
+                        <div class="project-card" style="--project-color: ${project.color}; --project-color-light: ${project.color}cc;">
+                            <div class="project-card-header">
+                                <div class="project-title" style="color: ${project.color}">
+                                    <i class="fas fa-project-diagram"></i>
+                                    ${project.name}
+                                </div>
+                            </div>
+                            ${project.description ? `<div class="project-description">${project.description}</div>` : ''}
+                            <div class="project-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar-plus"></i>
+                                    Created: ${new Date(project.created_at).toLocaleDateString()}
+                                </div>
                             </div>
                             <div class="project-actions">
-                                <button class="btn-delete" onclick="deleteProject(${project.id}, '${project.name}')">Delete</button>
+                                <button class="btn-delete" onclick="deleteProject(${project.id}, '${project.name}')">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
                             </div>
                         </div>
                     `;
@@ -606,8 +712,9 @@
                 container.innerHTML = html;
             } catch (error) {
                 console.error('Error loading projects:', error);
-                document.getElementById('projectsContainer').innerHTML = `
+                document.getElementById('projectsGrid').innerHTML = `
                     <div class="empty-state">
+                        <i class="fas fa-exclamation-circle empty-state-icon" style="color: #ef4444;"></i>
                         <h3>Error loading projects</h3>
                         <p>${error.message}</p>
                     </div>

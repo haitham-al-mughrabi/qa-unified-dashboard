@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -103,7 +104,7 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.25rem;
+            font-size: 1.125rem;
         }
 
         .navbar-links {
@@ -188,9 +189,22 @@
             background: white;
             border-radius: var(--radius-2xl);
             padding: var(--spacing-2xl);
-            box-shadow: var(--shadow-xl);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             margin-bottom: var(--spacing-xl);
             text-align: center;
+            border: 2px solid var(--gray-100);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
         }
 
         .upload-area {
@@ -221,8 +235,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 2.25rem;
             color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         .upload-text h3 {
@@ -335,8 +350,21 @@
             background: white;
             border-radius: var(--radius-2xl);
             padding: var(--spacing-2xl);
-            box-shadow: var(--shadow-xl);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             margin-bottom: var(--spacing-xl);
+            border: 2px solid var(--gray-100);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
         }
 
         .summary-header {
@@ -345,9 +373,16 @@
 
         .summary-header h2 {
             font-size: 1.875rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--gray-900);
             margin-bottom: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .summary-header h2 i {
+            color: var(--primary);
         }
 
         .summary-grid {
@@ -357,31 +392,65 @@
         }
 
         .summary-item {
-            background: var(--gray-50);
-            padding: var(--spacing-lg);
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            padding: var(--spacing-xl);
             border-radius: var(--radius-xl);
             text-align: center;
-            transition: transform 0.2s ease;
+            transition: all 0.3s ease;
+            border: 2px solid var(--gray-100);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--summary-color, var(--primary))20, transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .summary-item:hover {
-            transform: translateY(-4px);
+            transform: translateY(-6px);
+            border-color: var(--summary-color, var(--primary));
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15);
+        }
+
+        .summary-item:hover::before {
+            opacity: 0.08;
+        }
+
+        .summary-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+            opacity: 0.7;
+        }
+
+        .summary-icon i {
+            color: var(--summary-color, var(--primary));
         }
 
         .summary-value {
-            font-size: 2.5rem;
+            font-size: 2.75rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, var(--summary-color, var(--primary)), var(--summary-color-dark, #8b5cf6));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: var(--spacing-sm);
+            position: relative;
         }
 
         .summary-label {
             color: var(--gray-600);
             font-size: 0.9375rem;
-            font-weight: 500;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* Results Grid */
@@ -410,13 +479,28 @@
             background: white;
             border-radius: var(--radius-xl);
             padding: var(--spacing-xl);
-            box-shadow: var(--shadow-lg);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            opacity: 0.8;
         }
 
         .result-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-xl);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            border-color: #10b981;
         }
 
         .result-header {
@@ -432,6 +516,13 @@
             font-size: 1.25rem;
             font-weight: 700;
             color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .result-title i {
+            color: #3b82f6;
         }
 
         .result-badge {
@@ -459,6 +550,13 @@
             color: var(--gray-600);
             font-size: 0.9375rem;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .metric-label i {
+            font-size: 0.875rem;
         }
 
         .metric-value {
@@ -469,18 +567,37 @@
 
         .progress-bar {
             width: 100%;
-            height: 8px;
+            height: 10px;
             background: var(--gray-200);
             border-radius: var(--radius-full);
             overflow: hidden;
             margin-top: var(--spacing-md);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
         }
 
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--success) 0%, var(--success-dark) 100%);
             border-radius: var(--radius-full);
-            transition: width 0.6s ease;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         /* Modal Styles */
@@ -734,13 +851,13 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="/" class="navbar-brand">
-                <div class="navbar-brand-icon">📊</div>
+                <div class="navbar-brand-icon"><i class="fas fa-chart-line"></i></div>
                 <span>QA Dashboard</span>
             </a>
             <div class="navbar-links">
-                <a href="/dashboard" class="nav-btn">Dashboard</a>
-                <a href="/projects" class="nav-btn">Projects</a>
-                <button class="nav-btn nav-btn-success" id="saveBtn" onclick="openSaveModal()">💾 Save Analysis</button>
+                <a href="/dashboard" class="nav-btn"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="/projects" class="nav-btn"><i class="fas fa-folder-open"></i> Projects</a>
+                <button class="nav-btn nav-btn-success" id="saveBtn" onclick="openSaveModal()"><i class="fas fa-save"></i> Save Analysis</button>
             </div>
         </div>
     </nav>
@@ -756,14 +873,14 @@
         <!-- Upload Card -->
         <div class="upload-card">
             <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📁</div>
+                <div class="upload-icon"><i class="fas fa-file-excel"></i></div>
                 <div class="upload-text">
                     <h3>Upload Excel File</h3>
                     <p>Drag and drop your file here or click to browse</p>
                 </div>
                 <input type="file" id="fileInput" class="file-input" accept=".xlsx, .xls">
                 <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                    Choose File
+                    <i class="fas fa-upload"></i> Choose File
                 </button>
             </div>
             <div class="file-name" id="fileName"></div>
@@ -786,7 +903,7 @@
         <!-- Results Section -->
         <div class="results-section" id="resultsSection" style="display: none;">
             <div class="section-header">
-                <h2>Monthly Breakdown</h2>
+                <h2><i class="fas fa-calendar-week"></i> Monthly Breakdown</h2>
             </div>
             <div class="results-grid" id="resultsGrid"></div>
         </div>
@@ -796,8 +913,8 @@
     <div class="modal" id="saveModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Save Analysis</h2>
-                <button class="close-btn" onclick="closeSaveModal()">&times;</button>
+                <h2><i class="fas fa-save"></i> Save Analysis</h2>
+                <button class="close-btn" onclick="closeSaveModal()"><i class="fas fa-times"></i></button>
             </div>
 
             <form id="saveForm">
@@ -821,7 +938,7 @@
                     <div class="months-grid" id="monthsGrid"></div>
                 </div>
 
-                <button type="submit" class="btn-primary" id="saveSubmitBtn">Save to Database</button>
+                <button type="submit" class="btn-primary" id="saveSubmitBtn"><i class="fas fa-database"></i> Save to Database</button>
             </form>
         </div>
     </div>
@@ -997,22 +1114,26 @@
             const summaryHTML = `
                 <div class="summary-card">
                     <div class="summary-header">
-                        <h2>Overall Performance</h2>
+                        <h2><i class="fas fa-chart-pie"></i> Overall Performance</h2>
                     </div>
                     <div class="summary-grid">
-                        <div class="summary-item">
+                        <div class="summary-item" style="--summary-color: #3b82f6; --summary-color-dark: #2563eb;">
+                            <div class="summary-icon"><i class="fas fa-ticket-alt"></i></div>
                             <div class="summary-value">${totalTickets}</div>
                             <div class="summary-label">Total Tickets</div>
                         </div>
-                        <div class="summary-item">
+                        <div class="summary-item" style="--summary-color: #10b981; --summary-color-dark: #059669;">
+                            <div class="summary-icon"><i class="fas fa-check-circle"></i></div>
                             <div class="summary-value">${totalResolvedIn2Days}</div>
                             <div class="summary-label">Resolved in ≤2 Days</div>
                         </div>
-                        <div class="summary-item">
+                        <div class="summary-item" style="--summary-color: ${percentage >= 80 ? '#10b981' : percentage >= 60 ? '#f59e0b' : '#ef4444'}; --summary-color-dark: ${percentage >= 80 ? '#059669' : percentage >= 60 ? '#d97706' : '#dc2626'};">
+                            <div class="summary-icon"><i class="fas ${percentage >= 80 ? 'fa-trophy' : percentage >= 60 ? 'fa-chart-bar' : 'fa-exclamation-triangle'}"></i></div>
                             <div class="summary-value">${percentage}%</div>
                             <div class="summary-label">Success Rate</div>
                         </div>
-                        <div class="summary-item">
+                        <div class="summary-item" style="--summary-color: #f59e0b; --summary-color-dark: #d97706;">
+                            <div class="summary-icon"><i class="fas fa-clock"></i></div>
                             <div class="summary-value">${resolvedInMore}</div>
                             <div class="summary-label">Resolved in >2 Days</div>
                         </div>
@@ -1036,20 +1157,20 @@
 
                 card.innerHTML = `
                     <div class="result-header">
-                        <div class="result-title">${result.displayName}</div>
+                        <div class="result-title"><i class="fas fa-calendar-alt"></i> ${result.displayName}</div>
                         <div class="result-badge">${result.percentage}%</div>
                     </div>
                     <div class="result-metrics">
                         <div class="metric-row">
-                            <span class="metric-label">Total Tickets</span>
+                            <span class="metric-label"><i class="fas fa-list"></i> Total Tickets</span>
                             <span class="metric-value">${result.totalTickets}</span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label">Resolved in ≤2 Days</span>
+                            <span class="metric-label"><i class="fas fa-check"></i> Resolved in ≤2 Days</span>
                             <span class="metric-value">${result.resolvedIn2Days}</span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label">Resolved in >2 Days</span>
+                            <span class="metric-label"><i class="fas fa-hourglass-half"></i> Resolved in >2 Days</span>
                             <span class="metric-value">${result.totalTickets - result.resolvedIn2Days}</span>
                         </div>
                     </div>
