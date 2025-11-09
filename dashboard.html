@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -95,7 +96,7 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.25rem;
+            font-size: 1.125rem;
         }
 
         .navbar-links {
@@ -152,19 +153,35 @@
         .filters-card {
             background: white;
             border-radius: var(--radius-2xl);
-            padding: var(--spacing-xl);
-            box-shadow: var(--shadow-xl);
-            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-2xl);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin-bottom: var(--spacing-2xl);
+            border: 2px solid var(--gray-100);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filters-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
         }
 
         .filters-header {
-            margin-bottom: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
         }
 
         .filters-header h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.75rem;
+            font-weight: 800;
             color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
         }
 
         .filters-grid {
@@ -186,40 +203,56 @@
         }
 
         .filter-select {
-            padding: 0.75rem 1rem;
+            padding: 0.875rem 1.125rem;
             border: 2px solid var(--gray-200);
             border-radius: var(--radius-lg);
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             font-family: inherit;
+            background: white;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-select:hover {
+            border-color: var(--primary);
         }
 
         .filter-select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
         }
 
         .filter-checkbox-group {
             display: flex;
             align-items: center;
-            gap: var(--spacing-sm);
-            padding: 0.75rem 1rem;
-            background: var(--gray-50);
+            gap: var(--spacing-md);
+            padding: 0.875rem 1.125rem;
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
             border-radius: var(--radius-lg);
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filter-checkbox-group:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .filter-checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
             accent-color: var(--primary);
         }
 
         .filter-checkbox-group label {
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--gray-700);
         }
 
@@ -227,19 +260,46 @@
         .loading {
             background: white;
             border-radius: var(--radius-2xl);
-            padding: var(--spacing-2xl);
-            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-2xl) var(--spacing-xl);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             text-align: center;
+            border: 2px solid var(--gray-100);
         }
 
         .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid var(--gray-200);
-            border-top: 4px solid var(--primary);
+            width: 64px;
+            height: 64px;
+            border: 5px solid var(--gray-200);
+            border-top: 5px solid transparent;
             border-radius: 50%;
-            margin: 0 auto var(--spacing-lg);
-            animation: spin 1s linear infinite;
+            margin: 0 auto var(--spacing-xl);
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            position: relative;
+        }
+
+        .spinner::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border: 5px solid transparent;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite reverse;
+        }
+
+        .loading h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .loading p {
+            color: var(--gray-600);
+            font-size: 1rem;
         }
 
         @keyframes spin {
@@ -251,30 +311,53 @@
         .empty-state {
             background: white;
             border-radius: var(--radius-2xl);
-            padding: var(--spacing-2xl);
-            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-2xl) var(--spacing-xl);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             text-align: center;
+            border: 2px solid var(--gray-100);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: var(--spacing-lg);
+            opacity: 0.5;
+            color: var(--primary);
         }
 
         .empty-state h3 {
-            font-size: 1.875rem;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 800;
             color: var(--gray-900);
-            margin-bottom: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
         }
 
         .empty-state p {
             color: var(--gray-600);
             font-size: 1.125rem;
+            font-weight: 500;
         }
 
         /* Project Section */
         .project-section {
             background: white;
             border-radius: var(--radius-2xl);
-            padding: var(--spacing-xl);
-            margin-bottom: var(--spacing-xl);
-            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 2px solid var(--gray-100);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--project-color, var(--primary)), var(--project-color-light, var(--primary-light)));
         }
 
         .project-header {
@@ -282,45 +365,60 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: var(--spacing-xl);
-            padding-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-xl);
             border-bottom: 3px solid;
+            position: relative;
         }
 
         .project-name {
+            font-size: 2.25rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            letter-spacing: -0.5px;
+        }
+
+        .project-name i {
             font-size: 2rem;
-            font-weight: 800;
         }
 
         /* Year Navigation */
         .year-navigation {
             display: flex;
             align-items: center;
-            gap: var(--spacing-lg);
-            margin-bottom: var(--spacing-xl);
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-2xl);
             justify-content: center;
+            padding: var(--spacing-lg);
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--gray-200);
         }
 
         .year-nav-btn {
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--gray-100);
-            border: 2px solid var(--gray-200);
+            background: white;
+            border: 2px solid var(--gray-300);
             border-radius: var(--radius-full);
             cursor: pointer;
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             color: var(--gray-700);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .year-nav-btn:hover:not(:disabled) {
-            background: var(--primary);
-            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--project-color, var(--primary)), var(--project-color-light, var(--primary-light)));
+            border-color: var(--project-color, var(--primary));
             color: white;
-            transform: scale(1.1);
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .year-nav-btn:disabled {
@@ -329,10 +427,15 @@
         }
 
         .year-display {
-            font-size: 1.875rem;
-            font-weight: 800;
-            min-width: 100px;
+            font-size: 2.25rem;
+            font-weight: 900;
+            min-width: 120px;
             text-align: center;
+            background: linear-gradient(135deg, var(--project-color, var(--primary)), var(--project-color-light, var(--primary-light)));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
         }
 
         /* Quarters Container */
@@ -344,39 +447,52 @@
 
         /* Quarter Card */
         .quarter-card {
-            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            background: white;
             border-radius: var(--radius-xl);
             padding: var(--spacing-xl);
-            border-left: 6px solid;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        .quarter-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-xl);
+        .quarter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--card-color, var(--primary)), var(--card-color-light, var(--primary-light)));
+            opacity: 0.8;
         }
 
-        .quarter-card.expanded {
-            transform: none;
+        .quarter-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, var(--card-color, var(--primary))10, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .quarter-card:hover::after {
+            opacity: 0.05;
         }
 
         .quarter-title {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            font-size: 1.5rem;
-            font-weight: 700;
+            gap: var(--spacing-sm);
+            font-size: 1.75rem;
+            font-weight: 800;
             margin-bottom: var(--spacing-lg);
-        }
-
-        .expand-icon {
-            font-size: 1.125rem;
-            transition: transform 0.3s ease;
-        }
-
-        .quarter-card.expanded .expand-icon {
-            transform: rotate(180deg);
+            position: relative;
         }
 
         /* Metrics Grid */
@@ -388,48 +504,167 @@
         }
 
         .metric-card {
-            background: white;
-            padding: var(--spacing-md);
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            padding: var(--spacing-lg);
             border-radius: var(--radius-lg);
             text-align: center;
+            border: 2px solid var(--gray-100);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--metric-color, var(--primary))20, transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--metric-color, var(--primary));
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card:hover::before {
+            opacity: 0.08;
         }
 
         .metric-value {
-            font-size: 2rem;
+            font-size: 2.25rem;
             font-weight: 800;
             margin-bottom: var(--spacing-xs);
+            position: relative;
+            background: linear-gradient(135deg, var(--metric-color, var(--gray-900)), var(--metric-color-dark, var(--gray-700)));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .metric-label {
             font-size: 0.8125rem;
             color: var(--gray-600);
-            font-weight: 500;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .metric-icon {
+            font-size: 1.75rem;
+            margin-bottom: var(--spacing-sm);
+            opacity: 0.7;
+        }
+
+        .metric-icon i {
+            color: var(--metric-color, var(--primary));
         }
 
         /* Progress Bar */
         .progress-bar {
             width: 100%;
-            height: 10px;
+            height: 12px;
             background: var(--gray-200);
             border-radius: var(--radius-full);
             overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
         }
 
         .progress-fill {
             height: 100%;
             border-radius: var(--radius-full);
-            transition: width 0.6s ease;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, var(--progress-color, var(--primary)), var(--progress-color-light, var(--primary-light)));
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         /* Details Section */
         .details-section {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            margin-top: var(--spacing-lg);
+            margin-top: var(--spacing-xl);
         }
 
-        .details-section.active {
+        .records-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--gray-200);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .records-header:hover {
+            border-color: var(--card-color, var(--primary));
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .records-header h4 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin: 0;
+        }
+
+        .records-toggle-icon {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+            background: white;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-full);
+            border: 2px solid var(--gray-300);
+        }
+
+        .records-header:hover .records-toggle-icon {
+            background: var(--card-color, var(--primary));
+            border-color: var(--card-color, var(--primary));
+            color: white;
+        }
+
+        .records-toggle-icon.active {
+            transform: rotate(180deg);
+        }
+
+        .records-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .records-content.active {
             max-height: 4000px;
         }
 
@@ -454,21 +689,47 @@
         .month-card {
             background: white;
             border-radius: var(--radius-lg);
-            padding: var(--spacing-md);
+            padding: var(--spacing-lg);
             border: 2px solid var(--gray-200);
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .month-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--month-color, var(--primary)), var(--month-color-light, var(--primary-light)));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .month-card:hover {
-            border-color: var(--primary);
-            box-shadow: var(--shadow-md);
+            border-color: var(--month-color, var(--primary));
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .month-card:hover::before {
+            opacity: 1;
         }
 
         .month-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: var(--spacing-sm);
-            color: var(--gray-800);
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .month-title i {
+            font-size: 1.125rem;
         }
 
         .month-metrics {
@@ -495,38 +756,68 @@
 
         .month-progress-bar {
             width: 100%;
-            height: 6px;
+            height: 8px;
             background: var(--gray-200);
             border-radius: var(--radius-full);
             overflow: hidden;
-            margin-top: var(--spacing-xs);
+            margin-top: var(--spacing-md);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
         }
 
         .month-progress-fill {
             height: 100%;
             border-radius: var(--radius-full);
-            transition: width 0.6s ease;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, var(--month-color, var(--primary)), var(--month-color-light, var(--primary-light)));
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         /* Record Item */
         .record-item {
-            background: var(--gray-50);
-            padding: var(--spacing-md);
+            background: linear-gradient(135deg, #f8fafc 0%, white 100%);
+            padding: var(--spacing-lg);
             border-radius: var(--radius-lg);
-            margin-bottom: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
             display: flex;
             align-items: center;
             gap: var(--spacing-md);
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            border: 2px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .record-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .record-item:hover {
-            background: var(--gray-100);
+            background: white;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateX(4px);
+        }
+
+        .record-item:hover::before {
+            opacity: 1;
         }
 
         .record-item.excluded {
             opacity: 0.5;
             background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        .record-item.excluded:hover {
+            transform: none;
         }
 
         .record-checkbox {
@@ -546,14 +837,30 @@
         }
 
         .record-filename {
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: var(--spacing-xs);
             color: var(--gray-900);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .record-filename i {
+            color: #3b82f6;
+            font-size: 1.125rem;
         }
 
         .record-months {
             font-size: 0.875rem;
             color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .record-months i {
+            color: #8b5cf6;
         }
 
         .record-stats {
@@ -562,26 +869,55 @@
             font-size: 0.9375rem;
         }
 
+        .record-stats > div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .record-stats strong {
+            font-size: 1.25rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .record-actions {
             display: flex;
             gap: var(--spacing-sm);
         }
 
         .btn-delete-record {
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, var(--danger) 0%, #f87171 100%);
+            padding: 0.625rem 1.25rem;
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
             color: white;
             border: none;
             border-radius: var(--radius-lg);
             cursor: pointer;
             font-size: 0.875rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .btn-delete-record i {
+            font-size: 1rem;
         }
 
         .btn-delete-record:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .btn-delete-record:active {
+            transform: translateY(0);
         }
 
         /* Responsive */
@@ -609,12 +945,12 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="/" class="navbar-brand">
-                <div class="navbar-brand-icon">📊</div>
+                <div class="navbar-brand-icon"><i class="fas fa-chart-line"></i></div>
                 <span>QA Dashboard</span>
             </a>
             <div class="navbar-links">
-                <a href="/" class="nav-btn">Ticket Analyzer</a>
-                <a href="/projects" class="nav-btn">Projects</a>
+                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                <a href="/projects" class="nav-btn"><i class="fas fa-folder-open"></i> Projects</a>
             </div>
         </div>
     </nav>
@@ -630,7 +966,7 @@
         <!-- Filters -->
         <div class="filters-card">
             <div class="filters-header">
-                <h2>🔍 Filter Data</h2>
+                <h2><i class="fas fa-filter"></i> Filter Data</h2>
             </div>
             <div class="filters-grid">
                 <div class="filter-group">
@@ -722,6 +1058,7 @@
                 console.error('Error loading dashboard:', error);
                 document.getElementById('dashboardContainer').innerHTML = `
                     <div class="empty-state">
+                        <i class="fas fa-exclamation-circle empty-state-icon" style="color: #ef4444;"></i>
                         <h3>Error loading dashboard</h3>
                         <p>${error.message}</p>
                     </div>
@@ -818,6 +1155,7 @@
             if (Object.keys(filteredDashboardData).length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
+                        <i class="fas fa-chart-bar empty-state-icon"></i>
                         <h3>No data yet</h3>
                         <p>Start by analyzing tickets and saving them to projects</p>
                     </div>
@@ -838,22 +1176,23 @@
                 const quarters = Object.keys(yearData.quarters).sort();
 
                 html += `
-                    <div class="project-section">
+                    <div class="project-section" style="--project-color: ${project.project_color}; --project-color-light: ${project.project_color}cc;">
                         <div class="project-header" style="border-bottom-color: ${project.project_color}">
                             <div class="project-name" style="color: ${project.project_color}">
+                                <i class="fas fa-project-diagram"></i>
                                 ${project.project_name}
                             </div>
                         </div>
 
                         <div class="year-navigation">
                             <button class="year-nav-btn" onclick="changeYear('${projectKey}', -1)" ${years.indexOf(currentYear) >= years.length - 1 ? 'disabled' : ''}>
-                                ←
+                                <i class="fas fa-chevron-left"></i>
                             </button>
                             <div class="year-display" style="color: ${project.project_color}">
                                 ${currentYear}
                             </div>
                             <button class="year-nav-btn" onclick="changeYear('${projectKey}', 1)" ${years.indexOf(currentYear) <= 0 ? 'disabled' : ''}>
-                                →
+                                <i class="fas fa-chevron-right"></i>
                             </button>
                         </div>
 
@@ -863,77 +1202,84 @@
                                 const successRate = quarterData.success_rate;
 
                                 return `
-                                    <div class="quarter-card" id="quarter-${projectKey}-${currentYear}-${quarter}" style="border-left-color: ${project.project_color}" onclick="toggleQuarterDetails('${projectKey}', '${currentYear}', '${quarter}')">
+                                    <div class="quarter-card" id="quarter-${projectKey}-${currentYear}-${quarter}" style="--card-color: ${project.project_color}; --card-color-light: ${project.project_color}cc;">
                                         <div class="quarter-title" style="color: ${project.project_color}">
+                                            <i class="fas fa-calendar-alt"></i>
                                             ${quarter}
-                                            <span class="expand-icon">▼</span>
                                         </div>
 
                                         <div class="metrics-grid">
-                                            <div class="metric-card">
-                                                <div class="metric-value" style="color: ${project.project_color}">
+                                            <div class="metric-card" style="--metric-color: #3b82f6; --metric-color-dark: #2563eb;">
+                                                <div class="metric-icon"><i class="fas fa-ticket-alt"></i></div>
+                                                <div class="metric-value">
                                                     ${quarterData.total_tickets}
                                                 </div>
                                                 <div class="metric-label">Total Tickets</div>
                                             </div>
 
-                                            <div class="metric-card">
-                                                <div class="metric-value" style="color: ${project.project_color}">
+                                            <div class="metric-card" style="--metric-color: #10b981; --metric-color-dark: #059669;">
+                                                <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                                                <div class="metric-value">
                                                     ${quarterData.resolved_in_2days}
                                                 </div>
-                                                <div class="metric-label">Resolved in ≤2 Days</div>
+                                                <div class="metric-label">Resolved ≤2 Days</div>
                                             </div>
 
-                                            <div class="metric-card">
-                                                <div class="metric-value" style="color: ${project.project_color}">
+                                            <div class="metric-card" style="--metric-color: ${successRate >= 80 ? '#10b981' : successRate >= 60 ? '#f59e0b' : '#ef4444'}; --metric-color-dark: ${successRate >= 80 ? '#059669' : successRate >= 60 ? '#d97706' : '#dc2626'};">
+                                                <div class="metric-icon"><i class="fas ${successRate >= 80 ? 'fa-trophy' : successRate >= 60 ? 'fa-chart-bar' : 'fa-exclamation-triangle'}"></i></div>
+                                                <div class="metric-value">
                                                     ${successRate}%
                                                 </div>
                                                 <div class="metric-label">Success Rate</div>
                                             </div>
 
-                                            <div class="metric-card">
-                                                <div class="metric-value" style="color: ${project.project_color}">
+                                            <div class="metric-card" style="--metric-color: #f59e0b; --metric-color-dark: #d97706;">
+                                                <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                                                <div class="metric-value">
                                                     ${quarterData.total_tickets - quarterData.resolved_in_2days}
                                                 </div>
-                                                <div class="metric-label">Resolved in >2 Days</div>
+                                                <div class="metric-label">Resolved >2 Days</div>
                                             </div>
                                         </div>
 
                                         <div class="progress-bar">
-                                            <div class="progress-fill" style="width: ${successRate}%; background: ${project.project_color}"></div>
+                                            <div class="progress-fill" style="width: ${successRate}%; --progress-color: ${project.project_color}; --progress-color-light: ${project.project_color}cc;"></div>
                                         </div>
 
                                         <div class="details-section" id="details-${projectKey}-${currentYear}-${quarter}">
                                             ${quarterData.months && Object.keys(quarterData.months).length > 0 ? `
                                                 <div class="monthly-breakdown">
-                                                    <h4 style="margin-bottom: 15px; color: ${project.project_color}">Monthly Breakdown:</h4>
+                                                    <h4 style="margin-bottom: 15px; color: ${project.project_color}"><i class="fas fa-calendar-week"></i> Monthly Breakdown:</h4>
                                                     <div class="months-grid">
                                                         ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                                                             .filter(month => quarterData.months[month])
                                                             .map(month => {
                                                                 const monthData = quarterData.months[month];
                                                                 const monthSuccessRate = parseFloat(monthData.success_rate || 0);
+                                                                const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
+                                                                const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
                                                                 return `
-                                                                    <div class="month-card">
-                                                                        <div class="month-title" style="color: ${project.project_color}">
+                                                                    <div class="month-card" style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};">
+                                                                        <div class="month-title" style="color: ${monthColor}">
+                                                                            <i class="fas fa-calendar-day"></i>
                                                                             ${month}
                                                                         </div>
                                                                         <div class="month-metrics">
                                                                             <div class="month-metric-row">
-                                                                                <span class="month-metric-label">Total Tickets:</span>
+                                                                                <span class="month-metric-label"><i class="fas fa-list"></i> Total Tickets:</span>
                                                                                 <span class="month-metric-value">${monthData.total_tickets}</span>
                                                                             </div>
                                                                             <div class="month-metric-row">
-                                                                                <span class="month-metric-label">Resolved ≤2 Days:</span>
-                                                                                <span class="month-metric-value">${monthData.resolved_in_2days}</span>
+                                                                                <span class="month-metric-label"><i class="fas fa-check"></i> Resolved ≤2 Days:</span>
+                                                                                <span class="month-metric-value" style="color: #10b981">${monthData.resolved_in_2days}</span>
                                                                             </div>
                                                                             <div class="month-metric-row">
-                                                                                <span class="month-metric-label">Success Rate:</span>
-                                                                                <span class="month-metric-value" style="color: ${project.project_color}">${monthSuccessRate}%</span>
+                                                                                <span class="month-metric-label"><i class="fas ${monthSuccessRate >= 80 ? 'fa-star' : monthSuccessRate >= 60 ? 'fa-chart-line' : 'fa-exclamation-circle'}"></i> Success Rate:</span>
+                                                                                <span class="month-metric-value" style="color: ${monthColor}; font-weight: 800;">${monthSuccessRate}%</span>
                                                                             </div>
                                                                         </div>
                                                                         <div class="month-progress-bar">
-                                                                            <div class="month-progress-fill" style="width: ${monthSuccessRate}%; background: ${project.project_color}"></div>
+                                                                            <div class="month-progress-fill" style="width: ${monthSuccessRate}%;"></div>
                                                                         </div>
                                                                     </div>
                                                                 `;
@@ -942,30 +1288,47 @@
                                                 </div>
                                             ` : ''}
 
-                                            <h4 style="margin-bottom: 15px; color: ${project.project_color}">Records in this quarter:</h4>
-                                            ${quarterData.records.map(record => {
-                                                return `
-                                                    <div class="record-item" id="record-${record.id}" data-project="${projectKey}" data-year="${currentYear}" data-quarter="${quarter}">
-                                                        <div class="record-checkbox">
-                                                            <input type="checkbox"
-                                                                   id="record-checkbox-${record.id}"
-                                                                   checked
-                                                                   onchange="toggleRecordSelection('${projectKey}', '${currentYear}', '${quarter}', ${record.id})">
+                                            <div class="records-header" onclick="toggleRecordsSection('${projectKey}', '${currentYear}', '${quarter}')" style="--card-color: ${project.project_color};">
+                                                <h4 style="color: ${project.project_color}">
+                                                    <i class="fas fa-database"></i> Records in this quarter (${quarterData.records.length})
+                                                </h4>
+                                                <span class="records-toggle-icon" id="records-toggle-${projectKey}-${currentYear}-${quarter}">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </span>
+                                            </div>
+                                            <div class="records-content" id="records-content-${projectKey}-${currentYear}-${quarter}">
+                                                ${quarterData.records.map(record => {
+                                                    return `
+                                                        <div class="record-item" id="record-${record.id}" data-project="${projectKey}" data-year="${currentYear}" data-quarter="${quarter}">
+                                                            <div class="record-checkbox">
+                                                                <input type="checkbox"
+                                                                       id="record-checkbox-${record.id}"
+                                                                       checked
+                                                                       onchange="toggleRecordSelection('${projectKey}', '${currentYear}', '${quarter}', ${record.id})">
+                                                            </div>
+                                                            <div class="record-info">
+                                                                <div class="record-filename">
+                                                                    <i class="fas fa-file-alt"></i>
+                                                                    ${record.filename}
+                                                                </div>
+                                                                <div class="record-months">
+                                                                    <i class="fas fa-calendar"></i>
+                                                                    Months: ${record.months.join(', ')}
+                                                                </div>
+                                                            </div>
+                                                            <div class="record-stats">
+                                                                <div><strong>${record.total_tickets}</strong> tickets</div>
+                                                                <div><strong>${record.success_rate}%</strong> success</div>
+                                                            </div>
+                                                            <div class="record-actions">
+                                                                <button class="btn-delete-record" onclick="deleteRecord(${record.id}, '${projectKey}', '${currentYear}', '${quarter}')">
+                                                                    <i class="fas fa-trash-alt"></i> Delete
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                        <div class="record-info">
-                                                            <div class="record-filename">${record.filename}</div>
-                                                            <div class="record-months">Months: ${record.months.join(', ')}</div>
-                                                        </div>
-                                                        <div class="record-stats">
-                                                            <div><strong>${record.total_tickets}</strong> tickets</div>
-                                                            <div><strong>${record.success_rate}%</strong> success</div>
-                                                        </div>
-                                                        <div class="record-actions">
-                                                            <button class="btn-delete-record" onclick="deleteRecord(${record.id}, '${projectKey}', '${currentYear}', '${quarter}')">Delete</button>
-                                                        </div>
-                                                    </div>
-                                                `;
-                                            }).join('')}
+                                                    `;
+                                                }).join('')}
+                                            </div>
                                         </div>
                                     </div>
                                 `;
@@ -989,24 +1352,16 @@
             }
         }
 
-        function toggleQuarterDetails(projectKey, year, quarter) {
-            const card = document.getElementById(`quarter-${projectKey}-${year}-${quarter}`);
-            const details = document.getElementById(`details-${projectKey}-${year}-${quarter}`);
+        function toggleRecordsSection(projectKey, year, quarter) {
+            const content = document.getElementById(`records-content-${projectKey}-${year}-${quarter}`);
+            const toggleIcon = document.getElementById(`records-toggle-${projectKey}-${year}-${quarter}`);
 
-            if (details.classList.contains('active')) {
-                details.classList.remove('active');
-                card.classList.remove('expanded');
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                toggleIcon.classList.remove('active');
             } else {
-                // Close all other expanded quarters in this project
-                document.querySelectorAll(`[id^="quarter-${projectKey}"]`).forEach(c => {
-                    c.classList.remove('expanded');
-                });
-                document.querySelectorAll(`[id^="details-${projectKey}"]`).forEach(d => {
-                    d.classList.remove('active');
-                });
-
-                details.classList.add('active');
-                card.classList.add('expanded');
+                content.classList.add('active');
+                toggleIcon.classList.add('active');
             }
         }
 
