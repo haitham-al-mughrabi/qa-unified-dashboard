@@ -389,12 +389,62 @@
             display: flex;
             align-items: center;
             gap: var(--spacing-xl);
-            margin-bottom: var(--spacing-2xl);
+            margin-bottom: var(--spacing-lg);
             justify-content: center;
             padding: var(--spacing-lg);
             background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
             border-radius: var(--radius-xl);
             border: 2px solid var(--gray-200);
+        }
+
+        /* Quarter Navigation */
+        .quarter-navigation {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-2xl);
+            justify-content: center;
+            padding: var(--spacing-md);
+            background: linear-gradient(135deg, #f0f9ff 0%, white 100%);
+            border-radius: var(--radius-lg);
+            border: 2px solid #bfdbfe;
+        }
+
+        .quarter-nav-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 2px solid #93c5fd;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-size: 1.25rem;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #3b82f6;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .quarter-nav-btn:hover {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-color: #3b82f6;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .quarter-display {
+            font-size: 1.75rem;
+            font-weight: 900;
+            min-width: 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
         }
 
         .year-nav-btn {
@@ -1021,6 +1071,7 @@
         let dashboardData = {};
         let filteredDashboardData = {};
         let currentYearByProject = {};
+        let currentQuarterByProject = {};
         let allProjects = [];
         let allYears = new Set();
 
@@ -1050,6 +1101,8 @@
                     const sortedYears = years.sort((a, b) => b - a);
                     if (sortedYears.length > 0) {
                         currentYearByProject[projectKey] = sortedYears[0];
+                        // Initialize to Q1 by default
+                        currentQuarterByProject[projectKey] = 'Q1';
                     }
                 });
 
@@ -1197,13 +1250,25 @@
                             </button>
                         </div>
 
-                        <div class="quarters-container">
-                            ${quarters.map(quarter => {
+                        <div class="quarter-navigation">
+                            <button class="quarter-nav-btn" onclick="changeQuarter('${projectKey}', -1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="quarter-display" id="quarter-display-${projectKey}">
+                                Q1
+                            </div>
+                            <button class="quarter-nav-btn" onclick="changeQuarter('${projectKey}', 1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                            ${quarters.map((quarter, index) => {
                                 const quarterData = yearData.quarters[quarter];
                                 const successRate = quarterData.success_rate;
 
+                                const isFirstQuarter = index === 0;
                                 return `
-                                    <div class="quarter-card" id="quarter-${projectKey}-${currentYear}-${quarter}">
+                                    <div class="quarter-card" id="quarter-${projectKey}-${currentYear}-${quarter}" style="display: ${isFirstQuarter ? 'block' : 'none'};">
                                         <div class="quarter-title">
                                             <i class="fas fa-calendar-alt"></i>
                                             ${quarter}
@@ -1349,8 +1414,84 @@
 
             if (newIndex >= 0 && newIndex < years.length) {
                 currentYearByProject[projectKey] = years[newIndex];
+                // Reset to Q1 when changing years
+                currentQuarterByProject[projectKey] = 'Q1';
                 renderDashboard();
             }
+        }
+
+        function changeQuarter(projectKey, direction) {
+            const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+            const currentQuarter = currentQuarterByProject[projectKey] || 'Q1';
+            const currentIndex = quarters.indexOf(currentQuarter);
+            
+            let newIndex = currentIndex + direction;
+            
+            // Handle year transitions
+            if (newIndex > 3) {
+                // Moving forward past Q4 - go to next year Q1
+                newIndex = 0;
+                const years = Object.keys(dashboardData[projectKey].years).map(Number).sort((a, b) => b - a);
+                const currentYearIndex = years.indexOf(currentYearByProject[projectKey]);
+                
+                // Check if next year exists
+                if (currentYearIndex > 0) {
+                    currentYearByProject[projectKey] = years[currentYearIndex - 1];
+                    currentQuarterByProject[projectKey] = 'Q1';
+                    renderDashboard();
+                    return;
+                } else {
+                    // Can't go forward, stay at Q4
+                    return;
+                }
+            } else if (newIndex < 0) {
+                // Moving backward past Q1 - go to previous year Q4
+                newIndex = 3;
+                const years = Object.keys(dashboardData[projectKey].years).map(Number).sort((a, b) => b - a);
+                const currentYearIndex = years.indexOf(currentYearByProject[projectKey]);
+                
+                // Check if previous year exists
+                if (currentYearIndex < years.length - 1) {
+                    currentYearByProject[projectKey] = years[currentYearIndex + 1];
+                    currentQuarterByProject[projectKey] = 'Q4';
+                    renderDashboard();
+                    return;
+                } else {
+                    // Can't go backward, stay at Q1
+                    return;
+                }
+            }
+            
+            // Normal quarter change within same year
+            currentQuarterByProject[projectKey] = quarters[newIndex];
+            
+            // Update the quarter display
+            const quarterDisplay = document.getElementById(`quarter-display-${projectKey}`);
+            if (quarterDisplay) {
+                quarterDisplay.textContent = quarters[newIndex];
+            }
+            
+            // Filter and show only the selected quarter
+            filterQuarterDisplay(projectKey);
+        }
+
+        function filterQuarterDisplay(projectKey) {
+            const currentYear = currentYearByProject[projectKey];
+            const selectedQuarter = currentQuarterByProject[projectKey];
+            
+            // Get all quarter cards for this project
+            const allQuarters = document.querySelectorAll(`[id^="quarter-${projectKey}-${currentYear}-"]`);
+            
+            allQuarters.forEach(card => {
+                const quarterId = card.id;
+                const quarterMatch = quarterId.match(/quarter-.*-.*-(Q\d)/);
+                
+                if (quarterMatch && quarterMatch[1] === selectedQuarter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
 
         function toggleRecordsSection(projectKey, year, quarter) {
