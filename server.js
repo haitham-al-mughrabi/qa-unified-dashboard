@@ -246,8 +246,53 @@ app.get('/api/records/aggregated', (req, res) => {
                     aggregated[projectKey].years[year].quarters[quarter] = {
                         total_tickets: 0,
                         resolved_in_2days: 0,
-                        records: []
+                        records: [],
+                        months: {} // Add monthly breakdown
                     };
+                }
+
+                // Aggregate data for each month in this quarter
+                // Parse analysis_data to get monthly breakdown
+                let analysisDataArray = [];
+                try {
+                    analysisDataArray = typeof record.analysis_data === 'string'
+                        ? JSON.parse(record.analysis_data)
+                        : record.analysis_data || [];
+                } catch (e) {
+                    analysisDataArray = [];
+                }
+
+                // If analysis_data is an array, process each month's data
+                if (Array.isArray(analysisDataArray)) {
+                    analysisDataArray.forEach(monthInfo => {
+                        const displayName = monthInfo.displayName || '';
+                        const totalTickets = monthInfo.totalTickets || 0;
+                        const resolvedIn2Days = monthInfo.resolvedIn2Days || 0;
+
+                        // Find which quarter this month belongs to
+                        for (const [monthKey, monthQuarter] of Object.entries(monthToQuarter)) {
+                            if (displayName.toLowerCase().includes(monthKey.toLowerCase()) && monthQuarter === quarter) {
+                                if (!aggregated[projectKey].years[year].quarters[quarter].months[monthKey]) {
+                                    aggregated[projectKey].years[year].quarters[quarter].months[monthKey] = {
+                                        name: monthKey,
+                                        total_tickets: 0,
+                                        resolved_in_2days: 0,
+                                        records: []
+                                    };
+                                }
+
+                                aggregated[projectKey].years[year].quarters[quarter].months[monthKey].total_tickets += totalTickets;
+                                aggregated[projectKey].years[year].quarters[quarter].months[monthKey].resolved_in_2days += resolvedIn2Days;
+                                aggregated[projectKey].years[year].quarters[quarter].months[monthKey].records.push({
+                                    id: record.id,
+                                    filename: record.filename,
+                                    total_tickets: totalTickets,
+                                    resolved_in_2days: resolvedIn2Days
+                                });
+                                break;
+                            }
+                        }
+                    });
                 }
 
                 aggregated[projectKey].years[year].quarters[quarter].total_tickets += record.total_tickets;
@@ -265,7 +310,7 @@ app.get('/api/records/aggregated', (req, res) => {
             });
         });
 
-        // Calculate success rates
+        // Calculate success rates for quarters and months
         Object.values(aggregated).forEach(project => {
             Object.values(project.years).forEach(year => {
                 Object.values(year.quarters).forEach(quarter => {
@@ -274,6 +319,15 @@ app.get('/api/records/aggregated', (req, res) => {
                     } else {
                         quarter.success_rate = 0;
                     }
+
+                    // Calculate success rates for months within this quarter
+                    Object.values(quarter.months).forEach(month => {
+                        if (month.total_tickets > 0) {
+                            month.success_rate = ((month.resolved_in_2days / month.total_tickets) * 100).toFixed(2);
+                        } else {
+                            month.success_rate = 0;
+                        }
+                    });
                 });
             });
         });
