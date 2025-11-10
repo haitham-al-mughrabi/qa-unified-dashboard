@@ -821,16 +821,72 @@
         .monthly-breakdown h4 {
             font-size: 1.5rem;
             font-weight: 800;
-            margin-bottom: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
             display: flex;
             align-items: center;
             gap: var(--spacing-md);
         }
 
-        .months-grid {
+        .monthly-tabs {
             display: flex;
-            flex-direction: column;
-            gap: var(--spacing-xl);
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xl);
+            overflow-x: auto;
+            scrollbar-width: thin;
+            padding-bottom: var(--spacing-sm);
+        }
+
+        .monthly-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .monthly-tabs::-webkit-scrollbar-track {
+            background: var(--gray-100);
+            border-radius: var(--radius-full);
+        }
+
+        .monthly-tabs::-webkit-scrollbar-thumb {
+            background: var(--gray-400);
+            border-radius: var(--radius-full);
+        }
+
+        .month-tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .month-tab-btn i {
+            font-size: 1rem;
+        }
+
+        .month-tab-btn:hover {
+            background: var(--gray-200);
+            border-color: var(--gray-400);
+            transform: translateY(-2px);
+        }
+
+        .month-tab-btn.active {
+            background: linear-gradient(135deg, var(--month-color, var(--primary)), var(--month-color-light, var(--primary-light)));
+            color: white;
+            border-color: var(--month-color, var(--primary));
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .months-grid {
+            position: relative;
+            min-height: 300px;
         }
 
         .month-card {
@@ -842,6 +898,12 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .month-card.active {
+            display: block;
         }
 
         .month-card::before {
@@ -1451,54 +1513,72 @@
                                 ${quarterData.months && Object.keys(quarterData.months).length > 0 ? `
                                     <div class="monthly-breakdown">
                                         <h4 style="color: ${project.project_color}"><i class="fas fa-calendar-week"></i> Monthly Breakdown</h4>
+                                        <div class="monthly-tabs">
+                                            ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+                                                .filter(month => quarterData.months[month])
+                                                .map((month, index) => {
+                                                    const monthData = quarterData.months[month];
+                                                    const monthSuccessRate = parseFloat(monthData.success_rate || 0);
+                                                    const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
+                                                    const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
+                                                    return `
+                                                        <button class="month-tab-btn ${index === 0 ? 'active' : ''}"
+                                                                style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};"
+                                                                onclick="switchMonth('${month}')">
+                                                            <i class="fas fa-calendar-day"></i>
+                                                            ${month}
+                                                        </button>
+                                                    `;
+                                                }).join('')}
+                                        </div>
                                         <div class="months-grid">
-                                                        ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-                                                            .filter(month => quarterData.months[month])
-                                                            .map(month => {
-                                                                const monthData = quarterData.months[month];
-                                                                const monthSuccessRate = parseFloat(monthData.success_rate || 0);
-                                                                const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
-                                                                const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
-                                                                return `
-                                                                    <div class="month-card" style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};">
-                                                                        <div class="month-header">
-                                                                            <div class="month-title">
-                                                                                <i class="fas fa-calendar-day"></i>
-                                                                                ${month}
-                                                                            </div>
-                                                                            <div class="month-success-badge">
-                                                                                ${monthSuccessRate}%
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="month-metrics">
-                                                                            <div class="month-metric-item">
-                                                                                <div class="month-metric-label">
-                                                                                    <i class="fas fa-ticket-alt"></i>
-                                                                                    Total Tickets
-                                                                                </div>
-                                                                                <div class="month-metric-value">${monthData.total_tickets.toLocaleString()}</div>
-                                                                            </div>
-                                                                            <div class="month-metric-item">
-                                                                                <div class="month-metric-label">
-                                                                                    <i class="fas fa-check-circle"></i>
-                                                                                    Resolved ≤2 Days
-                                                                                </div>
-                                                                                <div class="month-metric-value">${monthData.resolved_in_2days.toLocaleString()}</div>
-                                                                            </div>
-                                                                            <div class="month-metric-item">
-                                                                                <div class="month-metric-label">
-                                                                                    <i class="fas fa-clock"></i>
-                                                                                    Resolved >2 Days
-                                                                                </div>
-                                                                                <div class="month-metric-value">${(monthData.total_tickets - monthData.resolved_in_2days).toLocaleString()}</div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="month-progress-bar">
-                                                                            <div class="month-progress-fill" style="width: ${monthSuccessRate}%;"></div>
-                                                                        </div>
+                                            ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+                                                .filter(month => quarterData.months[month])
+                                                .map((month, index) => {
+                                                    const monthData = quarterData.months[month];
+                                                    const monthSuccessRate = parseFloat(monthData.success_rate || 0);
+                                                    const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
+                                                    const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
+                                                    return `
+                                                        <div class="month-card ${index === 0 ? 'active' : ''}" id="month-${month}" style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};">
+                                                            <div class="month-header">
+                                                                <div class="month-title">
+                                                                    <i class="fas fa-calendar-day"></i>
+                                                                    ${month}
+                                                                </div>
+                                                                <div class="month-success-badge">
+                                                                    ${monthSuccessRate}%
+                                                                </div>
+                                                            </div>
+                                                            <div class="month-metrics">
+                                                                <div class="month-metric-item">
+                                                                    <div class="month-metric-label">
+                                                                        <i class="fas fa-ticket-alt"></i>
+                                                                        Total Tickets
                                                                     </div>
-                                                                `;
-                                                    }).join('')}
+                                                                    <div class="month-metric-value">${monthData.total_tickets.toLocaleString()}</div>
+                                                                </div>
+                                                                <div class="month-metric-item">
+                                                                    <div class="month-metric-label">
+                                                                        <i class="fas fa-check-circle"></i>
+                                                                        Resolved ≤2 Days
+                                                                    </div>
+                                                                    <div class="month-metric-value">${monthData.resolved_in_2days.toLocaleString()}</div>
+                                                                </div>
+                                                                <div class="month-metric-item">
+                                                                    <div class="month-metric-label">
+                                                                        <i class="fas fa-clock"></i>
+                                                                        Resolved >2 Days
+                                                                    </div>
+                                                                    <div class="month-metric-value">${(monthData.total_tickets - monthData.resolved_in_2days).toLocaleString()}</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="month-progress-bar">
+                                                                <div class="month-progress-fill" style="width: ${monthSuccessRate}%;"></div>
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                }).join('')}
                                         </div>
                                     </div>
                                 ` : ''}
@@ -1618,6 +1698,32 @@
             // Normal quarter change within same year
             currentQuarterByProject[activeProjectId] = quarters[newIndex];
             renderDashboard();
+        }
+
+        function switchMonth(monthName) {
+            // Hide all month cards
+            const allMonthCards = document.querySelectorAll('.month-card');
+            allMonthCards.forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Show selected month card
+            const selectedMonthCard = document.getElementById(`month-${monthName}`);
+            if (selectedMonthCard) {
+                selectedMonthCard.classList.add('active');
+            }
+
+            // Update tab buttons
+            const allTabButtons = document.querySelectorAll('.month-tab-btn');
+            allTabButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Set active tab button
+            const clickedButton = event.target.closest('.month-tab-btn');
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
         }
 
         function toggleRecordsSection() {
