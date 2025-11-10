@@ -111,8 +111,7 @@ app.post('/api/projects', (req, res) => {
                 project: {
                     id: this.lastID,
                     name,
-                    description,
-                    color: color || '#667eea'
+                    description
                 }
             });
         }

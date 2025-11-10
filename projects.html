@@ -896,13 +896,20 @@
             <div class="confirm-body">
                 <p>Are you sure you want to delete <span class="confirm-project-name" id="confirmProjectName"></span>?</p>
                 <p style="margin-top: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">This will also delete all associated analysis records.</p>
+                <div class="form-group" style="margin-top: 1.25rem;">
+                    <label class="form-label" style="color: var(--gray-900); font-size: 0.875rem;">
+                        <i class="fas fa-keyboard"></i>
+                        Type <strong id="confirmProjectNameInput"></strong> to confirm
+                    </label>
+                    <input type="text" id="deleteConfirmInput" class="form-input" placeholder="Enter project name" autocomplete="off">
+                </div>
             </div>
             <div class="confirm-actions">
                 <button class="btn-cancel" onclick="closeConfirmModal()">
                     <i class="fas fa-times"></i>
                     Cancel
                 </button>
-                <button class="btn-confirm-delete" onclick="confirmDelete()">
+                <button class="btn-confirm-delete" id="confirmDeleteBtn" onclick="confirmDelete()" disabled>
                     <i class="fas fa-trash-alt"></i>
                     Delete
                 </button>
@@ -1028,13 +1035,38 @@
         function deleteProject(id, name) {
             pendingDelete = { id, name };
             document.getElementById('confirmProjectName').textContent = name;
+            document.getElementById('confirmProjectNameInput').textContent = name;
+            document.getElementById('deleteConfirmInput').value = '';
+            document.getElementById('confirmDeleteBtn').disabled = true;
             document.getElementById('confirmModal').classList.add('active');
+
+            // Focus on the input field after a short delay to allow modal animation
+            setTimeout(() => {
+                document.getElementById('deleteConfirmInput').focus();
+            }, 100);
         }
 
         function closeConfirmModal() {
             document.getElementById('confirmModal').classList.remove('active');
+            document.getElementById('deleteConfirmInput').value = '';
+            document.getElementById('confirmDeleteBtn').disabled = true;
             pendingDelete = { id: null, name: '' };
         }
+
+        // Enable/disable delete button based on input
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteConfirmInput = document.getElementById('deleteConfirmInput');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+            deleteConfirmInput.addEventListener('input', (e) => {
+                const inputValue = e.target.value.trim();
+                if (inputValue === pendingDelete.name) {
+                    confirmDeleteBtn.disabled = false;
+                } else {
+                    confirmDeleteBtn.disabled = true;
+                }
+            });
+        });
 
         async function confirmDelete() {
             if (!pendingDelete.id) return;
