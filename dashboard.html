@@ -404,13 +404,12 @@
             font-size: 2rem;
         }
 
-        /* Period Navigation (Year + Quarter Combined) */
+        /* Period Navigation - Horizontal Year & Quarter Selection */
         .period-navigation {
             display: flex;
-            align-items: center;
-            gap: var(--spacing-xl);
+            flex-direction: column;
+            gap: var(--spacing-lg);
             margin-bottom: var(--spacing-2xl);
-            justify-content: center;
             padding: var(--spacing-xl);
             background: linear-gradient(135deg, #f0f9ff 0%, white 100%);
             border-radius: var(--radius-xl);
@@ -418,62 +417,98 @@
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
         }
 
-        .period-nav-btn {
-            width: 48px;
-            height: 48px;
+        .period-section {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border: 2px solid #93c5fd;
-            border-radius: var(--radius-full);
-            cursor: pointer;
-            font-size: 1.25rem;
-            font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: #3b82f6;
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+            flex-direction: column;
+            gap: var(--spacing-sm);
         }
 
-        .period-nav-btn:hover:not(:disabled) {
+        .period-label {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .period-label i {
+            color: #3b82f6;
+        }
+
+        .years-container,
+        .quarters-container {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .year-btn,
+        .quarter-btn {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: #475569;
+            border: 2px solid #cbd5e1;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .year-btn:hover:not(:disabled):not(.active),
+        .quarter-btn:hover:not(:disabled):not(.active) {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .year-btn.active,
+        .quarter-btn.active {
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             border-color: #3b82f6;
             color: white;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
         }
 
-        .period-nav-btn:disabled {
-            opacity: 0.3;
+        .year-btn:disabled,
+        .quarter-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: var(--gray-100);
+            border-color: var(--gray-200);
+        }
+
+        .year-btn.no-data,
+        .quarter-btn.no-data {
+            opacity: 0.5;
+            background: var(--gray-50);
+            border-style: dashed;
+        }
+
+        .year-btn.no-data:hover,
+        .quarter-btn.no-data:hover {
+            transform: none;
+            box-shadow: none;
             cursor: not-allowed;
         }
 
-        .period-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: var(--spacing-xs);
-            min-width: 200px;
-        }
-
-        .period-year {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.5px;
-        }
-
-        .period-quarter {
-            font-size: 2rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.5px;
+        .period-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         /* Quarter Empty State */
@@ -1326,6 +1361,79 @@
             renderDashboard();
         }
 
+        function renderYearQuarterNavigation() {
+            if (!activeProjectId) return '';
+
+            const project = dashboardData[activeProjectId];
+            if (!project) return '';
+
+            // Get all available years
+            const years = Object.keys(project.years).map(Number).sort((a, b) => a - b);
+            const currentYear = currentYearByProject[activeProjectId];
+
+            // Generate years HTML
+            const yearsHTML = years.map(year => {
+                const hasData = project.years[year] && Object.keys(project.years[year].quarters).length > 0;
+                const isActive = year === currentYear;
+                const classes = `year-btn ${isActive ? 'active' : ''} ${!hasData ? 'no-data' : ''}`;
+
+                return `
+                    <button class="${classes}"
+                            onclick="selectYear(${year})"
+                            ${!hasData ? 'disabled' : ''}>
+                        ${year}
+                        ${hasData ? '<span class="period-badge"></span>' : ''}
+                    </button>
+                `;
+            }).join('');
+
+            // Generate quarters HTML
+            const allQuarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+            const currentQuarter = currentQuarterByProject[activeProjectId];
+            const yearData = project.years[currentYear];
+
+            const quartersHTML = allQuarters.map(quarter => {
+                const hasData = yearData && yearData.quarters && yearData.quarters[quarter];
+                const isActive = quarter === currentQuarter;
+                const classes = `quarter-btn ${isActive ? 'active' : ''} ${!hasData ? 'no-data' : ''}`;
+
+                return `
+                    <button class="${classes}"
+                            onclick="selectQuarter('${quarter}')"
+                            ${!hasData ? 'disabled' : ''}>
+                        ${quarter}
+                        ${hasData ? '<span class="period-badge"></span>' : ''}
+                    </button>
+                `;
+            }).join('');
+
+            return `
+                <div class="period-navigation">
+                    <!-- Years Section -->
+                    <div class="period-section">
+                        <div class="period-label">
+                            <i class="fas fa-calendar"></i>
+                            Select Year
+                        </div>
+                        <div class="years-container">
+                            ${yearsHTML}
+                        </div>
+                    </div>
+
+                    <!-- Quarters Section -->
+                    <div class="period-section">
+                        <div class="period-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            Select Quarter
+                        </div>
+                        <div class="quarters-container">
+                            ${quartersHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderDashboard() {
             const container = document.getElementById('dashboardContainer');
 
@@ -1387,18 +1495,7 @@
                         </div>
                     </div>
 
-                    <div class="period-navigation">
-                        <button class="period-nav-btn" onclick="changePeriod(-1)">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <div class="period-display">
-                            <div class="period-year">${currentYear}</div>
-                            <div class="period-quarter">${currentQuarter}</div>
-                        </div>
-                        <button class="period-nav-btn" onclick="changePeriod(1)">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
+                    ${renderYearQuarterNavigation()}
             `;
 
             if (!quarterData) {
@@ -1589,50 +1686,46 @@
             container.innerHTML = html;
         }
 
-        function changePeriod(direction) {
+        function selectYear(year) {
             if (!activeProjectId) return;
 
             const project = dashboardData[activeProjectId];
-            const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
-            const currentQuarter = currentQuarterByProject[activeProjectId] || 'Q1';
-            const currentYear = currentYearByProject[activeProjectId];
-            const currentQuarterIndex = quarters.indexOf(currentQuarter);
+            if (!project || !project.years[year]) return;
 
-            let newQuarterIndex = currentQuarterIndex + direction;
+            // Update current year
+            currentYearByProject[activeProjectId] = year;
 
-            // Handle year transitions
-            if (newQuarterIndex > 3) {
-                // Moving forward past Q4 - go to next year Q1
-                const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
-                const currentYearIndex = years.indexOf(currentYear);
+            // Find first available quarter in the selected year
+            const yearData = project.years[year];
+            const availableQuarters = Object.keys(yearData.quarters).sort();
 
-                // Check if next year exists
-                if (currentYearIndex > 0) {
-                    currentYearByProject[activeProjectId] = years[currentYearIndex - 1];
-                    currentQuarterByProject[activeProjectId] = 'Q1';
-                    renderDashboard();
-                    return;
+            if (availableQuarters.length > 0) {
+                // If current quarter exists in new year, keep it; otherwise use first available
+                const currentQuarter = currentQuarterByProject[activeProjectId];
+                if (yearData.quarters[currentQuarter]) {
+                    currentQuarterByProject[activeProjectId] = currentQuarter;
+                } else {
+                    currentQuarterByProject[activeProjectId] = availableQuarters[0];
                 }
-                // Can't go forward, stay at current position
-                return;
-            } else if (newQuarterIndex < 0) {
-                // Moving backward past Q1 - go to previous year Q4
-                const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
-                const currentYearIndex = years.indexOf(currentYear);
-
-                // Check if previous year exists
-                if (currentYearIndex < years.length - 1) {
-                    currentYearByProject[activeProjectId] = years[currentYearIndex + 1];
-                    currentQuarterByProject[activeProjectId] = 'Q4';
-                    renderDashboard();
-                    return;
-                }
-                // Can't go backward, stay at current position
-                return;
+            } else {
+                // Default to Q1 if no data
+                currentQuarterByProject[activeProjectId] = 'Q1';
             }
 
-            // Normal quarter change within same year
-            currentQuarterByProject[activeProjectId] = quarters[newQuarterIndex];
+            renderDashboard();
+        }
+
+        function selectQuarter(quarter) {
+            if (!activeProjectId) return;
+
+            const project = dashboardData[activeProjectId];
+            const currentYear = currentYearByProject[activeProjectId];
+
+            if (!project || !project.years[currentYear]) return;
+
+            // Update current quarter
+            currentQuarterByProject[activeProjectId] = quarter;
+
             renderDashboard();
         }
 
