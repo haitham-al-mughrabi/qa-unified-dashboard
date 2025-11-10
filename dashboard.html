@@ -149,11 +149,10 @@
             font-weight: 300;
         }
 
-        /* Filters */
-        .filters-card {
+        /* Tabs */
+        .tabs-container {
             background: white;
             border-radius: var(--radius-2xl);
-            padding: var(--spacing-2xl);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             margin-bottom: var(--spacing-2xl);
             border: 2px solid var(--gray-100);
@@ -161,7 +160,7 @@
             overflow: hidden;
         }
 
-        .filters-card::before {
+        .tabs-container::before {
             content: '';
             position: absolute;
             top: 0;
@@ -171,89 +170,70 @@
             background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
         }
 
-        .filters-header {
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .filters-header h2 {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--gray-900);
+        .tabs-header {
             display: flex;
-            align-items: center;
             gap: var(--spacing-sm);
+            padding: var(--spacing-xl);
+            padding-top: calc(var(--spacing-xl) + 6px);
+            overflow-x: auto;
+            scrollbar-width: thin;
         }
 
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-lg);
+        .tabs-header::-webkit-scrollbar {
+            height: 6px;
         }
 
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
+        .tabs-header::-webkit-scrollbar-track {
+            background: var(--gray-100);
+            border-radius: var(--radius-full);
         }
 
-        .filter-label {
-            font-weight: 600;
+        .tabs-header::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: var(--radius-full);
+        }
+
+        .tab-btn {
+            padding: 0.875rem 1.75rem;
+            background: var(--gray-100);
             color: var(--gray-700);
-            font-size: 0.9375rem;
-        }
-
-        .filter-select {
-            padding: 0.875rem 1.125rem;
-            border: 2px solid var(--gray-200);
+            border: 2px solid transparent;
             border-radius: var(--radius-lg);
-            font-size: 1rem;
             cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
             transition: all 0.3s ease;
-            font-family: inherit;
-            background: white;
-            font-weight: 500;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
         }
 
-        .filter-select:hover {
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0;
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
+            transition: height 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: var(--gray-200);
             border-color: var(--primary);
         }
 
-        .filter-select:focus {
-            outline: none;
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
             transform: translateY(-2px);
         }
 
-        .filter-checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-            padding: 0.875rem 1.125rem;
-            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
-            border-radius: var(--radius-lg);
-            border: 2px solid var(--gray-200);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .filter-checkbox-group:hover {
-            border-color: var(--primary);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .filter-checkbox-group input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            accent-color: var(--primary);
-        }
-
-        .filter-checkbox-group label {
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--gray-700);
+        .tab-btn.active::before {
+            height: 4px;
         }
 
         /* Loading */
@@ -445,6 +425,72 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: -0.5px;
+        }
+
+        /* Quarter Empty State */
+        .quarter-empty-state {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 4rem 2rem;
+            text-align: center;
+            border: 2px solid var(--gray-100);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .quarter-empty-state .empty-state-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            color: #3b82f6;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
+        }
+
+        .quarter-empty-state h3 {
+            font-size: 1.875rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 0.75rem;
+        }
+
+        .quarter-empty-state p {
+            color: var(--gray-600);
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .quarter-empty-state .empty-state-hint {
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .quarter-empty-state .empty-state-hint::before {
+            content: '💡';
+            font-size: 1.25rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .year-nav-btn {
@@ -1015,44 +1061,10 @@
             <p>Comprehensive ticket resolution insights and trends</p>
         </div>
 
-        <!-- Filters -->
-        <div class="filters-card">
-            <div class="filters-header">
-                <h2><i class="fas fa-filter"></i> Filter Data</h2>
-            </div>
-            <div class="filters-grid">
-                <div class="filter-group">
-                    <label class="filter-label">Project</label>
-                    <select class="filter-select" id="projectFilter" onchange="applyFilters()">
-                        <option value="all">All Projects</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">Year</label>
-                    <select class="filter-select" id="yearFilter" onchange="applyFilters()">
-                        <option value="all">All Years</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">Quarter</label>
-                    <select class="filter-select" id="quarterFilter" onchange="applyFilters()">
-                        <option value="all">All Quarters</option>
-                        <option value="Q1">Q1</option>
-                        <option value="Q2">Q2</option>
-                        <option value="Q3">Q3</option>
-                        <option value="Q4">Q4</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label class="filter-label">Options</label>
-                    <div class="filter-checkbox-group">
-                        <input type="checkbox" id="includeNewData" checked onchange="applyFilters()">
-                        <label for="includeNewData">Include new uploads</label>
-                    </div>
-                </div>
+        <!-- Project Tabs -->
+        <div class="tabs-container">
+            <div class="tabs-header" id="projectTabs">
+                <!-- Tabs will be dynamically inserted here -->
             </div>
         </div>
 
@@ -1069,11 +1081,10 @@
     <script>
         const API_URL = 'http://localhost:3000/api';
         let dashboardData = {};
-        let filteredDashboardData = {};
         let currentYearByProject = {};
         let currentQuarterByProject = {};
         let allProjects = [];
-        let allYears = new Set();
+        let activeProjectId = null;
 
         async function loadDashboard() {
             try {
@@ -1084,30 +1095,36 @@
 
                 // Clear existing data before repopulating
                 allProjects = [];
-                allYears = new Set();
 
-                // Collect all projects and years for filters
+                // Collect all projects
                 Object.keys(dashboardData).forEach(projectKey => {
                     const project = dashboardData[projectKey];
                     allProjects.push({
                         id: projectKey,
-                        name: project.project_name
+                        name: project.project_name,
+                        color: project.project_color
                     });
 
                     const years = Object.keys(project.years).map(Number);
-                    years.forEach(year => allYears.add(year));
 
                     // Initialize current year for each project (use the latest year)
                     const sortedYears = years.sort((a, b) => b - a);
                     if (sortedYears.length > 0) {
                         currentYearByProject[projectKey] = sortedYears[0];
-                        // Initialize to Q1 by default
-                        currentQuarterByProject[projectKey] = 'Q1';
+
+                        // Find first available quarter in the latest year
+                        const quarters = Object.keys(project.years[sortedYears[0]].quarters).sort();
+                        currentQuarterByProject[projectKey] = quarters.length > 0 ? quarters[0] : 'Q1';
                     }
                 });
 
-                populateFilters();
-                applyFilters();
+                // Set active project to the first one if available
+                if (allProjects.length > 0 && !activeProjectId) {
+                    activeProjectId = allProjects[0].id;
+                }
+
+                populateTabs();
+                renderDashboard();
             } catch (error) {
                 console.error('Error loading dashboard:', error);
                 document.getElementById('dashboardContainer').innerHTML = `
@@ -1120,93 +1137,32 @@
             }
         }
 
-        function populateFilters() {
-            // Populate project filter
-            const projectFilter = document.getElementById('projectFilter');
-            projectFilter.innerHTML = '<option value="all">All Projects</option>';
-            allProjects.forEach(project => {
-                projectFilter.innerHTML += `<option value="${project.id}">${project.name}</option>`;
-            });
+        function populateTabs() {
+            const tabsContainer = document.getElementById('projectTabs');
 
-            // Populate year filter
-            const yearFilter = document.getElementById('yearFilter');
-            yearFilter.innerHTML = '<option value="all">All Years</option>';
-            Array.from(allYears).sort((a, b) => b - a).forEach(year => {
-                yearFilter.innerHTML += `<option value="${year}">${year}</option>`;
-            });
+            if (allProjects.length === 0) {
+                tabsContainer.innerHTML = '<p style="padding: 1rem; color: var(--gray-600);">No projects available</p>';
+                return;
+            }
+
+            tabsContainer.innerHTML = allProjects.map(project => `
+                <button class="tab-btn ${project.id === activeProjectId ? 'active' : ''}"
+                        onclick="switchProject('${project.id}')">
+                    <i class="fas fa-folder"></i> ${project.name}
+                </button>
+            `).join('');
         }
 
-        function applyFilters() {
-            const projectFilter = document.getElementById('projectFilter').value;
-            const yearFilter = document.getElementById('yearFilter').value;
-            const quarterFilter = document.getElementById('quarterFilter').value;
-            const includeNewData = document.getElementById('includeNewData').checked;
-
-            filteredDashboardData = {};
-
-            Object.keys(dashboardData).forEach(projectKey => {
-                // Filter by project
-                if (projectFilter !== 'all' && projectKey !== projectFilter) {
-                    return;
-                }
-
-                const project = dashboardData[projectKey];
-                filteredDashboardData[projectKey] = {
-                    ...project,
-                    years: {}
-                };
-
-                Object.keys(project.years).forEach(year => {
-                    // Filter by year
-                    if (yearFilter !== 'all' && year !== yearFilter) {
-                        return;
-                    }
-
-                    filteredDashboardData[projectKey].years[year] = {
-                        quarters: {}
-                    };
-
-                    Object.keys(project.years[year].quarters).forEach(quarter => {
-                        // Filter by quarter
-                        if (quarterFilter !== 'all' && quarter !== quarterFilter) {
-                            return;
-                        }
-
-                        let quarterData = {...project.years[year].quarters[quarter]};
-
-                        // Handle "include new data" toggle
-                        if (!includeNewData) {
-                            // Exclude the most recent record from each quarter
-                            const records = [...quarterData.records];
-                            if (records.length > 1) {
-                                records.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                                const latestRecord = records[0];
-
-                                quarterData.total_tickets -= latestRecord.total_tickets;
-                                quarterData.resolved_in_2days -= latestRecord.resolved_in_2days;
-                                quarterData.records = records.slice(1);
-
-                                // Recalculate success rate
-                                if (quarterData.total_tickets > 0) {
-                                    quarterData.success_rate = ((quarterData.resolved_in_2days / quarterData.total_tickets) * 100).toFixed(2);
-                                } else {
-                                    quarterData.success_rate = 0;
-                                }
-                            }
-                        }
-
-                        filteredDashboardData[projectKey].years[year].quarters[quarter] = quarterData;
-                    });
-                });
-            });
-
+        function switchProject(projectId) {
+            activeProjectId = projectId;
+            populateTabs();
             renderDashboard();
         }
 
         function renderDashboard() {
             const container = document.getElementById('dashboardContainer');
 
-            if (Object.keys(filteredDashboardData).length === 0) {
+            if (!activeProjectId || Object.keys(dashboardData).length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-chart-bar empty-state-icon"></i>
@@ -1217,106 +1173,133 @@
                 return;
             }
 
-            let html = '';
+            const project = dashboardData[activeProjectId];
+            if (!project) return;
 
-            Object.keys(filteredDashboardData).forEach(projectKey => {
-                const project = filteredDashboardData[projectKey];
-                const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
-                const currentYear = currentYearByProject[projectKey];
-                const yearData = project.years[currentYear];
+            const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
+            const currentYear = currentYearByProject[activeProjectId];
+            const yearData = project.years[currentYear];
 
-                if (!yearData) return;
+            if (!yearData) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-times empty-state-icon"></i>
+                        <h3>No data for this year</h3>
+                        <p>No records found for ${currentYear}</p>
+                    </div>
+                `;
+                return;
+            }
 
-                const quarters = Object.keys(yearData.quarters).sort();
+            const allQuarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+            const currentQuarter = currentQuarterByProject[activeProjectId];
 
+            // Check if current quarter has data
+            const quarterData = yearData.quarters[currentQuarter];
+
+            let html = `
+                <div class="project-section">
+                    <div class="project-header" style="border-bottom-color: ${project.project_color}">
+                        <div class="project-name" style="color: ${project.project_color}">
+                            <i class="fas fa-project-diagram"></i>
+                            ${project.project_name}
+                        </div>
+                    </div>
+
+                    <div class="year-navigation">
+                        <button class="year-nav-btn" onclick="changeYear(-1)" ${years.indexOf(currentYear) >= years.length - 1 ? 'disabled' : ''}>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="year-display">
+                            ${currentYear}
+                        </div>
+                        <button class="year-nav-btn" onclick="changeYear(1)" ${years.indexOf(currentYear) <= 0 ? 'disabled' : ''}>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="quarter-navigation">
+                        <button class="quarter-nav-btn" onclick="changeQuarter(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="quarter-display">
+                            ${currentQuarter}
+                        </div>
+                        <button class="quarter-nav-btn" onclick="changeQuarter(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+            `;
+
+            if (!quarterData) {
                 html += `
-                    <div class="project-section">
-                        <div class="project-header">
-                            <div class="project-name">
-                                <i class="fas fa-project-diagram"></i>
-                                ${project.project_name}
-                            </div>
+                    <div class="quarter-empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-inbox"></i>
                         </div>
+                        <h3>No Data for ${currentQuarter} ${currentYear}</h3>
+                        <p>There are no records for this quarter yet.</p>
+                        <p class="empty-state-hint">Upload data for this period to see analytics here.</p>
+                    </div>
+                </div>
+                `;
+                container.innerHTML = html;
+                return;
+            }
 
-                        <div class="year-navigation">
-                            <button class="year-nav-btn" onclick="changeYear('${projectKey}', -1)" ${years.indexOf(currentYear) >= years.length - 1 ? 'disabled' : ''}>
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <div class="year-display">
-                                ${currentYear}
+            const successRate = quarterData.success_rate;
+
+            html += `
+                    <div class="quarters-container">
+                        <div class="quarter-card" style="border-left-color: ${project.project_color}">
+                            <div class="quarter-title" style="color: ${project.project_color}">
+                                <i class="fas fa-calendar-alt"></i>
+                                ${currentQuarter}
                             </div>
-                            <button class="year-nav-btn" onclick="changeYear('${projectKey}', 1)" ${years.indexOf(currentYear) <= 0 ? 'disabled' : ''}>
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
 
-                        <div class="quarter-navigation">
-                            <button class="quarter-nav-btn" onclick="changeQuarter('${projectKey}', -1)">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <div class="quarter-display" id="quarter-display-${projectKey}">
-                                Q1
+                            <div class="metrics-grid">
+                                <div class="metric-card" style="--metric-color: #3b82f6; --metric-color-dark: #2563eb;">
+                                    <div class="metric-icon"><i class="fas fa-ticket-alt"></i></div>
+                                    <div class="metric-value">
+                                        ${quarterData.total_tickets}
+                                    </div>
+                                    <div class="metric-label">Total Tickets</div>
+                                </div>
+
+                                <div class="metric-card" style="--metric-color: #10b981; --metric-color-dark: #059669;">
+                                    <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                                    <div class="metric-value">
+                                        ${quarterData.resolved_in_2days}
+                                    </div>
+                                    <div class="metric-label">Resolved ≤2 Days</div>
+                                </div>
+
+                                <div class="metric-card" style="--metric-color: ${successRate >= 80 ? '#10b981' : successRate >= 60 ? '#f59e0b' : '#ef4444'}; --metric-color-dark: ${successRate >= 80 ? '#059669' : successRate >= 60 ? '#d97706' : '#dc2626'};">
+                                    <div class="metric-icon"><i class="fas ${successRate >= 80 ? 'fa-trophy' : successRate >= 60 ? 'fa-chart-bar' : 'fa-exclamation-triangle'}"></i></div>
+                                    <div class="metric-value">
+                                        ${successRate}%
+                                    </div>
+                                    <div class="metric-label">Success Rate</div>
+                                </div>
+
+                                <div class="metric-card" style="--metric-color: #f59e0b; --metric-color-dark: #d97706;">
+                                    <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                                    <div class="metric-value">
+                                        ${quarterData.total_tickets - quarterData.resolved_in_2days}
+                                    </div>
+                                    <div class="metric-label">Resolved >2 Days</div>
+                                </div>
                             </div>
-                            <button class="quarter-nav-btn" onclick="changeQuarter('${projectKey}', 1)">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
 
-                            ${quarters.map((quarter, index) => {
-                                const quarterData = yearData.quarters[quarter];
-                                const successRate = quarterData.success_rate;
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${successRate}%; background: ${project.project_color}"></div>
+                            </div>
 
-                                const isFirstQuarter = index === 0;
-                                return `
-                                    <div class="quarter-card" id="quarter-${projectKey}-${currentYear}-${quarter}" style="display: ${isFirstQuarter ? 'block' : 'none'};">
-                                        <div class="quarter-title">
-                                            <i class="fas fa-calendar-alt"></i>
-                                            ${quarter}
-                                        </div>
-
-                                        <div class="metrics-grid">
-                                            <div class="metric-card" style="--metric-color: #3b82f6; --metric-color-dark: #2563eb;">
-                                                <div class="metric-icon"><i class="fas fa-ticket-alt"></i></div>
-                                                <div class="metric-value">
-                                                    ${quarterData.total_tickets}
-                                                </div>
-                                                <div class="metric-label">Total Tickets</div>
-                                            </div>
-
-                                            <div class="metric-card" style="--metric-color: #10b981; --metric-color-dark: #059669;">
-                                                <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
-                                                <div class="metric-value">
-                                                    ${quarterData.resolved_in_2days}
-                                                </div>
-                                                <div class="metric-label">Resolved ≤2 Days</div>
-                                            </div>
-
-                                            <div class="metric-card" style="--metric-color: ${successRate >= 80 ? '#10b981' : successRate >= 60 ? '#f59e0b' : '#ef4444'}; --metric-color-dark: ${successRate >= 80 ? '#059669' : successRate >= 60 ? '#d97706' : '#dc2626'};">
-                                                <div class="metric-icon"><i class="fas ${successRate >= 80 ? 'fa-trophy' : successRate >= 60 ? 'fa-chart-bar' : 'fa-exclamation-triangle'}"></i></div>
-                                                <div class="metric-value">
-                                                    ${successRate}%
-                                                </div>
-                                                <div class="metric-label">Success Rate</div>
-                                            </div>
-
-                                            <div class="metric-card" style="--metric-color: #f59e0b; --metric-color-dark: #d97706;">
-                                                <div class="metric-icon"><i class="fas fa-clock"></i></div>
-                                                <div class="metric-value">
-                                                    ${quarterData.total_tickets - quarterData.resolved_in_2days}
-                                                </div>
-                                                <div class="metric-label">Resolved >2 Days</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: ${successRate}%;"></div>
-                                        </div>
-
-                                        <div class="details-section" id="details-${projectKey}-${currentYear}-${quarter}">
-                                            ${quarterData.months && Object.keys(quarterData.months).length > 0 ? `
-                                                <div class="monthly-breakdown">
-                                                    <h4 style="margin-bottom: 15px;"><i class="fas fa-calendar-week"></i> Monthly Breakdown:</h4>
-                                                    <div class="months-grid">
+                            <div class="details-section">
+                                ${quarterData.months && Object.keys(quarterData.months).length > 0 ? `
+                                    <div class="monthly-breakdown">
+                                        <h4 style="margin-bottom: 15px; color: ${project.project_color}"><i class="fas fa-calendar-week"></i> Monthly Breakdown:</h4>
+                                        <div class="months-grid">
                                                         ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                                                             .filter(month => quarterData.months[month])
                                                             .map(month => {
@@ -1349,154 +1332,131 @@
                                                                         </div>
                                                                     </div>
                                                                 `;
-                                                            }).join('')}
-                                                    </div>
-                                                </div>
-                                            ` : ''}
-
-                                            <div class="records-header" onclick="toggleRecordsSection('${projectKey}', '${currentYear}', '${quarter}')">
-                                                <h4>
-                                                    <i class="fas fa-database"></i> Records in this quarter (${quarterData.records.length})
-                                                </h4>
-                                                <span class="records-toggle-icon" id="records-toggle-${projectKey}-${currentYear}-${quarter}">
-                                                    <i class="fas fa-chevron-down"></i>
-                                                </span>
-                                            </div>
-                                            <div class="records-content" id="records-content-${projectKey}-${currentYear}-${quarter}">
-                                                ${quarterData.records.map(record => {
-                                                    return `
-                                                        <div class="record-item" id="record-${record.id}" data-project="${projectKey}" data-year="${currentYear}" data-quarter="${quarter}">
-                                                            <div class="record-checkbox">
-                                                                <input type="checkbox"
-                                                                       id="record-checkbox-${record.id}"
-                                                                       checked
-                                                                       onchange="toggleRecordSelection('${projectKey}', '${currentYear}', '${quarter}', ${record.id})">
-                                                            </div>
-                                                            <div class="record-info">
-                                                                <div class="record-filename">
-                                                                    <i class="fas fa-file-alt"></i>
-                                                                    ${record.filename}
-                                                                </div>
-                                                                <div class="record-months">
-                                                                    <i class="fas fa-calendar"></i>
-                                                                    Months: ${record.months.join(', ')}
-                                                                </div>
-                                                            </div>
-                                                            <div class="record-stats">
-                                                                <div><strong>${record.total_tickets}</strong> tickets</div>
-                                                                <div><strong>${record.success_rate}%</strong> success</div>
-                                                            </div>
-                                                            <div class="record-actions">
-                                                                <button class="btn-delete-record" onclick="deleteRecord(${record.id}, '${projectKey}', '${currentYear}', '${quarter}')">
-                                                                    <i class="fas fa-trash-alt"></i> Delete
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    `;
-                                                }).join('')}
-                                            </div>
+                                                    }).join('')}
                                         </div>
                                     </div>
-                                `;
-                            }).join('')}
+                                ` : ''}
+
+                                <div class="records-header" onclick="toggleRecordsSection()">
+                                    <h4>
+                                        <i class="fas fa-database"></i> Records in this quarter (${quarterData.records.length})
+                                    </h4>
+                                    <span class="records-toggle-icon" id="records-toggle-icon">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </span>
+                                </div>
+                                <div class="records-content" id="records-content">
+                                    ${quarterData.records.map(record => {
+                                        return `
+                                            <div class="record-item" id="record-${record.id}">
+                                                <div class="record-checkbox">
+                                                    <input type="checkbox"
+                                                           id="record-checkbox-${record.id}"
+                                                           checked
+                                                           onchange="toggleRecordSelection(${record.id})">
+                                                </div>
+                                                <div class="record-info">
+                                                    <div class="record-filename">
+                                                        <i class="fas fa-file-alt"></i>
+                                                        ${record.filename}
+                                                    </div>
+                                                    <div class="record-months">
+                                                        <i class="fas fa-calendar"></i>
+                                                        Months: ${record.months.join(', ')}
+                                                    </div>
+                                                </div>
+                                                <div class="record-stats">
+                                                    <div><strong>${record.total_tickets}</strong> tickets</div>
+                                                    <div><strong>${record.success_rate}%</strong> success</div>
+                                                </div>
+                                                <div class="record-actions">
+                                                    <button class="btn-delete-record" onclick="deleteRecord(${record.id})">
+                                                        <i class="fas fa-trash-alt"></i> Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                `;
-            });
+                </div>
+            `;
 
             container.innerHTML = html;
         }
 
-        function changeYear(projectKey, direction) {
-            const years = Object.keys(dashboardData[projectKey].years).map(Number).sort((a, b) => b - a);
-            const currentIndex = years.indexOf(currentYearByProject[projectKey]);
+        function changeYear(direction) {
+            if (!activeProjectId) return;
+
+            const project = dashboardData[activeProjectId];
+            const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
+            const currentIndex = years.indexOf(currentYearByProject[activeProjectId]);
             const newIndex = currentIndex - direction; // direction: 1 for next (newer), -1 for prev (older)
 
             if (newIndex >= 0 && newIndex < years.length) {
-                currentYearByProject[projectKey] = years[newIndex];
-                // Reset to Q1 when changing years
-                currentQuarterByProject[projectKey] = 'Q1';
+                currentYearByProject[activeProjectId] = years[newIndex];
+
+                // Find first available quarter in the new year
+                const newYearData = project.years[years[newIndex]];
+                const quarters = Object.keys(newYearData.quarters).sort();
+                currentQuarterByProject[activeProjectId] = quarters.length > 0 ? quarters[0] : 'Q1';
+
                 renderDashboard();
             }
         }
 
-        function changeQuarter(projectKey, direction) {
+        function changeQuarter(direction) {
+            if (!activeProjectId) return;
+
             const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
-            const currentQuarter = currentQuarterByProject[projectKey] || 'Q1';
+            const currentQuarter = currentQuarterByProject[activeProjectId] || 'Q1';
             const currentIndex = quarters.indexOf(currentQuarter);
-            
+
             let newIndex = currentIndex + direction;
-            
+
             // Handle year transitions
             if (newIndex > 3) {
                 // Moving forward past Q4 - go to next year Q1
-                newIndex = 0;
-                const years = Object.keys(dashboardData[projectKey].years).map(Number).sort((a, b) => b - a);
-                const currentYearIndex = years.indexOf(currentYearByProject[projectKey]);
-                
+                const project = dashboardData[activeProjectId];
+                const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
+                const currentYearIndex = years.indexOf(currentYearByProject[activeProjectId]);
+
                 // Check if next year exists
                 if (currentYearIndex > 0) {
-                    currentYearByProject[projectKey] = years[currentYearIndex - 1];
-                    currentQuarterByProject[projectKey] = 'Q1';
+                    currentYearByProject[activeProjectId] = years[currentYearIndex - 1];
+                    currentQuarterByProject[activeProjectId] = 'Q1';
                     renderDashboard();
                     return;
-                } else {
-                    // Can't go forward, stay at Q4
-                    return;
                 }
+                // Can't go forward, stay at Q4
+                return;
             } else if (newIndex < 0) {
                 // Moving backward past Q1 - go to previous year Q4
-                newIndex = 3;
-                const years = Object.keys(dashboardData[projectKey].years).map(Number).sort((a, b) => b - a);
-                const currentYearIndex = years.indexOf(currentYearByProject[projectKey]);
-                
+                const project = dashboardData[activeProjectId];
+                const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
+                const currentYearIndex = years.indexOf(currentYearByProject[activeProjectId]);
+
                 // Check if previous year exists
                 if (currentYearIndex < years.length - 1) {
-                    currentYearByProject[projectKey] = years[currentYearIndex + 1];
-                    currentQuarterByProject[projectKey] = 'Q4';
+                    currentYearByProject[activeProjectId] = years[currentYearIndex + 1];
+                    currentQuarterByProject[activeProjectId] = 'Q4';
                     renderDashboard();
                     return;
-                } else {
-                    // Can't go backward, stay at Q1
-                    return;
                 }
+                // Can't go backward, stay at Q1
+                return;
             }
-            
+
             // Normal quarter change within same year
-            currentQuarterByProject[projectKey] = quarters[newIndex];
-            
-            // Update the quarter display
-            const quarterDisplay = document.getElementById(`quarter-display-${projectKey}`);
-            if (quarterDisplay) {
-                quarterDisplay.textContent = quarters[newIndex];
-            }
-            
-            // Filter and show only the selected quarter
-            filterQuarterDisplay(projectKey);
+            currentQuarterByProject[activeProjectId] = quarters[newIndex];
+            renderDashboard();
         }
 
-        function filterQuarterDisplay(projectKey) {
-            const currentYear = currentYearByProject[projectKey];
-            const selectedQuarter = currentQuarterByProject[projectKey];
-            
-            // Get all quarter cards for this project
-            const allQuarters = document.querySelectorAll(`[id^="quarter-${projectKey}-${currentYear}-"]`);
-            
-            allQuarters.forEach(card => {
-                const quarterId = card.id;
-                const quarterMatch = quarterId.match(/quarter-.*-.*-(Q\d)/);
-                
-                if (quarterMatch && quarterMatch[1] === selectedQuarter) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        function toggleRecordsSection(projectKey, year, quarter) {
-            const content = document.getElementById(`records-content-${projectKey}-${year}-${quarter}`);
-            const toggleIcon = document.getElementById(`records-toggle-${projectKey}-${year}-${quarter}`);
+        function toggleRecordsSection() {
+            const content = document.getElementById('records-content');
+            const toggleIcon = document.getElementById('records-toggle-icon');
 
             if (content.classList.contains('active')) {
                 content.classList.remove('active');
@@ -1507,7 +1467,7 @@
             }
         }
 
-        function toggleRecordSelection(projectKey, year, quarter, recordId) {
+        function toggleRecordSelection(recordId) {
             const checkbox = document.getElementById(`record-checkbox-${recordId}`);
             const recordItem = document.getElementById(`record-${recordId}`);
 
@@ -1518,13 +1478,17 @@
             }
 
             // Recalculate quarter metrics based on selected records
-            recalculateQuarterMetrics(projectKey, year, quarter);
+            recalculateQuarterMetrics();
         }
 
-        function recalculateQuarterMetrics(projectKey, year, quarter) {
+        function recalculateQuarterMetrics() {
+            if (!activeProjectId) return;
+
+            const currentYear = currentYearByProject[activeProjectId];
+            const currentQuarter = currentQuarterByProject[activeProjectId];
+
             // Get all records in this quarter
-            const detailsSection = document.getElementById(`details-${projectKey}-${year}-${quarter}`);
-            const recordItems = detailsSection.querySelectorAll('.record-item');
+            const recordItems = document.querySelectorAll('.record-item');
 
             let totalTickets = 0;
             let resolvedIn2Days = 0;
@@ -1535,9 +1499,9 @@
 
                 if (checkbox && checkbox.checked) {
                     // Find the record data
-                    const project = filteredDashboardData[projectKey];
-                    if (project && project.years[year] && project.years[year].quarters[quarter]) {
-                        const record = project.years[year].quarters[quarter].records.find(r => r.id == recordId);
+                    const project = dashboardData[activeProjectId];
+                    if (project && project.years[currentYear] && project.years[currentYear].quarters[currentQuarter]) {
+                        const record = project.years[currentYear].quarters[currentQuarter].records.find(r => r.id == recordId);
                         if (record) {
                             totalTickets += record.total_tickets;
                             resolvedIn2Days += record.resolved_in_2days;
@@ -1550,8 +1514,7 @@
             const successRate = totalTickets > 0 ? ((resolvedIn2Days / totalTickets) * 100).toFixed(2) : 0;
 
             // Update the quarter card metrics
-            const quarterCard = document.getElementById(`quarter-${projectKey}-${year}-${quarter}`);
-            const metricCards = quarterCard.querySelectorAll('.metric-card .metric-value');
+            const metricCards = document.querySelectorAll('.metric-card .metric-value');
 
             if (metricCards.length >= 4) {
                 metricCards[0].textContent = totalTickets;
@@ -1561,13 +1524,13 @@
             }
 
             // Update progress bar
-            const progressFill = quarterCard.querySelector('.progress-fill');
+            const progressFill = document.querySelector('.progress-fill');
             if (progressFill) {
                 progressFill.style.width = `${successRate}%`;
             }
         }
 
-        async function deleteRecord(recordId, projectKey, year, quarter) {
+        async function deleteRecord(recordId) {
             if (!confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
                 return;
             }
@@ -1580,12 +1543,6 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Remove the record from the DOM
-                    const recordItem = document.getElementById(`record-${recordId}`);
-                    if (recordItem) {
-                        recordItem.remove();
-                    }
-
                     // Reload the dashboard to update all data
                     await loadDashboard();
 

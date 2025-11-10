@@ -162,8 +162,7 @@ app.get('/api/records', (req, res) => {
     const query = `
         SELECT
             r.*,
-            p.name as project_name,
-            p.color as project_color
+            p.name as project_name
         FROM analysis_records r
         LEFT JOIN projects p ON r.project_id = p.id
         ORDER BY r.created_at DESC
@@ -184,7 +183,6 @@ app.get('/api/records/aggregated', (req, res) => {
         SELECT
             r.*,
             p.name as project_name,
-            p.color as project_color,
             p.id as project_id
         FROM analysis_records r
         LEFT JOIN projects p ON r.project_id = p.id
@@ -229,7 +227,6 @@ app.get('/api/records/aggregated', (req, res) => {
                 aggregated[projectKey] = {
                     project_id: record.project_id,
                     project_name: record.project_name || 'Unassigned',
-                    project_color: record.project_color || '#667eea',
                     years: {}
                 };
             }
@@ -340,8 +337,7 @@ app.get('/api/records/project/:projectId', (req, res) => {
     const query = `
         SELECT
             r.*,
-            p.name as project_name,
-            p.color as project_color
+            p.name as project_name
         FROM analysis_records r
         LEFT JOIN projects p ON r.project_id = p.id
         WHERE r.project_id = ?
