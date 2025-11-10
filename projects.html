@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projects - QA Dashboard</title>
+    <title>Projects - QA Analytics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -16,23 +16,58 @@
         }
 
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --success: #10b981;
+            /* Colors */
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --primary-light: #c7d2fe;
+            --secondary: #10b981;
+            --secondary-dark: #059669;
+            --accent: #f59e0b;
+            --accent-dark: #d97706;
             --danger: #ef4444;
+            --warning: #f97316;
             --gray-50: #f9fafb;
             --gray-100: #f3f4f6;
             --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
             --gray-600: #4b5563;
             --gray-700: #374151;
+            --gray-800: #1f2937;
             --gray-900: #111827;
+
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-3xl: 2rem;
+            --radius-full: 9999px;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             min-height: 100vh;
-            color: var(--gray-900);
+            color: var(--gray-800);
             line-height: 1.6;
         }
 
@@ -40,25 +75,28 @@
         .navbar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-lg);
             position: sticky;
             top: 0;
             z-index: 1000;
+            border-bottom: 1px solid var(--gray-200);
         }
 
         .navbar-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 1rem 2rem;
+            padding: var(--spacing-lg) var(--spacing-xl);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
         }
 
         .navbar-brand {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: var(--spacing-sm);
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--primary);
@@ -66,68 +104,79 @@
         }
 
         .navbar-brand-icon {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            border-radius: 0.75rem;
+            border-radius: var(--radius-xl);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.125rem;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow-md);
         }
 
         .navbar-links {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--spacing-sm);
+            align-items: center;
         }
 
         .nav-btn {
-            padding: 0.625rem 1.25rem;
+            padding: 0.75rem 1.5rem;
             background: transparent;
             color: var(--gray-700);
-            border: none;
-            border-radius: 9999px;
+            border: 2px solid transparent;
+            border-radius: var(--radius-full);
             cursor: pointer;
             font-size: 0.9375rem;
-            font-weight: 500;
+            font-weight: 600;
             text-decoration: none;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--spacing-sm);
         }
 
         .nav-btn:hover {
             background: var(--gray-100);
             color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
         }
 
-        /* Main Layout */
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Main Container */
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 2.5rem 2rem 3rem;
+            padding: var(--spacing-2xl) var(--spacing-xl);
         }
 
         .page-header {
             text-align: center;
-            color: white;
-            margin-bottom: 2rem;
+            margin-bottom: var(--spacing-2xl);
+            padding: var(--spacing-xl) 0;
         }
 
         .page-header h1 {
             font-size: 2.75rem;
             font-weight: 900;
-            margin-bottom: 0.625rem;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: var(--spacing-sm);
+            color: var(--gray-900);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
             letter-spacing: -0.75px;
         }
 
         .page-header p {
-            font-size: 1.125rem;
-            opacity: 0.95;
-            font-weight: 400;
+            font-size: 1.25rem;
+            color: var(--gray-600);
+            font-weight: 500;
         }
 
         /* Header Actions */
@@ -135,7 +184,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: var(--spacing-xl);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .section-header h2 {
+            font-size: 1.875rem;
+            font-weight: 900;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-xs);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .section-header h2 i {
+            font-size: 1.625rem;
+            color: var(--primary);
+        }
+
+        .section-header p {
+            color: var(--gray-600);
+            font-size: 1.125rem;
         }
 
         .btn-create-project {
@@ -143,20 +214,21 @@
             background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
             color: white;
             border: none;
-            border-radius: 0.625rem;
+            border-radius: var(--radius-full);
             cursor: pointer;
             font-size: 1rem;
             font-weight: 700;
             transition: all 0.2s ease;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.625rem;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            gap: var(--spacing-sm);
+            box-shadow: var(--shadow-md);
+            flex-shrink: 0;
         }
 
         .btn-create-project:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
         }
 
         /* Modal */
@@ -181,15 +253,16 @@
 
         .modal-content {
             background: white;
-            border-radius: 1.25rem;
-            padding: 2rem;
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
             max-width: 500px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow-2xl);
             animation: slideUp 0.3s;
             position: relative;
+            border: 2px solid var(--gray-200);
         }
 
         @keyframes fadeIn {
@@ -212,18 +285,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
             border-bottom: 2px solid var(--gray-100);
         }
 
         .modal-header h2 {
-            font-size: 1.5rem;
-            font-weight: 800;
+            font-size: 1.875rem;
+            font-weight: 700;
             color: var(--gray-900);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: var(--spacing-sm);
         }
 
         .modal-header h2 i {
@@ -231,15 +304,15 @@
         }
 
         .close-btn {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: var(--gray-100);
             color: var(--gray-600);
             border: none;
-            border-radius: 50%;
+            border-radius: var(--radius-full);
             font-size: 1.25rem;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -248,6 +321,7 @@
         .close-btn:hover {
             background: var(--gray-200);
             color: var(--gray-900);
+            transform: rotate(90deg);
         }
 
         /* Confirm Modal */
@@ -272,53 +346,56 @@
 
         .confirm-content {
             background: white;
-            border-radius: 1.25rem;
-            padding: 2rem;
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
             max-width: 450px;
             width: 90%;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow-2xl);
             animation: slideUp 0.3s;
+            border: 2px solid var(--gray-200);
         }
 
         .confirm-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
         }
 
         .confirm-icon {
-            width: 48px;
-            height: 48px;
+            width: 60px;
+            height: 60px;
             background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            border-radius: 50%;
+            border-radius: var(--radius-full);
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--danger);
             font-size: 1.5rem;
+            box-shadow: var(--shadow-sm);
         }
 
         .confirm-header-text h3 {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             font-weight: 800;
             color: var(--gray-900);
-            margin-bottom: 0.25rem;
+            margin-bottom: var(--spacing-xs);
         }
 
         .confirm-header-text p {
-            font-size: 0.875rem;
+            font-size: 1rem;
             color: var(--gray-600);
         }
 
         .confirm-body {
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--spacing-xl);
         }
 
         .confirm-body p {
             color: var(--gray-700);
             line-height: 1.6;
-            font-size: 0.9375rem;
+            font-size: 1rem;
+            margin-bottom: var(--spacing-md);
         }
 
         .confirm-project-name {
@@ -328,23 +405,23 @@
 
         .confirm-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: var(--spacing-md);
         }
 
         .btn-cancel,
         .btn-confirm-delete {
             flex: 1;
-            padding: 0.75rem 1.25rem;
+            padding: 0.875rem 1.5rem;
             border: none;
-            border-radius: 0.625rem;
+            border-radius: var(--radius-full);
             cursor: pointer;
-            font-size: 0.9375rem;
+            font-size: 1rem;
             font-weight: 700;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: var(--spacing-sm);
         }
 
         .btn-cancel {
@@ -359,27 +436,27 @@
         .btn-confirm-delete {
             background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
             color: white;
-            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-confirm-delete:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+            box-shadow: var(--shadow-md);
             background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
         }
 
         .form-group {
-            margin-bottom: 1.25rem;
+            margin-bottom: var(--spacing-xl);
         }
 
         .form-label {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
+            gap: var(--spacing-sm);
+            font-weight: 700;
             color: var(--gray-900);
-            margin-bottom: 0.5rem;
-            font-size: 0.9375rem;
+            margin-bottom: var(--spacing-sm);
+            font-size: 1rem;
         }
 
         .form-label i {
@@ -390,50 +467,49 @@
         .form-input,
         .form-textarea {
             width: 100%;
-            padding: 0.8125rem 1rem;
+            padding: 0.875rem 1.25rem;
             border: 2px solid var(--gray-200);
-            border-radius: 0.625rem;
+            border-radius: var(--radius-lg);
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s ease;
-            background: white;
+            background: var(--gray-50);
         }
 
         .form-input:focus,
         .form-textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background: white;
         }
 
         .form-textarea {
             resize: vertical;
-            min-height: 90px;
+            min-height: 100px;
         }
-
-
 
         .btn-primary {
             width: 100%;
-            padding: 0.9375rem 1.5rem;
+            padding: 1rem 1.75rem;
             background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
             color: white;
             border: none;
-            border-radius: 0.625rem;
+            border-radius: var(--radius-full);
             cursor: pointer;
-            font-size: 1.0625rem;
+            font-size: 1.125rem;
             font-weight: 700;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.625rem;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            gap: var(--spacing-sm);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+            box-shadow: var(--shadow-xl);
         }
 
         .btn-primary:active {
@@ -447,26 +523,6 @@
             box-shadow: none;
         }
 
-        /* Section Header */
-        .section-header h2 {
-            font-size: 1.875rem;
-            font-weight: 900;
-            color: white;
-            margin-bottom: 0.375rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .section-header h2 i {
-            font-size: 1.625rem;
-        }
-
-        .section-header p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1rem;
-        }
-
         /* Projects List Section */
         .projects-section {
             min-height: 400px;
@@ -474,8 +530,8 @@
 
         .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--spacing-xl);
         }
 
         @media (max-width: 768px) {
@@ -486,9 +542,9 @@
 
         .project-card {
             background: white;
-            border-radius: 1.25rem;
-            padding: 1.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
             border: 2px solid transparent;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
@@ -501,14 +557,14 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 5px;
+            height: 6px;
             background: linear-gradient(90deg, var(--primary), #8b5cf6);
             opacity: 0.8;
         }
 
         .project-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 16px 20px -5px rgba(0, 0, 0, 0.15), 0 8px 8px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
             border-color: var(--primary);
         }
 
@@ -516,8 +572,8 @@
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 1.25rem;
-            padding-bottom: 0.875rem;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
             border-bottom: 2px solid var(--gray-100);
         }
 
@@ -532,7 +588,7 @@
             margin-bottom: 0;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: var(--spacing-md);
             line-height: 1.3;
         }
 
@@ -544,22 +600,22 @@
         .project-description {
             color: var(--gray-700);
             line-height: 1.6;
-            margin-bottom: 1rem;
-            font-size: 0.9375rem;
+            margin-bottom: var(--spacing-lg);
+            font-size: 1rem;
         }
 
         .project-meta {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
         }
 
         .meta-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
+            gap: var(--spacing-sm);
+            font-size: 0.9375rem;
             color: var(--gray-600);
             font-weight: 500;
         }
@@ -571,31 +627,31 @@
 
         .project-actions {
             display: flex;
-            gap: 0.75rem;
-            margin-top: 1rem;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
         }
 
         .btn-delete {
             flex: 1;
-            padding: 0.75rem 1.25rem;
+            padding: 0.875rem 1.5rem;
             border: none;
-            border-radius: 0.625rem;
+            border-radius: var(--radius-full);
             cursor: pointer;
-            font-size: 0.9375rem;
+            font-size: 1rem;
             font-weight: 700;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: var(--spacing-sm);
             background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
             color: white;
-            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-delete:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+            box-shadow: var(--shadow-md);
             background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
         }
 
@@ -606,45 +662,47 @@
         /* Empty State */
         .empty-state {
             background: white;
-            border-radius: 1.25rem;
-            padding: 3rem 2rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            box-shadow: var(--shadow-lg);
             text-align: center;
-            border: 2px solid var(--gray-100);
+            border: 2px solid var(--gray-200);
         }
 
         .empty-state-icon {
-            font-size: 4rem;
+            font-size: 5rem;
             display: block;
-            margin-bottom: 1.25rem;
+            margin: 0 auto var(--spacing-lg);
             opacity: 0.5;
             color: var(--primary);
         }
 
         .empty-state h3 {
-            font-size: 1.75rem;
+            font-size: 1.875rem;
             font-weight: 800;
             color: var(--gray-900);
-            margin-bottom: 0.625rem;
+            margin-bottom: var(--spacing-sm);
         }
 
         .empty-state p {
             color: var(--gray-600);
-            font-size: 1rem;
+            font-size: 1.125rem;
             font-weight: 500;
         }
 
         /* Messages */
         .message {
-            border-radius: 0.625rem;
-            padding: 0.875rem 1.25rem;
-            margin-bottom: 1.25rem;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
             display: none;
             animation: slideIn 0.3s ease;
             font-weight: 600;
             align-items: center;
-            gap: 0.625rem;
-            font-size: 0.9375rem;
+            gap: var(--spacing-sm);
+            font-size: 1rem;
+            text-align: center;
+            border-left: 4px solid;
         }
 
         .message.active {
@@ -656,15 +714,15 @@
         }
 
         .message-success {
-            background: #d1fae5;
-            color: var(--success);
-            border-left: 4px solid var(--success);
+            background: linear-gradient(135deg, #d1fae5, #ecfdf5);
+            color: var(--success-dark);
+            border-left-color: var(--secondary);
         }
 
         .message-error {
-            background: #fee2e2;
+            background: linear-gradient(135deg, #fee2e2, #fef2f2);
             color: #991b1b;
-            border-left: 4px solid var(--danger);
+            border-left-color: var(--danger);
         }
 
         @keyframes slideIn {
@@ -685,7 +743,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(4px);
             display: none;
             align-items: center;
@@ -700,48 +758,36 @@
 
         .loading {
             background: white;
-            border-radius: 1.25rem;
-            padding: 2.5rem 3rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            box-shadow: var(--shadow-2xl);
             text-align: center;
-            border: 2px solid var(--gray-100);
+            border: 2px solid var(--gray-200);
             animation: slideUp 0.3s;
+            max-width: 90%;
+            width: 400px;
         }
 
         .spinner {
             width: 64px;
             height: 64px;
             border: 5px solid var(--gray-200);
-            border-top: 5px solid transparent;
-            border-radius: 50%;
-            margin: 0 auto 1.5rem;
-            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-            position: relative;
-        }
-
-        .spinner::before {
-            content: '';
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
-            border: 5px solid transparent;
             border-top: 5px solid var(--primary);
             border-radius: 50%;
-            animation: spin 1.5s linear infinite reverse;
+            margin: 0 auto var(--spacing-lg);
+            animation: spin 1s linear infinite;
         }
 
         .loading h3 {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--gray-900);
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--spacing-sm);
         }
 
         .loading p {
             color: var(--gray-600);
-            font-size: 0.9375rem;
+            font-size: 1rem;
         }
 
         @keyframes spin {
@@ -757,8 +803,8 @@
 
             .header-actions {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
+                align-items: stretch;
+                gap: var(--spacing-md);
             }
 
             .btn-create-project {
@@ -767,19 +813,25 @@
             }
 
             .navbar-container {
-                padding: 1rem 1.5rem;
+                padding: var(--spacing-lg) var(--spacing-md);
             }
 
             .main-container {
-                padding: 1.5rem 1rem;
+                padding: var(--spacing-xl) var(--spacing-md);
             }
 
             .project-card {
-                padding: 1.5rem;
+                padding: var(--spacing-lg);
             }
 
             .modal-content {
-                padding: 1.5rem;
+                padding: var(--spacing-xl);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .confirm-actions {
+                flex-direction: column;
             }
         }
     </style>
@@ -789,12 +841,13 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="/" class="navbar-brand">
-                <div class="navbar-brand-icon"><i class="fas fa-chart-line"></i></div>
-                <span>QA Dashboard</span>
+                <div class="navbar-brand-icon"><i class="fas fa-chart-network"></i></div>
+                <span>QA Analytics</span>
             </a>
             <div class="navbar-links">
                 <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
-                <a href="/dashboard" class="nav-btn"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="/projects.html" class="nav-btn active"><i class="fas fa-sitemap"></i> Projects</a>
             </div>
         </div>
     </nav>
@@ -895,7 +948,7 @@
             </div>
             <div class="confirm-body">
                 <p>Are you sure you want to delete <span class="confirm-project-name" id="confirmProjectName"></span>?</p>
-                <p style="margin-top: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">This will also delete all associated analysis records.</p>
+                <p style="margin-top: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">This will also delete all associated records.</p>
                 <div class="form-group" style="margin-top: 1.25rem;">
                     <label class="form-label" style="color: var(--gray-900); font-size: 0.875rem;">
                         <i class="fas fa-keyboard"></i>
@@ -1120,7 +1173,7 @@
         window.onclick = function(event) {
             const createModal = document.getElementById('createModal');
             const confirmModal = document.getElementById('confirmModal');
-            
+
             if (event.target === createModal) {
                 closeModal();
             }

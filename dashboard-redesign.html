@@ -1083,13 +1083,12 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="/" class="navbar-brand">
-                <div class="navbar-brand-icon"><i class="fas fa-chart-network"></i></div>
-                <span>QA Analytics</span>
+                <div class="navbar-brand-icon"><i class="fas fa-chart-line"></i></div>
+                <span>QA Dashboard</span>
             </a>
             <div class="navbar-links">
                 <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
-                <a href="/dashboard.html" class="nav-btn active"><i class="fas fa-chart-bar"></i> Dashboard</a>
-                <a href="/projects.html" class="nav-btn"><i class="fas fa-sitemap"></i> Projects</a>
+                <a href="/projects" class="nav-btn active"><i class="fas fa-folder-open"></i> Projects</a>
             </div>
         </div>
     </nav>
@@ -1119,6 +1118,330 @@
 
         <!-- Dashboard Container -->
         <div id="dashboardContainer">
+            <!-- Dashboard content will be dynamically inserted here -->
+            <div class="project-section">
+                <div class="project-header">
+                    <div class="project-name">
+                        <i class="fas fa-project-diagram"></i>
+                        Project Alpha
+                    </div>
+                    <div class="project-actions">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Period Navigation -->
+                <div class="period-navigation">
+                    <!-- Years Section -->
+                    <div class="period-section">
+                        <div class="period-label">
+                            <i class="fas fa-calendar"></i>
+                            Select Year
+                        </div>
+                        <div class="years-container">
+                            <button class="year-btn no-data">2020</button>
+                            <button class="year-btn no-data">2021</button>
+                            <button class="year-btn no-data">2022</button>
+                            <button class="year-btn active">2023</button>
+                            <button class="year-btn">2024</button>
+                        </div>
+                    </div>
+
+                    <!-- Quarters Section -->
+                    <div class="period-section">
+                        <div class="period-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            Select Quarter
+                        </div>
+                        <div class="quarters-container">
+                            <button class="quarter-btn active">Q1</button>
+                            <button class="quarter-btn">Q2</button>
+                            <button class="quarter-btn">Q3</button>
+                            <button class="quarter-btn no-data">Q4</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quarter Card -->
+                <div class="quarter-card">
+                    <div class="quarter-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        Q1 2024
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-ticket-alt"></i></div>
+                            <div class="metric-value">1,248</div>
+                            <div class="metric-label">Total Tickets</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="metric-value">987</div>
+                            <div class="metric-label">Resolved ≤2 Days</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-trophy"></i></div>
+                            <div class="metric-value">79%</div>
+                            <div class="metric-label">Success Rate</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                            <div class="metric-value">261</div>
+                            <div class="metric-label">Resolved >2 Days</div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <div class="progress-label">Resolution Success Rate</div>
+                            <div class="progress-value">79%</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 79%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="details-section">
+                        <!-- Monthly Breakdown -->
+                        <div class="monthly-breakdown">
+                            <h4><i class="fas fa-calendar-week"></i> Monthly Breakdown</h4>
+                            <div class="monthly-tabs">
+                                <button class="month-tab-btn active" onclick="switchMonth('January')">
+                                    <i class="fas fa-calendar-day"></i>
+                                    January
+                                </button>
+                                <button class="month-tab-btn" onclick="switchMonth('February')">
+                                    <i class="fas fa-calendar-day"></i>
+                                    February
+                                </button>
+                                <button class="month-tab-btn" onclick="switchMonth('March')">
+                                    <i class="fas fa-calendar-day"></i>
+                                    March
+                                </button>
+                            </div>
+                            
+                            <div class="month-card active" id="month-January">
+                                <div class="month-header">
+                                    <div class="month-title">
+                                        <i class="fas fa-calendar-day"></i>
+                                        January
+                                    </div>
+                                    <div class="month-success-badge">
+                                        78%
+                                    </div>
+                                </div>
+                                
+                                <div class="month-metrics">
+                                    <div class="month-metric-item">
+                                        <div class="month-metric-label">
+                                            <i class="fas fa-ticket-alt"></i>
+                                            Total Tickets
+                                        </div>
+                                        <div class="month-metric-value">445</div>
+                                    </div>
+                                    <div class="month-metric-item">
+                                        <div class="month-metric-label">
+                                            <i class="fas fa-check-circle"></i>
+                                            Resolved ≤2 Days
+                                        </div>
+                                        <div class="month-metric-value">347</div>
+                                    </div>
+                                    <div class="month-metric-item">
+                                        <div class="month-metric-label">
+                                            <i class="fas fa-clock"></i>
+                                            Resolved >2 Days
+                                        </div>
+                                        <div class="month-metric-value">98</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="month-progress-bar">
+                                    <div class="month-progress-fill" style="width: 78%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="month-card" id="month-February">
+                                <div class="month-header">
+                                    <div class="month-title">
+                                        <i class="fas fa-calendar-day"></i>
+                                        February
+                                    </div>
+                                    <div class="month-success-badge">
+                                        82%
+                                    </div>
+                                </div>
+                                
+                                <div class="month-metrics">
+                                    <div class="month-metric-item">
+                                        <div class="month-metric-label">
+                                            <i class="fas fa-ticket-alt"></i>
+                                            Total Tickets
+                                        </div>
+                                        <div class="month-metric-value">412</div>
+                                    </div>
+                                    <div class="month-metric-item">
+                                        <div class="month-metric-label">
+                                            <i class="fas fa-check-circle"></i>
+                                            Resolved ≤2 Days
+                                        </div>
+                                        <div class="month-metric-value">338</div>
+                                    </div>
+                                    <div class="month-metric-item">
+                                        <div class="month-metric-label">
+                                            <i class="fas fa-clock"></i>
+                                            Resolved >2 Days
+                                        </div>
+                                        <div class="month-metric-value">74</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="month-progress-bar">
+                                    <div class="month-progress-fill" style="width: 82%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="month-card" id="month-March">
+                                <div class="month-header">
+                                    <div class="month-title">
+                                        <i class="fas fa-calendar-day"></i>
+                                        March
+                                    </div>
+                                    <div class="month-success-badge">
+                                        77%
+                                    </div>
+                                </div>
+                                
+                                <div class="month-metrics">
+                                    <div class="month-metric-item">
+                                        <div class="month-metric-label">
+                                            <i class="fas fa-ticket-alt"></i>
+                                            Total Tickets
+                                        </div>
+                                        <div class="month-metric-value">391</div>
+                                    </div>
+                                    <div class="month-metric-item">
+                                        <div class="month-metric-label">
+                                            <i class="fas fa-check-circle"></i>
+                                            Resolved ≤2 Days
+                                        </div>
+                                        <div class="month-metric-value">302</div>
+                                    </div>
+                                    <div class="month-metric-item">
+                                        <div class="month-metric-label">
+                                            <i class="fas fa-clock"></i>
+                                            Resolved >2 Days
+                                        </div>
+                                        <div class="month-metric-value">89</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="month-progress-bar">
+                                    <div class="month-progress-fill" style="width: 77%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Records Section -->
+                        <div class="records-header" onclick="toggleRecordsSection()">
+                            <h4>
+                                <i class="fas fa-database"></i> Records in this quarter (3)
+                            </h4>
+                            <span class="records-toggle-icon" id="records-toggle-icon">
+                                <i class="fas fa-chevron-down"></i>
+                            </span>
+                        </div>
+                        
+                        <div class="records-content" id="records-content">
+                            <div class="record-item">
+                                <div class="record-checkbox">
+                                    <input type="checkbox" id="record-checkbox-1" checked>
+                                </div>
+                                <div class="record-info">
+                                    <div class="record-filename">
+                                        <i class="fas fa-file-alt"></i>
+                                        ticket_data_january.csv
+                                    </div>
+                                    <div class="record-months">
+                                        <i class="fas fa-calendar"></i>
+                                        Months: January
+                                    </div>
+                                </div>
+                                <div class="record-stats">
+                                    <div><strong>445</strong> tickets</div>
+                                    <div><strong>78%</strong> success</div>
+                                </div>
+                                <div class="record-actions">
+                                    <button class="btn-delete-record" onclick="deleteRecord(1)">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="record-item">
+                                <div class="record-checkbox">
+                                    <input type="checkbox" id="record-checkbox-2" checked>
+                                </div>
+                                <div class="record-info">
+                                    <div class="record-filename">
+                                        <i class="fas fa-file-alt"></i>
+                                        ticket_data_february.csv
+                                    </div>
+                                    <div class="record-months">
+                                        <i class="fas fa-calendar"></i>
+                                        Months: February
+                                    </div>
+                                </div>
+                                <div class="record-stats">
+                                    <div><strong>412</strong> tickets</div>
+                                    <div><strong>82%</strong> success</div>
+                                </div>
+                                <div class="record-actions">
+                                    <button class="btn-delete-record" onclick="deleteRecord(2)">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="record-item">
+                                <div class="record-checkbox">
+                                    <input type="checkbox" id="record-checkbox-3" checked>
+                                </div>
+                                <div class="record-info">
+                                    <div class="record-filename">
+                                        <i class="fas fa-file-alt"></i>
+                                        ticket_data_march.csv
+                                    </div>
+                                    <div class="record-months">
+                                        <i class="fas fa-calendar"></i>
+                                        Months: March
+                                    </div>
+                                </div>
+                                <div class="record-stats">
+                                    <div><strong>391</strong> tickets</div>
+                                    <div><strong>77%</strong> success</div>
+                                </div>
+                                <div class="record-actions">
+                                    <button class="btn-delete-record" onclick="deleteRecord(3)">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1132,477 +1455,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000/api';
-        let dashboardData = {};
-        let currentYearByProject = {};
-        let currentQuarterByProject = {};
-        let allProjects = [];
-        let activeProjectId = null;
-
-        // Show/hide loading overlay
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.add('active');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('active');
-        }
-
-        async function loadDashboard() {
-            showLoading();
-            try {
-                // Fetch all projects first
-                const projectsResponse = await fetch(`${API_URL}/projects`);
-                const projectsData = await projectsResponse.json();
-
-                // Fetch aggregated records data
-                const recordsResponse = await fetch(`${API_URL}/records/aggregated`);
-                const recordsData = await recordsResponse.json();
-
-                dashboardData = recordsData.aggregated;
-
-                // Clear existing data before repopulating
-                allProjects = [];
-
-                // Collect ALL projects (including those without data)
-                projectsData.projects.forEach(project => {
-                    allProjects.push({
-                        id: String(project.id),
-                        name: project.name,
-                        color: project.color
-                    });
-
-                    // Initialize year/quarter for projects with data
-                    const projectKey = String(project.id);
-                    if (dashboardData[projectKey]) {
-                        const years = Object.keys(dashboardData[projectKey].years).map(Number);
-                        const sortedYears = years.sort((a, b) => b - a);
-
-                        if (sortedYears.length > 0) {
-                            currentYearByProject[projectKey] = sortedYears[0];
-
-                            // Find first available quarter in the latest year
-                            const quarters = Object.keys(dashboardData[projectKey].years[sortedYears[0]].quarters).sort();
-                            currentQuarterByProject[projectKey] = quarters.length > 0 ? quarters[0] : 'Q1';
-                        }
-                    }
-                });
-
-                // Set active project to the first one if available
-                if (allProjects.length > 0 && !activeProjectId) {
-                    activeProjectId = allProjects[0].id;
-                }
-
-                populateTabs();
-                renderDashboard();
-                hideLoading();
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-                document.getElementById('dashboardContainer').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-circle empty-state-icon" style="color: #ef4444;"></i>
-                        <h3>Error loading dashboard</h3>
-                        <p>${error.message}</p>
-                    </div>
-                `;
-                hideLoading();
-            }
-        }
-
-        function populateTabs() {
-            const tabsContainer = document.getElementById('projectTabs');
-
-            if (allProjects.length === 0) {
-                tabsContainer.innerHTML = '<p style="padding: 1rem; color: var(--gray-600);">No projects available</p>';
-                return;
-            }
-
-            tabsContainer.innerHTML = allProjects.map(project => `
-                <button class="tab-btn ${project.id === activeProjectId ? 'active' : ''}"
-                        onclick="switchProject('${project.id}')">
-                    <i class="fas fa-folder"></i> ${project.name}
-                </button>
-            `).join('');
-        }
-
-        function switchProject(projectId) {
-            activeProjectId = projectId;
-            populateTabs();
-            renderDashboard();
-        }
-
-        function renderYearQuarterNavigation() {
-            if (!activeProjectId) return '';
-
-            const project = dashboardData[activeProjectId];
-            if (!project) return '';
-
-            // Get all available years
-            const years = Object.keys(project.years).map(Number).sort((a, b) => a - b);
-            const currentYear = currentYearByProject[activeProjectId];
-
-            // Generate years HTML
-            const yearsHTML = years.map(year => {
-                const hasData = project.years[year] && Object.keys(project.years[year].quarters).length > 0;
-                const isActive = year === currentYear;
-                const classes = `year-btn ${isActive ? 'active' : ''} ${!hasData ? 'no-data' : ''}`;
-
-                return `
-                    <button class="${classes}"
-                            onclick="selectYear(${year})"
-                            ${!hasData ? 'disabled' : ''}>
-                        ${year}
-                        ${hasData ? '<span class="period-badge"></span>' : ''}
-                    </button>
-                `;
-            }).join('');
-
-            // Generate quarters HTML
-            const allQuarters = ['Q1', 'Q2', 'Q3', 'Q4'];
-            const currentQuarter = currentQuarterByProject[activeProjectId];
-            const yearData = project.years[currentYear];
-
-            const quartersHTML = allQuarters.map(quarter => {
-                const hasData = yearData && yearData.quarters && yearData.quarters[quarter];
-                const isActive = quarter === currentQuarter;
-                const classes = `quarter-btn ${isActive ? 'active' : ''} ${!hasData ? 'no-data' : ''}`;
-
-                return `
-                    <button class="${classes}"
-                            onclick="selectQuarter('${quarter}')"
-                            ${!hasData ? 'disabled' : ''}>
-                        ${quarter}
-                        ${hasData ? '<span class="period-badge"></span>' : ''}
-                    </button>
-                `;
-            }).join('');
-
-            return `
-                <div class="period-navigation">
-                    <!-- Years Section -->
-                    <div class="period-section">
-                        <div class="period-label">
-                            <i class="fas fa-calendar"></i>
-                            Select Year
-                        </div>
-                        <div class="years-container">
-                            ${yearsHTML}
-                        </div>
-                    </div>
-
-                    <!-- Quarters Section -->
-                    <div class="period-section">
-                        <div class="period-label">
-                            <i class="fas fa-calendar-alt"></i>
-                            Select Quarter
-                        </div>
-                        <div class="quarters-container">
-                            ${quartersHTML}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderDashboard() {
-            const container = document.getElementById('dashboardContainer');
-
-            if (!activeProjectId) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-folder-open empty-state-icon"></i>
-                        <h3>No Projects</h3>
-                        <p>Create a project to get started</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Get the active project info
-            const activeProject = allProjects.find(p => p.id === activeProjectId);
-            const project = dashboardData[activeProjectId];
-
-            // If project has no data, show empty state
-            if (!project) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-chart-line empty-state-icon"></i>
-                        <h3>No Data for ${activeProject.name}</h3>
-                        <p>Upload ticket data for this project to see analytics</p>
-                        <p style="margin-top: 1rem; color: var(--gray-600); font-size: 0.875rem;">Go to <a href="/" style="color: var(--primary); text-decoration: none; font-weight: 600;">Ticket Analyzer</a> to upload data</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
-            const currentYear = currentYearByProject[activeProjectId];
-            const yearData = project.years[currentYear];
-
-            if (!yearData) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-calendar-times empty-state-icon"></i>
-                        <h3>No data for this year</h3>
-                        <p>No records found for ${currentYear}</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const allQuarters = ['Q1', 'Q2', 'Q3', 'Q4'];
-            const currentQuarter = currentQuarterByProject[activeProjectId];
-
-            // Check if current quarter has data
-            const quarterData = yearData.quarters[currentQuarter];
-
-            let html = `
-                <div class="project-section">
-                    <div class="project-header" style="border-bottom-color: ${project.project_color}">
-                        <div class="project-name" style="color: ${project.project_color}">
-                            <i class="fas fa-project-diagram"></i>
-                            ${project.project_name}
-                        </div>
-                    </div>
-
-                    ${renderYearQuarterNavigation()}
-            `;
-
-            if (!quarterData) {
-                html += `
-                    <div class="quarter-empty-state">
-                        <div class="empty-state-icon">
-                            <i class="fas fa-inbox"></i>
-                        </div>
-                        <h3>No Data for ${currentQuarter} ${currentYear}</h3>
-                        <p>There are no records for this quarter yet.</p>
-                        <p class="empty-state-hint">Upload data for this period to see analytics here.</p>
-                    </div>
-                </div>
-                `;
-                container.innerHTML = html;
-                return;
-            }
-
-            const successRate = quarterData.success_rate;
-
-            html += `
-                    <div class="quarter-card" style="border-left-color: ${project.project_color}">
-                        <div class="quarter-title" style="color: ${project.project_color}">
-                            <i class="fas fa-calendar-alt"></i>
-                            ${currentQuarter}
-                        </div>
-
-                        <div class="metrics-grid">
-                            <div class="metric-card" style="--metric-color: #3b82f6; --metric-color-dark: #2563eb;">
-                                <div class="metric-icon"><i class="fas fa-ticket-alt"></i></div>
-                                <div class="metric-value">
-                                    ${quarterData.total_tickets}
-                                </div>
-                                <div class="metric-label">Total Tickets</div>
-                            </div>
-
-                            <div class="metric-card" style="--metric-color: #10b981; --metric-color-dark: #059669;">
-                                <div class="metric-icon"><i class="fas fa-check-circle"></i></div>
-                                <div class="metric-value">
-                                    ${quarterData.resolved_in_2days}
-                                </div>
-                                <div class="metric-label">Resolved ≤2 Days</div>
-                            </div>
-
-                            <div class="metric-card" style="--metric-color: ${successRate >= 80 ? '#10b981' : successRate >= 60 ? '#f59e0b' : '#ef4444'}; --metric-color-dark: ${successRate >= 80 ? '#059669' : successRate >= 60 ? '#d97706' : '#dc2626'};">
-                                <div class="metric-icon"><i class="fas ${successRate >= 80 ? 'fa-trophy' : successRate >= 60 ? 'fa-chart-bar' : 'fa-exclamation-triangle'}"></i></div>
-                                <div class="metric-value">
-                                    ${successRate}%
-                                </div>
-                                <div class="metric-label">Success Rate</div>
-                            </div>
-
-                            <div class="metric-card" style="--metric-color: #f59e0b; --metric-color-dark: #d97706;">
-                                <div class="metric-icon"><i class="fas fa-clock"></i></div>
-                                <div class="metric-value">
-                                    ${quarterData.total_tickets - quarterData.resolved_in_2days}
-                                </div>
-                                <div class="metric-label">Resolved >2 Days</div>
-                            </div>
-                        </div>
-
-                        <div class="progress-container">
-                            <div class="progress-header">
-                                <div class="progress-label">Resolution Success Rate</div>
-                                <div class="progress-value">${successRate}%</div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${successRate}%; background: ${project.project_color}"></div>
-                            </div>
-                        </div>
-
-                        <div class="details-section">
-                            ${quarterData.months && Object.keys(quarterData.months).length > 0 ? `
-                                <div class="monthly-breakdown">
-                                    <h4 style="color: ${project.project_color}"><i class="fas fa-calendar-week"></i> Monthly Breakdown</h4>
-                                    <div class="monthly-tabs">
-                                        ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-                                            .filter(month => quarterData.months[month])
-                                            .map((month, index) => {
-                                                const monthData = quarterData.months[month];
-                                                const monthSuccessRate = parseFloat(monthData.success_rate || 0);
-                                                const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
-                                                const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
-                                                return `
-                                                    <button class="month-tab-btn ${index === 0 ? 'active' : ''}"
-                                                            style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};"
-                                                            onclick="switchMonth('${month}')">
-                                                        <i class="fas fa-calendar-day"></i>
-                                                        ${month}
-                                                    </button>
-                                                `;
-                                            }).join('')}
-                                    </div>
-                                    <div class="months-grid">
-                                        ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-                                            .filter(month => quarterData.months[month])
-                                            .map((month, index) => {
-                                                const monthData = quarterData.months[month];
-                                                const monthSuccessRate = parseFloat(monthData.success_rate || 0);
-                                                const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
-                                                const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
-                                                return `
-                                                    <div class="month-card ${index === 0 ? 'active' : ''}" id="month-${month}" style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};">
-                                                        <div class="month-header">
-                                                            <div class="month-title">
-                                                                <i class="fas fa-calendar-day"></i>
-                                                                ${month}
-                                                            </div>
-                                                            <div class="month-success-badge">
-                                                                ${monthSuccessRate}%
-                                                            </div>
-                                                        </div>
-                                                        <div class="month-metrics">
-                                                            <div class="month-metric-item">
-                                                                <div class="month-metric-label">
-                                                                    <i class="fas fa-ticket-alt"></i>
-                                                                    Total Tickets
-                                                                </div>
-                                                                <div class="month-metric-value">${monthData.total_tickets.toLocaleString()}</div>
-                                                            </div>
-                                                            <div class="month-metric-item">
-                                                                <div class="month-metric-label">
-                                                                    <i class="fas fa-check-circle"></i>
-                                                                    Resolved ≤2 Days
-                                                                </div>
-                                                                <div class="month-metric-value">${monthData.resolved_in_2days.toLocaleString()}</div>
-                                                            </div>
-                                                            <div class="month-metric-item">
-                                                                <div class="month-metric-label">
-                                                                    <i class="fas fa-clock"></i>
-                                                                    Resolved >2 Days
-                                                                </div>
-                                                                <div class="month-metric-value">${(monthData.total_tickets - monthData.resolved_in_2days).toLocaleString()}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="month-progress-bar">
-                                                            <div class="month-progress-fill" style="width: ${monthSuccessRate}%;"></div>
-                                                        </div>
-                                                    </div>
-                                                `;
-                                            }).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            <div class="records-header" onclick="toggleRecordsSection()">
-                                <h4>
-                                    <i class="fas fa-database"></i> Records in this quarter (${quarterData.records.length})
-                                </h4>
-                                <span class="records-toggle-icon" id="records-toggle-icon">
-                                    <i class="fas fa-chevron-down"></i>
-                                </span>
-                            </div>
-                            <div class="records-content" id="records-content">
-                                ${quarterData.records.map(record => {
-                                    return `
-                                        <div class="record-item" id="record-${record.id}">
-                                            <div class="record-checkbox">
-                                                <input type="checkbox"
-                                                       id="record-checkbox-${record.id}"
-                                                       checked
-                                                       onchange="toggleRecordSelection(${record.id})">
-                                            </div>
-                                            <div class="record-info">
-                                                <div class="record-filename">
-                                                    <i class="fas fa-file-alt"></i>
-                                                    ${record.filename}
-                                                </div>
-                                                <div class="record-months">
-                                                    <i class="fas fa-calendar"></i>
-                                                    Months: ${record.months.join(', ')}
-                                                </div>
-                                            </div>
-                                            <div class="record-stats">
-                                                <div><strong>${record.total_tickets}</strong> tickets</div>
-                                                <div><strong>${record.success_rate}%</strong> success</div>
-                                            </div>
-                                            <div class="record-actions">
-                                                <button class="btn-delete-record" onclick="deleteRecord(${record.id})">
-                                                    <i class="fas fa-trash-alt"></i> Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            container.innerHTML = html;
-        }
-
-        function selectYear(year) {
-            if (!activeProjectId) return;
-
-            const project = dashboardData[activeProjectId];
-            if (!project || !project.years[year]) return;
-
-            // Update current year
-            currentYearByProject[activeProjectId] = year;
-
-            // Find first available quarter in the selected year
-            const yearData = project.years[year];
-            const availableQuarters = Object.keys(yearData.quarters).sort();
-
-            if (availableQuarters.length > 0) {
-                // If current quarter exists in new year, keep it; otherwise use first available
-                const currentQuarter = currentQuarterByProject[activeProjectId];
-                if (yearData.quarters[currentQuarter]) {
-                    currentQuarterByProject[activeProjectId] = currentQuarter;
-                } else {
-                    currentQuarterByProject[activeProjectId] = availableQuarters[0];
-                }
-            } else {
-                // Default to Q1 if no data
-                currentQuarterByProject[activeProjectId] = 'Q1';
-            }
-
-            renderDashboard();
-        }
-
-        function selectQuarter(quarter) {
-            if (!activeProjectId) return;
-
-            const project = dashboardData[activeProjectId];
-            const currentYear = currentYearByProject[activeProjectId];
-
-            if (!project || !project.years[currentYear]) return;
-
-            // Update current quarter
-            currentQuarterByProject[activeProjectId] = quarter;
-
-            renderDashboard();
-        }
-
+        // Function to switch between months
         function switchMonth(monthName) {
             // Hide all month cards
             const allMonthCards = document.querySelectorAll('.month-card');
@@ -1629,6 +1482,7 @@
             }
         }
 
+        // Function to toggle records section
         function toggleRecordsSection() {
             const content = document.getElementById('records-content');
             const toggleIcon = document.getElementById('records-toggle-icon');
@@ -1642,97 +1496,44 @@
             }
         }
 
-        function toggleRecordSelection(recordId) {
-            const checkbox = document.getElementById(`record-checkbox-${recordId}`);
-            const recordItem = document.getElementById(`record-${recordId}`);
-
-            if (checkbox.checked) {
-                recordItem.classList.remove('excluded');
-            } else {
-                recordItem.classList.add('excluded');
-            }
-
-            // Recalculate quarter metrics based on selected records
-            recalculateQuarterMetrics();
-        }
-
-        function recalculateQuarterMetrics() {
-            if (!activeProjectId) return;
-
-            const currentYear = currentYearByProject[activeProjectId];
-            const currentQuarter = currentQuarterByProject[activeProjectId];
-
-            // Get all records in this quarter
-            const recordItems = document.querySelectorAll('.record-item');
-
-            let totalTickets = 0;
-            let resolvedIn2Days = 0;
-
-            recordItems.forEach(item => {
-                const recordId = item.id.replace('record-', '');
-                const checkbox = document.getElementById(`record-checkbox-${recordId}`);
-
-                if (checkbox && checkbox.checked) {
-                    // Find the record data
-                    const project = dashboardData[activeProjectId];
-                    if (project && project.years[currentYear] && project.years[currentYear].quarters[currentQuarter]) {
-                        const record = project.years[currentYear].quarters[currentQuarter].records.find(r => r.id == recordId);
-                        if (record) {
-                            totalTickets += record.total_tickets;
-                            resolvedIn2Days += record.resolved_in_2days;
-                        }
-                    }
-                }
-            });
-
-            // Calculate success rate
-            const successRate = totalTickets > 0 ? ((resolvedIn2Days / totalTickets) * 100).toFixed(2) : 0;
-
-            // Update the quarter card metrics
-            const metricCards = document.querySelectorAll('.metric-card .metric-value');
-
-            if (metricCards.length >= 4) {
-                metricCards[0].textContent = totalTickets;
-                metricCards[1].textContent = resolvedIn2Days;
-                metricCards[2].textContent = `${successRate}%`;
-                metricCards[3].textContent = totalTickets - resolvedIn2Days;
-            }
-
-            // Update progress bar
-            const progressFill = document.querySelector('.progress-fill');
-            if (progressFill) {
-                progressFill.style.width = `${successRate}%`;
-            }
-        }
-
-        async function deleteRecord(recordId) {
+        // Function to delete a record
+        function deleteRecord(recordId) {
             if (!confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
                 return;
             }
-
-            try {
-                const response = await fetch(`${API_URL}/records/${recordId}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Reload the dashboard to update all data
-                    await loadDashboard();
-
-                    alert('Record deleted successfully');
-                } else {
-                    alert('Error deleting record: ' + data.error);
-                }
-            } catch (error) {
-                console.error('Error deleting record:', error);
-                alert('Error deleting record: ' + error.message);
+            
+            const recordItem = document.getElementById(`record-${recordId}`);
+            if (recordItem) {
+                recordItem.style.opacity = '0';
+                recordItem.style.transform = 'translateX(-100%)';
+                
+                setTimeout(() => {
+                    recordItem.remove();
+                    // Update record count in header
+                    const recordCount = document.querySelectorAll('.record-item').length;
+                    document.querySelector('.records-header h4').innerHTML = 
+                        `<i class="fas fa-database"></i> Records in this quarter (${recordCount})`;
+                }, 300);
             }
         }
 
-        // Load dashboard on page load
-        loadDashboard();
+        // Function to switch projects
+        function switchProject(projectId) {
+            // Update tab buttons
+            const allTabButtons = document.querySelectorAll('.tab-btn');
+            allTabButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Set active tab button
+            const clickedButton = event.target.closest('.tab-btn');
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            
+            // In a real implementation, this would load the selected project's data
+            console.log(`Switched to project: ${projectId}`);
+        }
 
         // Add hover effect to metric cards
         document.querySelectorAll('.metric-card').forEach(card => {
@@ -1743,6 +1544,11 @@
                 }, 10);
             });
         });
+        
+        // Simulate loading completion after a short delay
+        setTimeout(() => {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }, 1500);
     </script>
 </body>
 </html>
