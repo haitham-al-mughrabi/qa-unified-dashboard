@@ -815,23 +815,33 @@
         /* Monthly Breakdown */
         .monthly-breakdown {
             margin-bottom: var(--spacing-xl);
+            margin-top: var(--spacing-2xl);
+        }
+
+        .monthly-breakdown h4 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
         }
 
         .months-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xl);
         }
 
         .month-card {
-            background: white;
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
+            background: linear-gradient(135deg, white 0%, var(--gray-50) 100%);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
             border: 2px solid var(--gray-200);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
         .month-card::before {
@@ -839,67 +849,120 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(180deg, var(--month-color, var(--primary)), var(--month-color-light, var(--primary-light)));
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--month-color, var(--primary)), var(--month-color-light, var(--primary-light)));
+            opacity: 0.8;
+        }
+
+        .month-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at top right, var(--month-color, var(--primary))15, transparent 70%);
+            opacity: 0.1;
+            pointer-events: none;
         }
 
         .month-card:hover {
             border-color: var(--month-color, var(--primary));
-            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.05);
             transform: translateY(-4px);
         }
 
-        .month-card:hover::before {
-            opacity: 1;
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            position: relative;
         }
 
         .month-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            margin-bottom: var(--spacing-md);
+            font-size: 1.5rem;
+            font-weight: 800;
             color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            position: relative;
+        }
+
+        .month-title i {
+            font-size: 1.5rem;
+            color: var(--month-color, var(--primary));
+        }
+
+        .month-success-badge {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--month-color, var(--primary)), var(--month-color-light, var(--primary-light)));
+            color: white;
+            border-radius: var(--radius-full);
+            font-size: 1.25rem;
+            font-weight: 800;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .month-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            position: relative;
+        }
+
+        .month-metric-item {
+            background: white;
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--gray-100);
+            transition: all 0.2s ease;
+        }
+
+        .month-metric-item:hover {
+            border-color: var(--month-color, var(--primary));
+            transform: scale(1.02);
+        }
+
+        .month-metric-label {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--spacing-sm);
             display: flex;
             align-items: center;
             gap: var(--spacing-sm);
         }
 
-        .month-title i {
-            font-size: 1.125rem;
-        }
-
-        .month-metrics {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-xs);
-        }
-
-        .month-metric-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.875rem;
-        }
-
-        .month-metric-label {
-            color: var(--gray-600);
+        .month-metric-label i {
+            font-size: 1rem;
         }
 
         .month-metric-value {
-            font-weight: 600;
+            font-size: 2rem;
+            font-weight: 800;
             color: var(--gray-900);
+            background: linear-gradient(135deg, var(--month-color, var(--primary)), var(--month-color-light, var(--primary-light)));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .month-progress-bar {
             width: 100%;
-            height: 8px;
+            height: 12px;
             background: var(--gray-200);
             border-radius: var(--radius-full);
             overflow: hidden;
             margin-top: var(--spacing-md);
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+            position: relative;
         }
 
         .month-progress-fill {
@@ -908,6 +971,18 @@
             transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             background: linear-gradient(90deg, var(--month-color, var(--primary)), var(--month-color-light, var(--primary-light)));
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .month-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
         }
 
         /* Record Item */
@@ -1375,7 +1450,7 @@
                             <div class="details-section">
                                 ${quarterData.months && Object.keys(quarterData.months).length > 0 ? `
                                     <div class="monthly-breakdown">
-                                        <h4 style="margin-bottom: 15px; color: ${project.project_color}"><i class="fas fa-calendar-week"></i> Monthly Breakdown:</h4>
+                                        <h4 style="color: ${project.project_color}"><i class="fas fa-calendar-week"></i> Monthly Breakdown</h4>
                                         <div class="months-grid">
                                                         ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
                                                             .filter(month => quarterData.months[month])
@@ -1386,22 +1461,36 @@
                                                                 const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
                                                                 return `
                                                                     <div class="month-card" style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};">
-                                                                        <div class="month-title" style="color: ${monthColor}">
-                                                                            <i class="fas fa-calendar-day"></i>
-                                                                            ${month}
+                                                                        <div class="month-header">
+                                                                            <div class="month-title">
+                                                                                <i class="fas fa-calendar-day"></i>
+                                                                                ${month}
+                                                                            </div>
+                                                                            <div class="month-success-badge">
+                                                                                ${monthSuccessRate}%
+                                                                            </div>
                                                                         </div>
                                                                         <div class="month-metrics">
-                                                                            <div class="month-metric-row">
-                                                                                <span class="month-metric-label"><i class="fas fa-list"></i> Total Tickets:</span>
-                                                                                <span class="month-metric-value">${monthData.total_tickets}</span>
+                                                                            <div class="month-metric-item">
+                                                                                <div class="month-metric-label">
+                                                                                    <i class="fas fa-ticket-alt"></i>
+                                                                                    Total Tickets
+                                                                                </div>
+                                                                                <div class="month-metric-value">${monthData.total_tickets.toLocaleString()}</div>
                                                                             </div>
-                                                                            <div class="month-metric-row">
-                                                                                <span class="month-metric-label"><i class="fas fa-check"></i> Resolved ≤2 Days:</span>
-                                                                                <span class="month-metric-value" style="color: #10b981">${monthData.resolved_in_2days}</span>
+                                                                            <div class="month-metric-item">
+                                                                                <div class="month-metric-label">
+                                                                                    <i class="fas fa-check-circle"></i>
+                                                                                    Resolved ≤2 Days
+                                                                                </div>
+                                                                                <div class="month-metric-value">${monthData.resolved_in_2days.toLocaleString()}</div>
                                                                             </div>
-                                                                            <div class="month-metric-row">
-                                                                                <span class="month-metric-label"><i class="fas ${monthSuccessRate >= 80 ? 'fa-star' : monthSuccessRate >= 60 ? 'fa-chart-line' : 'fa-exclamation-circle'}"></i> Success Rate:</span>
-                                                                                <span class="month-metric-value" style="color: ${monthColor}; font-weight: 800;">${monthSuccessRate}%</span>
+                                                                            <div class="month-metric-item">
+                                                                                <div class="month-metric-label">
+                                                                                    <i class="fas fa-clock"></i>
+                                                                                    Resolved >2 Days
+                                                                                </div>
+                                                                                <div class="month-metric-value">${(monthData.total_tickets - monthData.resolved_in_2days).toLocaleString()}</div>
                                                                             </div>
                                                                         </div>
                                                                         <div class="month-progress-bar">
