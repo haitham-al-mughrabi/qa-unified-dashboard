@@ -1142,33 +1142,40 @@
         async function loadDashboard() {
             showLoading();
             try {
-                const response = await fetch(`${API_URL}/records/aggregated`);
-                const data = await response.json();
+                // Fetch all projects first
+                const projectsResponse = await fetch(`${API_URL}/projects`);
+                const projectsData = await projectsResponse.json();
 
-                dashboardData = data.aggregated;
+                // Fetch aggregated records data
+                const recordsResponse = await fetch(`${API_URL}/records/aggregated`);
+                const recordsData = await recordsResponse.json();
+
+                dashboardData = recordsData.aggregated;
 
                 // Clear existing data before repopulating
                 allProjects = [];
 
-                // Collect all projects
-                Object.keys(dashboardData).forEach(projectKey => {
-                    const project = dashboardData[projectKey];
+                // Collect ALL projects (including those without data)
+                projectsData.projects.forEach(project => {
                     allProjects.push({
-                        id: projectKey,
-                        name: project.project_name,
-                        color: project.project_color
+                        id: String(project.id),
+                        name: project.name,
+                        color: project.color
                     });
 
-                    const years = Object.keys(project.years).map(Number);
+                    // Initialize year/quarter for projects with data
+                    const projectKey = String(project.id);
+                    if (dashboardData[projectKey]) {
+                        const years = Object.keys(dashboardData[projectKey].years).map(Number);
+                        const sortedYears = years.sort((a, b) => b - a);
 
-                    // Initialize current year for each project (use the latest year)
-                    const sortedYears = years.sort((a, b) => b - a);
-                    if (sortedYears.length > 0) {
-                        currentYearByProject[projectKey] = sortedYears[0];
+                        if (sortedYears.length > 0) {
+                            currentYearByProject[projectKey] = sortedYears[0];
 
-                        // Find first available quarter in the latest year
-                        const quarters = Object.keys(project.years[sortedYears[0]].quarters).sort();
-                        currentQuarterByProject[projectKey] = quarters.length > 0 ? quarters[0] : 'Q1';
+                            // Find first available quarter in the latest year
+                            const quarters = Object.keys(dashboardData[projectKey].years[sortedYears[0]].quarters).sort();
+                            currentQuarterByProject[projectKey] = quarters.length > 0 ? quarters[0] : 'Q1';
+                        }
                     }
                 });
 
@@ -1218,19 +1225,33 @@
         function renderDashboard() {
             const container = document.getElementById('dashboardContainer');
 
-            if (!activeProjectId || Object.keys(dashboardData).length === 0) {
+            if (!activeProjectId) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-chart-bar empty-state-icon"></i>
-                        <h3>No data yet</h3>
-                        <p>Start by analyzing tickets and saving them to projects</p>
+                        <i class="fas fa-folder-open empty-state-icon"></i>
+                        <h3>No Projects</h3>
+                        <p>Create a project to get started</p>
                     </div>
                 `;
                 return;
             }
 
+            // Get the active project info
+            const activeProject = allProjects.find(p => p.id === activeProjectId);
             const project = dashboardData[activeProjectId];
-            if (!project) return;
+
+            // If project has no data, show empty state
+            if (!project) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line empty-state-icon"></i>
+                        <h3>No Data for ${activeProject.name}</h3>
+                        <p>Upload ticket data for this project to see analytics</p>
+                        <p style="margin-top: 1rem; color: var(--gray-600); font-size: 0.875rem;">Go to <a href="/" style="color: var(--primary); text-decoration: none; font-weight: 600;">Ticket Analyzer</a> to upload data</p>
+                    </div>
+                `;
+                return;
+            }
 
             const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
             const currentYear = currentYearByProject[activeProjectId];
