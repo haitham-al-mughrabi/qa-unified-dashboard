@@ -236,14 +236,34 @@
             height: 4px;
         }
 
-        /* Loading */
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1500;
+            animation: fadeIn 0.3s;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
         .loading {
             background: white;
-            border-radius: var(--radius-2xl);
-            padding: var(--spacing-2xl) var(--spacing-xl);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 1.25rem;
+            padding: 2.5rem 3rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
             text-align: center;
             border: 2px solid var(--gray-100);
+            animation: slideUp 0.3s;
         }
 
         .spinner {
@@ -252,7 +272,7 @@
             border: 5px solid var(--gray-200);
             border-top: 5px solid transparent;
             border-radius: 50%;
-            margin: 0 auto var(--spacing-xl);
+            margin: 0 auto 1.5rem;
             animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
             position: relative;
         }
@@ -271,20 +291,40 @@
         }
 
         .loading h3 {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--gray-900);
-            margin-bottom: var(--spacing-sm);
+            margin-bottom: 0.5rem;
         }
 
         .loading p {
             color: var(--gray-600);
-            font-size: 1rem;
+            font-size: 0.9375rem;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Empty State */
@@ -1070,11 +1110,15 @@
 
         <!-- Dashboard Container -->
         <div id="dashboardContainer">
-            <div class="loading">
-                <div class="spinner"></div>
-                <h3>Loading dashboard...</h3>
-                <p>Please wait</p>
-            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay active" id="loadingOverlay">
+        <div class="loading">
+            <div class="spinner"></div>
+            <h3>Loading dashboard...</h3>
+            <p>Please wait</p>
         </div>
     </div>
 
@@ -1086,7 +1130,17 @@
         let allProjects = [];
         let activeProjectId = null;
 
+        // Show/hide loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
         async function loadDashboard() {
+            showLoading();
             try {
                 const response = await fetch(`${API_URL}/records/aggregated`);
                 const data = await response.json();
@@ -1125,6 +1179,7 @@
 
                 populateTabs();
                 renderDashboard();
+                hideLoading();
             } catch (error) {
                 console.error('Error loading dashboard:', error);
                 document.getElementById('dashboardContainer').innerHTML = `
@@ -1134,6 +1189,7 @@
                         <p>${error.message}</p>
                     </div>
                 `;
+                hideLoading();
             }
         }
 
