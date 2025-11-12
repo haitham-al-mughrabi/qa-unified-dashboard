@@ -463,6 +463,87 @@ app.delete('/api/records', (req, res) => {
     });
 });
 
+// ==================== DASHBOARD API ====================
+
+// Get dashboard statistics with filtering
+app.get('/api/dashboard', (req, res) => {
+    const projectId = req.query.projectId;
+    const period = req.query.period || 'all';
+
+    let query = `
+        SELECT
+            r.*,
+            p.name as project_name
+        FROM analysis_records r
+        LEFT JOIN projects p ON r.project_id = p.id
+    `;
+
+    const params = [];
+
+    // Filter by project if specified
+    if (projectId && projectId !== 'all') {
+        query += ' WHERE r.project_id = ?';
+        params.push(projectId);
+    }
+
+    query += ' ORDER BY r.created_at DESC';
+
+    db.all(query, params, (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+
+        // Transform records into the format expected by frontend
+        const records = [];
+        rows.forEach(row => {
+            // Parse analysis_data to get monthly breakdown
+            try {
+                const analysisData = JSON.parse(row.analysis_data || '[]');
+
+                // Add one record per monthly data point
+                if (Array.isArray(analysisData)) {
+                    analysisData.forEach(monthData => {
+                        records.push({
+                            id: row.id,
+                            project_id: row.project_id,
+                            project_name: row.project_name,
+                            filename: row.filename,
+                            created_at: row.created_at,
+                            year: row.year,
+                            month: monthData.month,
+                            displayName: monthData.displayName,
+                            total_tickets: monthData.totalTickets || 0,
+                            resolved_in_2days: monthData.resolvedIn2Days || 0,
+                            resolved_after_2days: monthData.resolvedAfter2Days || 0,
+                            success_rate: parseFloat(monthData.successRate) || 0,
+                            status: monthData.resolvedIn2Days > 0 ? 'resolved' : 'pending',
+                            resolution_type: monthData.resolvedIn2Days > 0 ? 'within_2_days' : 'after_2_days'
+                        });
+                    });
+                }
+            } catch (e) {
+                // If analysis_data is not valid JSON, create a single record from aggregate data
+                records.push({
+                    id: row.id,
+                    project_id: row.project_id,
+                    project_name: row.project_name,
+                    filename: row.filename,
+                    created_at: row.created_at,
+                    year: row.year,
+                    total_tickets: row.total_tickets,
+                    resolved_in_2days: row.resolved_in_2days,
+                    success_rate: row.success_rate,
+                    status: row.resolved_in_2days > 0 ? 'resolved' : 'pending',
+                    resolution_type: row.resolved_in_2days > 0 ? 'within_2_days' : 'after_2_days'
+                });
+            }
+        });
+
+        res.json({ records });
+    });
+});
+
 // ==================== SERVE HTML PAGES ====================
 
 app.get('/', (req, res) => {
@@ -475,6 +556,10 @@ app.get('/dashboard', (req, res) => {
 
 app.get('/projects', (req, res) => {
     res.sendFile(path.join(__dirname, 'projects.html'));
+});
+
+app.get('/statistics', (req, res) => {
+    res.sendFile(path.join(__dirname, 'statistics.html'));
 });
 
 // Start server
