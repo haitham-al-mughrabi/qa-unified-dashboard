@@ -31,7 +31,7 @@
     <div class="main-container">
         <!-- Page Header -->
         <div class="page-header">
-            <h1>Project Management</h1>
+            <h1><i class="fas fa-folder-open"></i> Project Management</h1>
             <p>Create and organize your QA analysis projects</p>
         </div>
 
@@ -59,8 +59,20 @@
 
         <!-- Projects List -->
         <div class="projects-section">
-            <div class="projects-grid" id="projectsGrid">
-                <!-- Projects will be loaded here -->
+            <div class="projects-table-wrapper">
+                <table class="projects-table" id="projectsTable">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-folder"></i>Project Name</th>
+                            <th><i class="fas fa-align-left"></i>Description</th>
+                            <th><i class="fas fa-calendar"></i>Created Date</th>
+                            <th><i class="fas fa-cog"></i>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBody">
+                        <!-- Projects will be loaded here -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -200,15 +212,19 @@
                 const response = await fetch(`${API_URL}/projects`);
                 const data = await response.json();
 
-                const container = document.getElementById('projectsGrid');
+                const tableBody = document.getElementById('projectsTableBody');
 
                 if (!data.projects || data.projects.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-folder-plus empty-state-icon"></i>
-                            <h3>No projects yet</h3>
-                            <p>Click "New Project" to create your first project</p>
-                        </div>
+                    tableBody.innerHTML = `
+                        <tr class="empty-row">
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <i class="fas fa-folder-plus empty-state-icon"></i>
+                                    <h3>No projects yet</h3>
+                                    <p>Click "New Project" to create your first project</p>
+                                </div>
+                            </td>
+                        </tr>
                     `;
                     hideLoading();
                     return;
@@ -216,42 +232,45 @@
 
                 let html = '';
                 data.projects.forEach(project => {
+                    const createdDate = new Date(project.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                     html += `
-                        <div class="project-card">
-                            <div class="project-header">
-                                <div class="project-title-section">
-                                    <div class="project-name">
-                                        <i class="fas fa-project-diagram"></i>
-                                        ${project.name}
-                                    </div>
+                        <tr class="project-row">
+                            <td class="project-name-cell">
+                                <div class="project-name-content">
+                                    <i class="fas fa-folder-open"></i>
+                                    <span>${project.name}</span>
                                 </div>
-                            </div>
-                            ${project.description ? `<div class="project-description">${project.description}</div>` : '<div class="project-description" style="color: #9ca3af; font-style: italic;">No description provided</div>'}
-                            <div class="project-meta">
-                                <div class="meta-item">
-                                    <i class="fas fa-calendar-plus"></i>
-                                    Created: ${new Date(project.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                                </div>
-                            </div>
-                            <div class="project-actions">
-                                <button class="btn-delete" onclick="deleteProject(${project.id}, '${project.name.replace(/'/g, "\\'")}')">
-                                    <i class="fas fa-trash-alt"></i> Delete
+                            </td>
+                            <td class="project-description-cell">
+                                <span class="description-text">${project.description ? project.description : '<em>No description</em>'}</span>
+                            </td>
+                            <td class="project-date-cell">
+                                <span class="date-badge">${createdDate}</span>
+                            </td>
+                            <td class="project-actions-cell">
+                                <button class="btn-action btn-delete" onclick="deleteProject(${project.id}, '${project.name.replace(/'/g, "\\'")}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                    Delete
                                 </button>
-                            </div>
-                        </div>
+                            </td>
+                        </tr>
                     `;
                 });
 
-                container.innerHTML = html;
+                tableBody.innerHTML = html;
                 hideLoading();
             } catch (error) {
                 console.error('Error loading projects:', error);
-                document.getElementById('projectsGrid').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-circle empty-state-icon" style="color: #ef4444;"></i>
-                        <h3>Error loading projects</h3>
-                        <p>${error.message}</p>
-                    </div>
+                document.getElementById('projectsTableBody').innerHTML = `
+                    <tr class="error-row">
+                        <td colspan="4">
+                            <div class="empty-state error-state">
+                                <i class="fas fa-exclamation-circle empty-state-icon"></i>
+                                <h3>Error loading projects</h3>
+                                <p>${error.message}</p>
+                            </div>
+                        </td>
+                    </tr>
                 `;
                 hideLoading();
             }

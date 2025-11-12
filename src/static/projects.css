@@ -169,6 +169,18 @@ body {
   background-clip: text;
   letter-spacing: -1px;
   line-height: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.page-header h1 i {
+  font-size: 3.5rem;
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .page-header p {
@@ -532,44 +544,145 @@ body {
   min-height: 400px;
 }
 
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: var(--spacing-xl);
-}
-
-@media (max-width: 768px) {
-  .projects-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.project-card {
+/* Projects Table */
+.projects-table-wrapper {
   background: white;
   border-radius: var(--radius-2xl);
-  padding: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
-  border: 2px solid transparent;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
 }
 
-.project-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 6px;
-  background: linear-gradient(90deg, var(--primary), #8b5cf6);
-  opacity: 0.8;
+.projects-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
 }
 
-.project-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--primary);
+.projects-table thead {
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+  border-bottom: none;
+}
+
+.projects-table thead th {
+  padding: var(--spacing-lg);
+  text-align: left;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.projects-table thead th i {
+  opacity: 1;
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-right: var(--spacing-sm);
+}
+
+.projects-table tbody tr {
+  border-bottom: 1px solid var(--gray-200);
+  transition: all 0.2s ease;
+}
+
+.projects-table tbody tr:hover {
+  background-color: rgba(79, 70, 229, 0.05);
+}
+
+.projects-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.projects-table td {
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--gray-700);
+}
+
+.project-name-cell {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.project-name-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.project-name-content i {
+  color: var(--primary);
+  font-size: 1.125rem;
+}
+
+.project-description-cell {
+  color: var(--gray-600);
+  max-width: 250px;
+  word-wrap: break-word;
+}
+
+.description-text em {
+  font-style: italic;
+  color: var(--gray-400);
+}
+
+.project-date-cell {
+  text-align: center;
+}
+
+.date-badge {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  color: var(--primary);
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  display: inline-block;
+}
+
+.project-actions-cell {
+  text-align: center;
+}
+
+.btn-action {
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  white-space: nowrap;
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+}
+
+.btn-delete:active {
+  transform: translateY(0);
+}
+
+.empty-row,
+.error-row {
+  background: white;
+}
+
+.empty-row td,
+.error-row td {
+  padding: var(--spacing-2xl) var(--spacing-lg) !important;
 }
 
 .project-header {
@@ -828,8 +941,31 @@ body {
     padding: var(--spacing-xl) var(--spacing-md);
   }
 
-  .project-card {
-    padding: var(--spacing-lg);
+  /* Table responsive design */
+  .projects-table {
+    font-size: 0.8125rem;
+  }
+
+  .projects-table thead th {
+    padding: var(--spacing-md);
+    font-size: 0.75rem;
+  }
+
+  .projects-table thead th i {
+    display: none;
+  }
+
+  .projects-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .project-description-cell {
+    max-width: 150px;
+  }
+
+  .btn-action {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
   }
 
   .modal-content {
