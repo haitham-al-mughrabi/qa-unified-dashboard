@@ -70,6 +70,44 @@ app.get('/api/projects', (req, res) => {
     });
 });
 
+// Get project statistics (must be before :id route to avoid route shadowing)
+app.get('/api/projects/:id/statistics', (req, res) => {
+    const projectId = req.params.id;
+
+    const query = `
+        SELECT
+            COUNT(*) as totalTickets,
+            SUM(CASE WHEN resolved_in_2days > 0 THEN 1 ELSE 0 END) as resolvedTickets,
+            SUM(resolved_in_2days) as within2Days,
+            SUM(total_tickets) as allTickets
+        FROM analysis_records
+        WHERE project_id = ?
+    `;
+
+    db.get(query, [projectId], (err, row) => {
+        if (err) {
+            res.status(500).json({ success: false, error: err.message });
+            return;
+        }
+
+        // Calculate statistics
+        const totalTickets = row.allTickets || 0;
+        const resolvedTickets = row.resolvedTickets || 0;
+        const within2Days = row.within2Days || 0;
+        const resolutionRate = totalTickets > 0 ? ((within2Days / totalTickets) * 100).toFixed(2) : 0;
+
+        res.json({
+            success: true,
+            statistics: {
+                totalTickets: totalTickets,
+                resolvedTickets: resolvedTickets,
+                within2Days: within2Days,
+                resolutionRate: parseFloat(resolutionRate)
+            }
+        });
+    });
+});
+
 // Get single project
 app.get('/api/projects/:id', (req, res) => {
     db.get('SELECT * FROM projects WHERE id = ?', [req.params.id], (err, row) => {

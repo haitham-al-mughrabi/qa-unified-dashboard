@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - QA Analytics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="src/static/dashboard.css">
+    <link rel="stylesheet" href="src/static/statistics.css">
+    <link rel="stylesheet" href="src/static/footer.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard.html" class="navbar-brand">
+                <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+                <span>QA Analytics</span>
+            </a>
+            <div class="navbar-links">
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                <a href="/projects.html" class="nav-btn"><i class="fas fa-sitemap"></i> Projects</a>
+                <a href="/statistics.html" class="nav-btn active"><i class="fas fa-chart-line"></i> Statistics</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero -->
+        <div class="hero">
+            <h1><i class="fas fa-chart-pie"></i> Statistics & Analytics</h1>
+            <p>View detailed project analytics and compare performance across different time periods</p>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="projectSelect" class="filter-label">
+                    <i class="fas fa-folder"></i> Select Project
+                </label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <select id="projectSelect" class="filter-select" style="flex: 1;">
+                        <option value="">All Projects</option>
+                    </select>
+                    <button class="btn-filter" onclick="openProjectModal()" style="padding: 0.75rem 1rem; white-space: nowrap;">
+                        <i class="fas fa-th-large"></i> Browse
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label for="periodSelect" class="filter-label">
+                    <i class="fas fa-calendar"></i> Time Period
+                </label>
+                <select id="periodSelect" class="filter-select">
+                    <option value="month">This Month</option>
+                    <option value="quarter">This Quarter</option>
+                    <option value="year">This Year</option>
+                    <option value="all">All Time</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="comparisonSelect" class="filter-label">
+                    <i class="fas fa-code-branch"></i> Compare With
+                </label>
+                <select id="comparisonSelect" class="filter-select">
+                    <option value="none">None</option>
+                    <option value="previous">Previous Period</option>
+                    <option value="lastyear">Same Period Last Year</option>
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <button class="btn-filter" onclick="applyFilters()">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+                <button class="btn-export" onclick="exportReport()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Tickets</h3>
+                    <p class="stat-value" id="totalTickets">0</p>
+                    <span class="stat-change positive">↑ 12% from previous period</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Resolved</h3>
+                    <p class="stat-value" id="resolvedTickets">0</p>
+                    <span class="stat-change positive">↑ 8% from previous period</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-hourglass-end"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Within 2 Days</h3>
+                    <p class="stat-value" id="within2Days">0</p>
+                    <span class="stat-change positive">↑ 5% from previous period</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Resolution Rate</h3>
+                    <p class="stat-value" id="resolutionRate">0%</p>
+                    <span class="stat-change positive">↑ 3% from previous period</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2><i class="fas fa-chart-bar"></i> Monthly Comparison</h2>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2><i class="fas fa-chart-line"></i> Resolution Trend</h2>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Charts -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2><i class="fas fa-chart-doughnut"></i> Resolution Status</h2>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2><i class="fas fa-clock"></i> Resolution Time Distribution</h2>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="timeDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Statistics Table -->
+        <div class="detailed-stats-section">
+            <div class="section-header">
+                <h2><i class="fas fa-table"></i> Detailed Statistics</h2>
+                <p>Comprehensive breakdown of all metrics</p>
+            </div>
+
+            <div class="stats-table-wrapper">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-folder"></i>Project Name</th>
+                            <th><i class="fas fa-tasks"></i>Total</th>
+                            <th><i class="fas fa-check"></i>Resolved</th>
+                            <th><i class="fas fa-hourglass"></i>Within 2 Days</th>
+                            <th><i class="fas fa-percentage"></i>Resolution %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody">
+                        <!-- Statistics will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay active" id="loadingOverlay">
+        <div class="loading">
+            <div class="spinner"></div>
+            <h3>Loading statistics...</h3>
+            <p>Please wait</p>
+        </div>
+    </div>
+
+    <!-- Project Selection Modal -->
+    <div class="modal modal-project" id="projectModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-folder-open"></i> Select Project</h2>
+                <button class="close-btn" onclick="closeProjectModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="projects-grid" id="projectsGrid">
+                    <!-- Projects will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-developer">
+                    <i class="fas fa-user-tie"></i> Developed by: <strong>Haitham Al Mughrabi</strong>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-company">
+                    <div class="footer-company-header">
+                        <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
+                    </div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        let monthlyChartInstance = null;
+        let trendChartInstance = null;
+        let statusChartInstance = null;
+        let timeDistributionChartInstance = null;
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        let allProjects = [];
+
+        // Load projects into dropdown and modal
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_URL}/projects`);
+                const data = await response.json();
+
+                allProjects = data.projects || [];
+
+                const projectSelect = document.getElementById('projectSelect');
+                if (allProjects.length > 0) {
+                    allProjects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        projectSelect.appendChild(option);
+                    });
+
+                    // Load projects into modal grid
+                    loadProjectsModal();
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        // Load projects into modal
+        function loadProjectsModal() {
+            const projectsGrid = document.getElementById('projectsGrid');
+            let html = '';
+
+            allProjects.forEach(project => {
+                html += `
+                    <div class="project-card-modal" onclick="selectProject(${project.id}, '${project.name}')">
+                        <div class="project-card-header">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <h3>${project.name}</h3>
+                        <p>${project.description || 'No description'}</p>
+                        <div class="project-meta">
+                            <span><i class="fas fa-calendar"></i> ${new Date(project.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            projectsGrid.innerHTML = html || '<p>No projects available</p>';
+        }
+
+        // Select project and load details
+        async function selectProject(projectId, projectName) {
+            closeProjectModal();
+            document.getElementById('projectSelect').value = projectId;
+
+            // Load detailed project statistics
+            await loadProjectDetails(projectId, projectName);
+            applyFilters();
+        }
+
+        // Load detailed project statistics from database
+        async function loadProjectDetails(projectId, projectName) {
+            try {
+                const response = await fetch(`${API_URL}/projects/${projectId}/statistics`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update header with project name
+                    const heroSection = document.querySelector('.hero');
+                    heroSection.innerHTML = `
+                        <h1><i class="fas fa-chart-pie"></i> ${projectName} Statistics</h1>
+                        <p>Detailed analytics for ${projectName}</p>
+                    `;
+
+                    // Update stat cards with project-specific data
+                    document.getElementById('totalTickets').textContent = data.statistics.totalTickets || 0;
+                    document.getElementById('resolvedTickets').textContent = data.statistics.resolvedTickets || 0;
+                    document.getElementById('within2Days').textContent = data.statistics.within2Days || 0;
+                    document.getElementById('resolutionRate').textContent = (data.statistics.resolutionRate || 0) + '%';
+                }
+            } catch (error) {
+                console.error('Error loading project details:', error);
+            }
+        }
+
+        // Open project selection modal
+        function openProjectModal() {
+            document.getElementById('projectModal').style.display = 'flex';
+        }
+
+        // Close project selection modal
+        function closeProjectModal() {
+            document.getElementById('projectModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('projectModal');
+            if (event.target === modal) {
+                closeProjectModal();
+            }
+        }
+
+        // Apply filters and load statistics
+        async function applyFilters() {
+            showLoading();
+            try {
+                const projectId = document.getElementById('projectSelect').value;
+                const period = document.getElementById('periodSelect').value;
+
+                const response = await fetch(`${API_URL}/dashboard?projectId=${projectId || 'all'}&period=${period}`);
+                const data = await response.json();
+
+                // Update stat cards
+                updateStatCards(data);
+
+                // Update charts
+                updateCharts(data);
+
+                // Update detailed table
+                updateStatsTable(data);
+
+                hideLoading();
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                hideLoading();
+            }
+        }
+
+        function updateStatCards(data) {
+            const totalTickets = data.records ? data.records.length : 0;
+            const resolved = data.records ? data.records.filter(r => r.status === 'resolved').length : 0;
+            const within2Days = data.records ? data.records.filter(r => r.resolution_type === 'within_2_days').length : 0;
+            const resolutionRate = totalTickets > 0 ? ((resolved / totalTickets) * 100).toFixed(1) : 0;
+
+            document.getElementById('totalTickets').textContent = totalTickets;
+            document.getElementById('resolvedTickets').textContent = resolved;
+            document.getElementById('within2Days').textContent = within2Days;
+            document.getElementById('resolutionRate').textContent = resolutionRate + '%';
+        }
+
+        function updateCharts(data) {
+            // Monthly chart
+            const monthlyData = groupByMonth(data.records || []);
+            updateMonthlyChart(monthlyData);
+
+            // Trend chart
+            updateTrendChart(monthlyData);
+
+            // Status chart
+            const statusData = groupByStatus(data.records || []);
+            updateStatusChart(statusData);
+
+            // Time distribution chart
+            const timeData = groupByResolutionType(data.records || []);
+            updateTimeDistributionChart(timeData);
+        }
+
+        function groupByMonth(records) {
+            const months = {};
+            records.forEach(record => {
+                const date = new Date(record.created_at);
+                const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+                if (!months[month]) {
+                    months[month] = { total: 0, resolved: 0, within2Days: 0 };
+                }
+                months[month].total++;
+                if (record.status === 'resolved') months[month].resolved++;
+                if (record.resolution_type === 'within_2_days') months[month].within2Days++;
+            });
+            return months;
+        }
+
+        function groupByStatus(records) {
+            let resolved = 0, pending = 0, rejected = 0;
+            records.forEach(record => {
+                if (record.status === 'resolved') resolved++;
+                else if (record.status === 'pending') pending++;
+                else if (record.status === 'rejected') rejected++;
+            });
+            return { resolved, pending, rejected };
+        }
+
+        function groupByResolutionType(records) {
+            let within2Days = 0, after2Days = 0;
+            records.forEach(record => {
+                if (record.resolution_type === 'within_2_days') within2Days++;
+                else if (record.resolution_type === 'after_2_days') after2Days++;
+            });
+            return { within2Days, after2Days };
+        }
+
+        function updateMonthlyChart(monthlyData) {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            const labels = Object.keys(monthlyData);
+            const totalData = labels.map(label => monthlyData[label].total);
+            const resolvedData = labels.map(label => monthlyData[label].resolved);
+
+            if (monthlyChartInstance) {
+                monthlyChartInstance.destroy();
+            }
+
+            monthlyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total Tickets',
+                            data: totalData,
+                            backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                            borderColor: 'rgb(79, 70, 229)',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                        },
+                        {
+                            label: 'Resolved',
+                            data: resolvedData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                            borderColor: 'rgb(16, 185, 129)',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 12, weight: 600 },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTrendChart(monthlyData) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            const labels = Object.keys(monthlyData);
+            const data = labels.map(label => monthlyData[label].resolved);
+
+            if (trendChartInstance) {
+                trendChartInstance.destroy();
+            }
+
+            trendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Resolved Tickets',
+                        data: data,
+                        borderColor: 'rgb(79, 70, 229)',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: 'rgb(79, 70, 229)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: { size: 12, weight: 600 },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateStatusChart(statusData) {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+
+            if (statusChartInstance) {
+                statusChartInstance.destroy();
+            }
+
+            statusChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Resolved', 'Pending', 'Rejected'],
+                    datasets: [{
+                        data: [statusData.resolved, statusData.pending, statusData.rejected],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(239, 68, 68)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 12, weight: 600 },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTimeDistributionChart(timeData) {
+            const ctx = document.getElementById('timeDistributionChart').getContext('2d');
+
+            if (timeDistributionChartInstance) {
+                timeDistributionChartInstance.destroy();
+            }
+
+            timeDistributionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Within 2 Days', 'After 2 Days'],
+                    datasets: [{
+                        label: 'Tickets',
+                        data: [timeData.within2Days, timeData.after2Days],
+                        backgroundColor: [
+                            'rgba(79, 70, 229, 0.8)',
+                            'rgba(245, 158, 11, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(79, 70, 229)',
+                            'rgb(245, 158, 11)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: { size: 12, weight: 600 },
+                                padding: 15
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateStatsTable(data) {
+            const tableBody = document.getElementById('statsTableBody');
+
+            if (!data.projects || data.projects.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: var(--spacing-lg); color: var(--gray-500);">
+                            No data available
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            data.projects.forEach(project => {
+                const projectRecords = (data.records || []).filter(r => r.project_id === project.id);
+                const total = projectRecords.length;
+                const resolved = projectRecords.filter(r => r.status === 'resolved').length;
+                const within2Days = projectRecords.filter(r => r.resolution_type === 'within_2_days').length;
+                const resolutionRate = total > 0 ? ((resolved / total) * 100).toFixed(1) : 0;
+
+                html += `
+                    <tr>
+                        <td class="project-name-cell">
+                            <div class="project-name-content">
+                                <i class="fas fa-folder-open"></i>
+                                <span>${project.name}</span>
+                            </div>
+                        </td>
+                        <td class="stats-value-cell">${total}</td>
+                        <td class="stats-value-cell">
+                            <span class="badge badge-success">${resolved}</span>
+                        </td>
+                        <td class="stats-value-cell">
+                            <span class="badge badge-info">${within2Days}</span>
+                        </td>
+                        <td class="stats-value-cell">
+                            <span class="percentage">${resolutionRate}%</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableBody.innerHTML = html;
+        }
+
+        // Export report as CSV
+        function exportReport() {
+            const projectId = document.getElementById('projectSelect').value;
+            const period = document.getElementById('periodSelect').value;
+            const comparison = document.getElementById('comparisonSelect').value;
+
+            // Get current data from page
+            const totalTickets = document.getElementById('totalTickets').textContent;
+            const resolvedTickets = document.getElementById('resolvedTickets').textContent;
+            const within2Days = document.getElementById('within2Days').textContent;
+            const resolutionRate = document.getElementById('resolutionRate').textContent;
+
+            // Create CSV content
+            let csvContent = 'data:text/csv;charset=utf-8,';
+            csvContent += 'QA Analytics Statistics Report\n';
+            csvContent += `Generated: ${new Date().toLocaleString()}\n\n`;
+            csvContent += `Project,${projectId || 'All Projects'}\n`;
+            csvContent += `Period,${period}\n`;
+            csvContent += `Comparison,${comparison}\n\n`;
+            csvContent += 'SUMMARY STATISTICS\n';
+            csvContent += `Total Tickets,${totalTickets}\n`;
+            csvContent += `Resolved Tickets,${resolvedTickets}\n`;
+            csvContent += `Within 2 Days,${within2Days}\n`;
+            csvContent += `Resolution Rate,${resolutionRate}\n\n`;
+            csvContent += 'DETAILED STATISTICS\n';
+            csvContent += 'Project Name,Total,Resolved,Within 2 Days,Resolution %\n';
+
+            // Add table data
+            const table = document.querySelector('.stats-table tbody');
+            table.querySelectorAll('tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 0) {
+                    const projectName = cells[0].innerText;
+                    const total = cells[1].innerText;
+                    const resolved = cells[2].innerText;
+                    const within = cells[3].innerText;
+                    const percentage = cells[4].innerText;
+                    csvContent += `${projectName},${total},${resolved},${within},${percentage}\n`;
+                }
+            });
+
+            // Create download link
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `statistics_report_${new Date().getTime()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show confirmation
+            alert('Report exported successfully!');
+        }
+
+        // Set current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Load initial data
+        window.addEventListener('load', () => {
+            loadProjects();
+            applyFilters();
+        });
+    </script>
+</body>
+</html>
