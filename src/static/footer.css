@@ -36,6 +36,15 @@ footer {
   color: rgba(255, 255, 255, 0.85);
   letter-spacing: 0.5px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.footer-copyright i {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 0.9;
 }
 
 .footer-divider {
@@ -50,6 +59,15 @@ footer {
   color: rgba(255, 255, 255, 0.85);
   letter-spacing: 0.5px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.footer-developer i {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 0.9;
 }
 
 .footer-developer strong {
@@ -64,6 +82,19 @@ footer {
   letter-spacing: 0.5px;
 }
 
+.footer-company-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+.footer-company-header i {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 0.9;
+}
+
 .footer-company-name {
   font-weight: 700;
   color: rgba(255, 255, 255, 1);
@@ -76,6 +107,16 @@ footer {
   color: rgba(255, 255, 255, 0.75);
   margin-top: var(--spacing-xs);
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+}
+
+.footer-department i {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 0.85;
 }
 
 /* Responsive design */
