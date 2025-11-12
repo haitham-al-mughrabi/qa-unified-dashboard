@@ -34,176 +34,274 @@
     <div class="main-container">
         <!-- Hero -->
         <div class="hero">
-            <h1><i class="fas fa-chart-pie"></i> Statistics & Analytics</h1>
-            <p>View detailed project analytics and compare performance across different time periods</p>
+            <h1><i class="fas fa-chart-pie"></i> <span id="heroTitle">Statistics & Analytics</span></h1>
+            <p id="heroSubtitle">Select a project to view detailed analytics and compare performance across different time periods</p>
+        </div>
+
+        <!-- Selected Project Info -->
+        <div id="selectedProjectInfo" style="display: none; background: white; border-radius: var(--radius-2xl); padding: var(--spacing-lg); margin-bottom: var(--spacing-2xl); box-shadow: var(--shadow-md); border: 1px solid var(--gray-200);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="margin: 0; color: var(--primary); font-size: 1.25rem;">
+                        <i class="fas fa-folder-open"></i> <span id="selectedProjectName"></span>
+                    </h3>
+                    <p style="margin: 0.5rem 0 0 0; color: var(--gray-600);" id="selectedProjectDescription"></p>
+                </div>
+                <button class="btn-filter" onclick="openProjectModal()" style="padding: 0.75rem 1.5rem;">
+                    <i class="fas fa-exchange-alt"></i> Change Project
+                </button>
+            </div>
         </div>
 
         <!-- Filters Section -->
-        <div class="filters-section">
-            <div class="filter-group">
-                <label for="projectSelect" class="filter-label">
-                    <i class="fas fa-folder"></i> Select Project
-                </label>
-                <div style="display: flex; gap: 0.5rem;">
-                    <select id="projectSelect" class="filter-select" style="flex: 1;">
-                        <option value="">All Projects</option>
-                    </select>
-                    <button class="btn-filter" onclick="openProjectModal()" style="padding: 0.75rem 1rem; white-space: nowrap;">
-                        <i class="fas fa-th-large"></i> Browse
-                    </button>
+        <div class="filters-section" id="filtersSection" style="display: none;">
+            <div style="width: 100%; margin-bottom: var(--spacing-lg);">
+                <h3 style="margin: 0 0 var(--spacing-md) 0; color: var(--primary); font-size: 1.125rem;">
+                    <i class="fas fa-sliders-h"></i> Time Period Comparison
+                </h3>
+            </div>
+
+            <!-- Primary Period -->
+            <div style="flex: 1; min-width: 100%; border: 2px solid var(--primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); background: rgba(79, 70, 229, 0.05);">
+                <h4 style="margin: 0 0 var(--spacing-md) 0; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.875rem;">
+                    <i class="fas fa-calendar-check"></i> Primary Period
+                </h4>
+                <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label class="filter-label">
+                            <i class="fas fa-calendar-alt"></i> Year
+                        </label>
+                        <select id="primaryYear" class="filter-select">
+                            <option value="">All Years</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label class="filter-label">
+                            <i class="fas fa-calendar"></i> Quarter
+                        </label>
+                        <select id="primaryQuarter" class="filter-select">
+                            <option value="">All Quarters</option>
+                            <option value="Q1">Q1 (Jan-Mar)</option>
+                            <option value="Q2">Q2 (Apr-Jun)</option>
+                            <option value="Q3">Q3 (Jul-Sep)</option>
+                            <option value="Q4">Q4 (Oct-Dec)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label class="filter-label">
+                            <i class="fas fa-calendar-day"></i> Month
+                        </label>
+                        <select id="primaryMonth" class="filter-select">
+                            <option value="">All Months</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="filter-group">
-                <label for="periodSelect" class="filter-label">
-                    <i class="fas fa-calendar"></i> Time Period
+            <!-- Comparison Toggle -->
+            <div style="width: 100%; display: flex; align-items: center; gap: var(--spacing-md);">
+                <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                    <input type="checkbox" id="enableComparison" onchange="toggleComparison()" style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
+                    <span style="font-weight: 600; color: var(--gray-700);">Enable Comparison</span>
                 </label>
-                <select id="periodSelect" class="filter-select">
-                    <option value="month">This Month</option>
-                    <option value="quarter">This Quarter</option>
-                    <option value="year">This Year</option>
-                    <option value="all">All Time</option>
-                </select>
             </div>
 
-            <div class="filter-group">
-                <label for="comparisonSelect" class="filter-label">
-                    <i class="fas fa-code-branch"></i> Compare With
-                </label>
-                <select id="comparisonSelect" class="filter-select">
-                    <option value="none">None</option>
-                    <option value="previous">Previous Period</option>
-                    <option value="lastyear">Same Period Last Year</option>
-                </select>
+            <!-- Comparison Period -->
+            <div id="comparisonPeriodSection" style="flex: 1; min-width: 100%; border: 2px solid var(--secondary); border-radius: var(--radius-xl); padding: var(--spacing-lg); background: rgba(16, 185, 129, 0.05); display: none;">
+                <h4 style="margin: 0 0 var(--spacing-md) 0; color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.875rem;">
+                    <i class="fas fa-calendar-plus"></i> Comparison Period
+                </h4>
+                <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label class="filter-label">
+                            <i class="fas fa-calendar-alt"></i> Year
+                        </label>
+                        <select id="compareYear" class="filter-select">
+                            <option value="">All Years</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label class="filter-label">
+                            <i class="fas fa-calendar"></i> Quarter
+                        </label>
+                        <select id="compareQuarter" class="filter-select">
+                            <option value="">All Quarters</option>
+                            <option value="Q1">Q1 (Jan-Mar)</option>
+                            <option value="Q2">Q2 (Apr-Jun)</option>
+                            <option value="Q3">Q3 (Jul-Sep)</option>
+                            <option value="Q4">Q4 (Oct-Dec)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <label class="filter-label">
+                            <i class="fas fa-calendar-day"></i> Month
+                        </label>
+                        <select id="compareMonth" class="filter-select">
+                            <option value="">All Months</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
-            <div class="filter-actions">
-                <button class="btn-filter" onclick="applyFilters()">
-                    <i class="fas fa-filter"></i> Apply Filters
+            <!-- Apply Button -->
+            <div class="filter-actions" style="width: 100%; justify-content: center;">
+                <button class="btn-filter" onclick="applyFilters()" style="padding: 1rem 3rem; font-size: 1rem;">
+                    <i class="fas fa-chart-line"></i> Load Statistics
                 </button>
                 <button class="btn-export" onclick="exportReport()">
-                    <i class="fas fa-download"></i> Export
+                    <i class="fas fa-download"></i> Export Report
                 </button>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-cards-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-tasks"></i>
+        <!-- Statistics Content (Hidden until data is loaded) -->
+        <div id="statisticsContent" style="display: none;">
+            <!-- Stats Cards -->
+            <div class="stats-cards-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Tickets</h3>
+                        <p class="stat-value" id="totalTickets">0</p>
+                        <span class="stat-change" id="totalTicketsChange"></span>
+                    </div>
                 </div>
-                <div class="stat-content">
-                    <h3>Total Tickets</h3>
-                    <p class="stat-value" id="totalTickets">0</p>
-                    <span class="stat-change positive">↑ 12% from previous period</span>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Resolved in 2 Days</h3>
+                        <p class="stat-value" id="resolvedIn2Days">0</p>
+                        <span class="stat-change" id="resolvedIn2DaysChange"></span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Resolved After 2 Days</h3>
+                        <p class="stat-value" id="resolvedAfter2Days">0</p>
+                        <span class="stat-change" id="resolvedAfter2DaysChange"></span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Success Rate</h3>
+                        <p class="stat-value" id="successRate">0%</p>
+                        <span class="stat-change" id="successRateChange"></span>
+                    </div>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-check-circle"></i>
+            <!-- Charts Section -->
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2><i class="fas fa-chart-bar"></i> Period Comparison</h2>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
                 </div>
-                <div class="stat-content">
-                    <h3>Resolved</h3>
-                    <p class="stat-value" id="resolvedTickets">0</p>
-                    <span class="stat-change positive">↑ 8% from previous period</span>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2><i class="fas fa-chart-pie"></i> Resolution Breakdown</h2>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="resolutionChart"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-hourglass-end"></i>
+            <!-- Additional Charts -->
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2><i class="fas fa-chart-line"></i> Monthly Trend</h2>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="trendChart"></canvas>
+                    </div>
                 </div>
-                <div class="stat-content">
-                    <h3>Within 2 Days</h3>
-                    <p class="stat-value" id="within2Days">0</p>
-                    <span class="stat-change positive">↑ 5% from previous period</span>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2><i class="fas fa-chart-area"></i> Success Rate Comparison</h2>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="successRateChart"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-percentage"></i>
+            <!-- Detailed Statistics Table -->
+            <div class="detailed-stats-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-table"></i> Detailed Monthly Statistics</h2>
+                    <p>Complete breakdown of all metrics for the selected period</p>
                 </div>
-                <div class="stat-content">
-                    <h3>Resolution Rate</h3>
-                    <p class="stat-value" id="resolutionRate">0%</p>
-                    <span class="stat-change positive">↑ 3% from previous period</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Charts Section -->
-        <div class="charts-container">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h2><i class="fas fa-chart-bar"></i> Monthly Comparison</h2>
+                <div class="stats-table-wrapper">
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar"></i> Month</th>
+                                <th><i class="fas fa-tasks"></i> Total Tickets</th>
+                                <th><i class="fas fa-check"></i> Resolved in 2 Days</th>
+                                <th><i class="fas fa-clock"></i> Resolved After 2 Days</th>
+                                <th><i class="fas fa-percentage"></i> Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statsTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: var(--spacing-lg); color: var(--gray-500);">
+                                    No data available. Please select filters and load statistics.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="monthlyChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h2><i class="fas fa-chart-line"></i> Resolution Trend</h2>
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Additional Charts -->
-        <div class="charts-container">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h2><i class="fas fa-chart-doughnut"></i> Resolution Status</h2>
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h2><i class="fas fa-clock"></i> Resolution Time Distribution</h2>
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="timeDistributionChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Detailed Statistics Table -->
-        <div class="detailed-stats-section">
-            <div class="section-header">
-                <h2><i class="fas fa-table"></i> Detailed Statistics</h2>
-                <p>Comprehensive breakdown of all metrics</p>
-            </div>
-
-            <div class="stats-table-wrapper">
-                <table class="stats-table">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-folder"></i>Project Name</th>
-                            <th><i class="fas fa-tasks"></i>Total</th>
-                            <th><i class="fas fa-check"></i>Resolved</th>
-                            <th><i class="fas fa-hourglass"></i>Within 2 Days</th>
-                            <th><i class="fas fa-percentage"></i>Resolution %</th>
-                        </tr>
-                    </thead>
-                    <tbody id="statsTableBody">
-                        <!-- Statistics will be loaded here -->
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 
     <!-- Loading Overlay -->
-    <div class="loading-overlay active" id="loadingOverlay">
+    <div class="loading-overlay" id="loadingOverlay">
         <div class="loading">
             <div class="spinner"></div>
             <h3>Loading statistics...</h3>
@@ -212,18 +310,21 @@
     </div>
 
     <!-- Project Selection Modal -->
-    <div class="modal modal-project" id="projectModal">
+    <div class="modal modal-project" id="projectModal" style="display: flex;">
         <div class="modal-content modal-large">
             <div class="modal-header">
                 <h2><i class="fas fa-folder-open"></i> Select Project</h2>
-                <button class="close-btn" onclick="closeProjectModal()">
+                <button class="close-btn" onclick="closeProjectModal()" id="closeModalBtn" style="display: none;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
             <div class="modal-body">
                 <div class="projects-grid" id="projectsGrid">
-                    <!-- Projects will be loaded here -->
+                    <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-2xl);">
+                        <div class="spinner" style="margin: 0 auto var(--spacing-lg);"></div>
+                        <p style="color: var(--gray-600);">Loading projects...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -254,10 +355,15 @@
     <script>
         const API_URL = 'http://localhost:3000/api';
 
-        let monthlyChartInstance = null;
+        let selectedProject = null;
+        let allProjects = [];
+        let availableYears = new Set();
+
+        // Chart instances
+        let comparisonChartInstance = null;
+        let resolutionChartInstance = null;
         let trendChartInstance = null;
-        let statusChartInstance = null;
-        let timeDistributionChartInstance = null;
+        let successRateChartInstance = null;
 
         function showLoading() {
             document.getElementById('loadingOverlay').classList.add('active');
@@ -267,9 +373,7 @@
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 
-        let allProjects = [];
-
-        // Load projects into dropdown and modal
+        // Load projects on page load
         async function loadProjects() {
             try {
                 const response = await fetch(`${API_URL}/projects`);
@@ -277,20 +381,30 @@
 
                 allProjects = data.projects || [];
 
-                const projectSelect = document.getElementById('projectSelect');
-                if (allProjects.length > 0) {
-                    allProjects.forEach(project => {
-                        const option = document.createElement('option');
-                        option.value = project.id;
-                        option.textContent = project.name;
-                        projectSelect.appendChild(option);
-                    });
-
-                    // Load projects into modal grid
-                    loadProjectsModal();
+                if (allProjects.length === 0) {
+                    document.getElementById('projectsGrid').innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-2xl);">
+                            <i class="fas fa-folder-open" style="font-size: 3rem; color: var(--gray-400); margin-bottom: var(--spacing-lg);"></i>
+                            <h3 style="color: var(--gray-600); margin-bottom: var(--spacing-sm);">No Projects Found</h3>
+                            <p style="color: var(--gray-500);">Please create a project first to view statistics.</p>
+                            <a href="/projects.html" class="btn-filter" style="margin-top: var(--spacing-lg); display: inline-flex; text-decoration: none;">
+                                <i class="fas fa-plus"></i> Create Project
+                            </a>
+                        </div>
+                    `;
+                    return;
                 }
+
+                loadProjectsModal();
             } catch (error) {
                 console.error('Error loading projects:', error);
+                document.getElementById('projectsGrid').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-2xl); color: var(--danger);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: var(--spacing-lg);"></i>
+                        <h3>Error Loading Projects</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
             }
         }
 
@@ -301,12 +415,12 @@
 
             allProjects.forEach(project => {
                 html += `
-                    <div class="project-card-modal" onclick="selectProject(${project.id}, '${project.name}')">
+                    <div class="project-card-modal" onclick="selectProject(${project.id}, '${escapeHtml(project.name)}', '${escapeHtml(project.description || '')}')">
                         <div class="project-card-header">
                             <i class="fas fa-folder"></i>
                         </div>
-                        <h3>${project.name}</h3>
-                        <p>${project.description || 'No description'}</p>
+                        <h3>${escapeHtml(project.name)}</h3>
+                        <p>${escapeHtml(project.description || 'No description')}</p>
                         <div class="project-meta">
                             <span><i class="fas fa-calendar"></i> ${new Date(project.created_at).toLocaleDateString()}</span>
                         </div>
@@ -314,41 +428,71 @@
                 `;
             });
 
-            projectsGrid.innerHTML = html || '<p>No projects available</p>';
+            projectsGrid.innerHTML = html;
         }
 
-        // Select project and load details
-        async function selectProject(projectId, projectName) {
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Select project
+        async function selectProject(projectId, projectName, projectDescription) {
+            selectedProject = {
+                id: projectId,
+                name: projectName,
+                description: projectDescription
+            };
+
+            // Update UI
+            document.getElementById('heroTitle').textContent = `${projectName} Statistics`;
+            document.getElementById('heroSubtitle').textContent = `Detailed analytics and performance comparison for ${projectName}`;
+            document.getElementById('selectedProjectName').textContent = projectName;
+            document.getElementById('selectedProjectDescription').textContent = projectDescription || 'No description available';
+            document.getElementById('selectedProjectInfo').style.display = 'block';
+            document.getElementById('filtersSection').style.display = 'flex';
+
+            // Close modal and enable close button
             closeProjectModal();
-            document.getElementById('projectSelect').value = projectId;
+            document.getElementById('closeModalBtn').style.display = 'flex';
 
-            // Load detailed project statistics
-            await loadProjectDetails(projectId, projectName);
-            applyFilters();
+            // Load available years for this project
+            await loadAvailableYears(projectId);
         }
 
-        // Load detailed project statistics from database
-        async function loadProjectDetails(projectId, projectName) {
+        // Load available years for the selected project
+        async function loadAvailableYears(projectId) {
             try {
-                const response = await fetch(`${API_URL}/projects/${projectId}/statistics`);
+                const response = await fetch(`${API_URL}/records/project/${projectId}`);
                 const data = await response.json();
 
-                if (data.success) {
-                    // Update header with project name
-                    const heroSection = document.querySelector('.hero');
-                    heroSection.innerHTML = `
-                        <h1><i class="fas fa-chart-pie"></i> ${projectName} Statistics</h1>
-                        <p>Detailed analytics for ${projectName}</p>
-                    `;
+                availableYears.clear();
+                data.records.forEach(record => {
+                    availableYears.add(record.year);
+                });
 
-                    // Update stat cards with project-specific data
-                    document.getElementById('totalTickets').textContent = data.statistics.totalTickets || 0;
-                    document.getElementById('resolvedTickets').textContent = data.statistics.resolvedTickets || 0;
-                    document.getElementById('within2Days').textContent = data.statistics.within2Days || 0;
-                    document.getElementById('resolutionRate').textContent = (data.statistics.resolutionRate || 0) + '%';
+                // Populate year dropdowns
+                const years = Array.from(availableYears).sort((a, b) => b - a);
+                const primaryYearSelect = document.getElementById('primaryYear');
+                const compareYearSelect = document.getElementById('compareYear');
+
+                primaryYearSelect.innerHTML = '<option value="">All Years</option>';
+                compareYearSelect.innerHTML = '<option value="">All Years</option>';
+
+                years.forEach(year => {
+                    primaryYearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+                    compareYearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+                });
+
+                // Set default to current year if available
+                const currentYear = new Date().getFullYear();
+                if (years.includes(currentYear)) {
+                    primaryYearSelect.value = currentYear;
                 }
             } catch (error) {
-                console.error('Error loading project details:', error);
+                console.error('Error loading available years:', error);
             }
         }
 
@@ -359,138 +503,151 @@
 
         // Close project selection modal
         function closeProjectModal() {
-            document.getElementById('projectModal').style.display = 'none';
+            // Only allow closing if a project is selected
+            if (selectedProject) {
+                document.getElementById('projectModal').style.display = 'none';
+            }
         }
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('projectModal');
-            if (event.target === modal) {
-                closeProjectModal();
-            }
+        // Toggle comparison section
+        function toggleComparison() {
+            const enabled = document.getElementById('enableComparison').checked;
+            document.getElementById('comparisonPeriodSection').style.display = enabled ? 'flex' : 'none';
         }
 
         // Apply filters and load statistics
         async function applyFilters() {
-            showLoading();
-            try {
-                const projectId = document.getElementById('projectSelect').value;
-                const period = document.getElementById('periodSelect').value;
+            if (!selectedProject) {
+                alert('Please select a project first');
+                return;
+            }
 
-                const response = await fetch(`${API_URL}/dashboard?projectId=${projectId || 'all'}&period=${period}`);
+            const primaryYear = document.getElementById('primaryYear').value;
+            const primaryQuarter = document.getElementById('primaryQuarter').value;
+            const primaryMonth = document.getElementById('primaryMonth').value;
+
+            const enableComparison = document.getElementById('enableComparison').checked;
+            const compareYear = enableComparison ? document.getElementById('compareYear').value : '';
+            const compareQuarter = enableComparison ? document.getElementById('compareQuarter').value : '';
+            const compareMonth = enableComparison ? document.getElementById('compareMonth').value : '';
+
+            // Build query parameters
+            let queryParams = `projectId=${selectedProject.id}`;
+            if (primaryYear) queryParams += `&primaryYear=${primaryYear}`;
+            if (primaryQuarter) queryParams += `&primaryQuarter=${primaryQuarter}`;
+            if (primaryMonth) queryParams += `&primaryMonth=${primaryMonth}`;
+
+            if (enableComparison) {
+                if (compareYear) queryParams += `&compareYear=${compareYear}`;
+                if (compareQuarter) queryParams += `&compareQuarter=${compareQuarter}`;
+                if (compareMonth) queryParams += `&compareMonth=${compareMonth}`;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch(`${API_URL}/statistics/compare?${queryParams}`);
                 const data = await response.json();
 
-                // Update stat cards
-                updateStatCards(data);
-
-                // Update charts
-                updateCharts(data);
-
-                // Update detailed table
-                updateStatsTable(data);
-
-                hideLoading();
+                if (data.success) {
+                    updateStatistics(data);
+                    document.getElementById('statisticsContent').style.display = 'block';
+                } else {
+                    alert('Error loading statistics: ' + (data.error || 'Unknown error'));
+                }
             } catch (error) {
                 console.error('Error loading statistics:', error);
+                alert('Error loading statistics: ' + error.message);
+            } finally {
                 hideLoading();
             }
         }
 
-        function updateStatCards(data) {
-            const totalTickets = data.records ? data.records.length : 0;
-            const resolved = data.records ? data.records.filter(r => r.status === 'resolved').length : 0;
-            const within2Days = data.records ? data.records.filter(r => r.resolution_type === 'within_2_days').length : 0;
-            const resolutionRate = totalTickets > 0 ? ((resolved / totalTickets) * 100).toFixed(1) : 0;
+        // Update statistics with loaded data
+        function updateStatistics(data) {
+            const primary = data.primary;
+            const compare = data.compare;
+            const changes = data.changes;
 
-            document.getElementById('totalTickets').textContent = totalTickets;
-            document.getElementById('resolvedTickets').textContent = resolved;
-            document.getElementById('within2Days').textContent = within2Days;
-            document.getElementById('resolutionRate').textContent = resolutionRate + '%';
-        }
+            // Update stat cards
+            document.getElementById('totalTickets').textContent = primary.totalTickets;
+            document.getElementById('resolvedIn2Days').textContent = primary.resolvedIn2Days;
+            document.getElementById('resolvedAfter2Days').textContent = primary.resolvedAfter2Days;
+            document.getElementById('successRate').textContent = primary.successRate + '%';
 
-        function updateCharts(data) {
-            // Monthly chart
-            const monthlyData = groupByMonth(data.records || []);
-            updateMonthlyChart(monthlyData);
-
-            // Trend chart
-            updateTrendChart(monthlyData);
-
-            // Status chart
-            const statusData = groupByStatus(data.records || []);
-            updateStatusChart(statusData);
-
-            // Time distribution chart
-            const timeData = groupByResolutionType(data.records || []);
-            updateTimeDistributionChart(timeData);
-        }
-
-        function groupByMonth(records) {
-            const months = {};
-            records.forEach(record => {
-                const date = new Date(record.created_at);
-                const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
-                if (!months[month]) {
-                    months[month] = { total: 0, resolved: 0, within2Days: 0 };
-                }
-                months[month].total++;
-                if (record.status === 'resolved') months[month].resolved++;
-                if (record.resolution_type === 'within_2_days') months[month].within2Days++;
-            });
-            return months;
-        }
-
-        function groupByStatus(records) {
-            let resolved = 0, pending = 0, rejected = 0;
-            records.forEach(record => {
-                if (record.status === 'resolved') resolved++;
-                else if (record.status === 'pending') pending++;
-                else if (record.status === 'rejected') rejected++;
-            });
-            return { resolved, pending, rejected };
-        }
-
-        function groupByResolutionType(records) {
-            let within2Days = 0, after2Days = 0;
-            records.forEach(record => {
-                if (record.resolution_type === 'within_2_days') within2Days++;
-                else if (record.resolution_type === 'after_2_days') after2Days++;
-            });
-            return { within2Days, after2Days };
-        }
-
-        function updateMonthlyChart(monthlyData) {
-            const ctx = document.getElementById('monthlyChart').getContext('2d');
-            const labels = Object.keys(monthlyData);
-            const totalData = labels.map(label => monthlyData[label].total);
-            const resolvedData = labels.map(label => monthlyData[label].resolved);
-
-            if (monthlyChartInstance) {
-                monthlyChartInstance.destroy();
+            // Update change indicators
+            if (changes) {
+                updateChangeIndicator('totalTicketsChange', changes.totalTickets, changes.totalTicketsPercent);
+                updateChangeIndicator('resolvedIn2DaysChange', changes.resolvedIn2Days, changes.resolvedIn2DaysPercent);
+                updateChangeIndicator('resolvedAfter2DaysChange', changes.resolvedIn2Days * -1, changes.resolvedIn2DaysPercent);
+                updateChangeIndicator('successRateChange', changes.successRate, changes.successRate, '%');
+            } else {
+                // Hide change indicators
+                document.getElementById('totalTicketsChange').textContent = '';
+                document.getElementById('resolvedIn2DaysChange').textContent = '';
+                document.getElementById('resolvedAfter2DaysChange').textContent = '';
+                document.getElementById('successRateChange').textContent = '';
             }
 
-            monthlyChartInstance = new Chart(ctx, {
+            // Update charts
+            updateComparisonChart(primary, compare);
+            updateResolutionChart(primary);
+            updateTrendChart(primary.records);
+            updateSuccessRateChart(primary, compare);
+
+            // Update detailed table
+            updateStatsTable(primary.records);
+        }
+
+        // Update change indicator
+        function updateChangeIndicator(elementId, change, changePercent, suffix = '') {
+            const element = document.getElementById(elementId);
+
+            if (change > 0) {
+                element.className = 'stat-change positive';
+                element.textContent = `↑ ${change} (${changePercent}${suffix}) from comparison period`;
+            } else if (change < 0) {
+                element.className = 'stat-change negative';
+                element.textContent = `↓ ${Math.abs(change)} (${Math.abs(changePercent)}${suffix}) from comparison period`;
+            } else {
+                element.className = 'stat-change';
+                element.textContent = `No change from comparison period`;
+            }
+        }
+
+        // Update comparison chart
+        function updateComparisonChart(primary, compare) {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+
+            if (comparisonChartInstance) {
+                comparisonChartInstance.destroy();
+            }
+
+            const datasets = [{
+                label: 'Primary Period',
+                data: [primary.totalTickets, primary.resolvedIn2Days, primary.resolvedAfter2Days],
+                backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                borderColor: 'rgb(79, 70, 229)',
+                borderWidth: 2,
+                borderRadius: 4
+            }];
+
+            if (compare) {
+                datasets.push({
+                    label: 'Comparison Period',
+                    data: [compare.totalTickets, compare.resolvedIn2Days, compare.resolvedAfter2Days],
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: 'rgb(16, 185, 129)',
+                    borderWidth: 2,
+                    borderRadius: 4
+                });
+            }
+
+            comparisonChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Total Tickets',
-                            data: totalData,
-                            backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                            borderColor: 'rgb(79, 70, 229)',
-                            borderWidth: 2,
-                            borderRadius: 4,
-                        },
-                        {
-                            label: 'Resolved',
-                            data: resolvedData,
-                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                            borderColor: 'rgb(16, 185, 129)',
-                            borderWidth: 2,
-                            borderRadius: 4,
-                        }
-                    ]
+                    labels: ['Total Tickets', 'Resolved in 2 Days', 'Resolved After 2 Days'],
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
@@ -515,32 +672,106 @@
             });
         }
 
-        function updateTrendChart(monthlyData) {
+        // Update resolution chart
+        function updateResolutionChart(primary) {
+            const ctx = document.getElementById('resolutionChart').getContext('2d');
+
+            if (resolutionChartInstance) {
+                resolutionChartInstance.destroy();
+            }
+
+            resolutionChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Resolved in 2 Days', 'Resolved After 2 Days'],
+                    datasets: [{
+                        data: [primary.resolvedIn2Days, primary.resolvedAfter2Days],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 12, weight: 600 },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update trend chart
+        function updateTrendChart(records) {
             const ctx = document.getElementById('trendChart').getContext('2d');
-            const labels = Object.keys(monthlyData);
-            const data = labels.map(label => monthlyData[label].resolved);
 
             if (trendChartInstance) {
                 trendChartInstance.destroy();
             }
 
+            // Group by month and sort
+            const monthlyData = {};
+            records.forEach(record => {
+                const key = record.displayName || `${record.year}-${record.month}`;
+                if (!monthlyData[key]) {
+                    monthlyData[key] = {
+                        totalTickets: 0,
+                        resolvedIn2Days: 0
+                    };
+                }
+                monthlyData[key].totalTickets += record.total_tickets || 0;
+                monthlyData[key].resolvedIn2Days += record.resolved_in_2days || 0;
+            });
+
+            const labels = Object.keys(monthlyData);
+            const totalData = labels.map(label => monthlyData[label].totalTickets);
+            const resolvedData = labels.map(label => monthlyData[label].resolvedIn2Days);
+
             trendChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Resolved Tickets',
-                        data: data,
-                        borderColor: 'rgb(79, 70, 229)',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: 'rgb(79, 70, 229)',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                    }]
+                    datasets: [
+                        {
+                            label: 'Total Tickets',
+                            data: totalData,
+                            borderColor: 'rgb(79, 70, 229)',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgb(79, 70, 229)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'Resolved in 2 Days',
+                            data: resolvedData,
+                            borderColor: 'rgb(16, 185, 129)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgb(16, 185, 129)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -564,77 +795,37 @@
             });
         }
 
-        function updateStatusChart(statusData) {
-            const ctx = document.getElementById('statusChart').getContext('2d');
+        // Update success rate chart
+        function updateSuccessRateChart(primary, compare) {
+            const ctx = document.getElementById('successRateChart').getContext('2d');
 
-            if (statusChartInstance) {
-                statusChartInstance.destroy();
+            if (successRateChartInstance) {
+                successRateChartInstance.destroy();
             }
 
-            statusChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Resolved', 'Pending', 'Rejected'],
-                    datasets: [{
-                        data: [statusData.resolved, statusData.pending, statusData.rejected],
-                        backgroundColor: [
-                            'rgba(16, 185, 129, 0.8)',
-                            'rgba(245, 158, 11, 0.8)',
-                            'rgba(239, 68, 68, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgb(16, 185, 129)',
-                            'rgb(245, 158, 11)',
-                            'rgb(239, 68, 68)'
-                        ],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: { size: 12, weight: 600 },
-                                padding: 15,
-                                usePointStyle: true
-                            }
-                        }
-                    }
-                }
-            });
-        }
+            const labels = compare ? ['Primary Period', 'Comparison Period'] : ['Primary Period'];
+            const data = compare ? [primary.successRate, compare.successRate] : [primary.successRate];
 
-        function updateTimeDistributionChart(timeData) {
-            const ctx = document.getElementById('timeDistributionChart').getContext('2d');
-
-            if (timeDistributionChartInstance) {
-                timeDistributionChartInstance.destroy();
-            }
-
-            timeDistributionChartInstance = new Chart(ctx, {
+            successRateChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Within 2 Days', 'After 2 Days'],
+                    labels: labels,
                     datasets: [{
-                        label: 'Tickets',
-                        data: [timeData.within2Days, timeData.after2Days],
+                        label: 'Success Rate (%)',
+                        data: data,
                         backgroundColor: [
                             'rgba(79, 70, 229, 0.8)',
-                            'rgba(245, 158, 11, 0.8)'
+                            'rgba(16, 185, 129, 0.8)'
                         ],
                         borderColor: [
                             'rgb(79, 70, 229)',
-                            'rgb(245, 158, 11)'
+                            'rgb(16, 185, 129)'
                         ],
                         borderWidth: 2,
-                        borderRadius: 4,
+                        borderRadius: 4
                     }]
                 },
                 options: {
-                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
@@ -646,23 +837,30 @@
                         }
                     },
                     scales: {
-                        x: {
+                        y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                            max: 100,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
                         }
                     }
                 }
             });
         }
 
-        function updateStatsTable(data) {
+        // Update stats table
+        function updateStatsTable(records) {
             const tableBody = document.getElementById('statsTableBody');
 
-            if (!data.projects || data.projects.length === 0) {
+            if (!records || records.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="5" style="text-align: center; padding: var(--spacing-lg); color: var(--gray-500);">
-                            No data available
+                            No data available for the selected period
                         </td>
                     </tr>
                 `;
@@ -670,30 +868,25 @@
             }
 
             let html = '';
-            data.projects.forEach(project => {
-                const projectRecords = (data.records || []).filter(r => r.project_id === project.id);
-                const total = projectRecords.length;
-                const resolved = projectRecords.filter(r => r.status === 'resolved').length;
-                const within2Days = projectRecords.filter(r => r.resolution_type === 'within_2_days').length;
-                const resolutionRate = total > 0 ? ((resolved / total) * 100).toFixed(1) : 0;
-
+            records.forEach(record => {
+                const successRate = record.success_rate || 0;
                 html += `
                     <tr>
                         <td class="project-name-cell">
                             <div class="project-name-content">
-                                <i class="fas fa-folder-open"></i>
-                                <span>${project.name}</span>
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>${record.displayName || `${record.year}-${record.month}`}</span>
                             </div>
                         </td>
-                        <td class="stats-value-cell">${total}</td>
+                        <td class="stats-value-cell">${record.total_tickets || 0}</td>
                         <td class="stats-value-cell">
-                            <span class="badge badge-success">${resolved}</span>
+                            <span class="badge badge-success">${record.resolved_in_2days || 0}</span>
                         </td>
                         <td class="stats-value-cell">
-                            <span class="badge badge-info">${within2Days}</span>
+                            <span class="badge badge-info">${record.resolved_after_2days || 0}</span>
                         </td>
                         <td class="stats-value-cell">
-                            <span class="percentage">${resolutionRate}%</span>
+                            <span class="percentage">${successRate.toFixed(2)}%</span>
                         </td>
                     </tr>
                 `;
@@ -704,42 +897,56 @@
 
         // Export report as CSV
         function exportReport() {
-            const projectId = document.getElementById('projectSelect').value;
-            const period = document.getElementById('periodSelect').value;
-            const comparison = document.getElementById('comparisonSelect').value;
+            if (!selectedProject) {
+                alert('Please select a project and load statistics first');
+                return;
+            }
+
+            const primaryYear = document.getElementById('primaryYear').value || 'All';
+            const primaryQuarter = document.getElementById('primaryQuarter').value || 'All';
+            const primaryMonth = document.getElementById('primaryMonth').value || 'All';
+
+            const enableComparison = document.getElementById('enableComparison').checked;
 
             // Get current data from page
             const totalTickets = document.getElementById('totalTickets').textContent;
-            const resolvedTickets = document.getElementById('resolvedTickets').textContent;
-            const within2Days = document.getElementById('within2Days').textContent;
-            const resolutionRate = document.getElementById('resolutionRate').textContent;
+            const resolvedIn2Days = document.getElementById('resolvedIn2Days').textContent;
+            const resolvedAfter2Days = document.getElementById('resolvedAfter2Days').textContent;
+            const successRate = document.getElementById('successRate').textContent;
 
             // Create CSV content
             let csvContent = 'data:text/csv;charset=utf-8,';
             csvContent += 'QA Analytics Statistics Report\n';
             csvContent += `Generated: ${new Date().toLocaleString()}\n\n`;
-            csvContent += `Project,${projectId || 'All Projects'}\n`;
-            csvContent += `Period,${period}\n`;
-            csvContent += `Comparison,${comparison}\n\n`;
-            csvContent += 'SUMMARY STATISTICS\n';
+            csvContent += `Project,${selectedProject.name}\n`;
+            csvContent += `Primary Period,Year: ${primaryYear} | Quarter: ${primaryQuarter} | Month: ${primaryMonth}\n`;
+
+            if (enableComparison) {
+                const compareYear = document.getElementById('compareYear').value || 'All';
+                const compareQuarter = document.getElementById('compareQuarter').value || 'All';
+                const compareMonth = document.getElementById('compareMonth').value || 'All';
+                csvContent += `Comparison Period,Year: ${compareYear} | Quarter: ${compareQuarter} | Month: ${compareMonth}\n`;
+            }
+
+            csvContent += '\nSUMMARY STATISTICS\n';
             csvContent += `Total Tickets,${totalTickets}\n`;
-            csvContent += `Resolved Tickets,${resolvedTickets}\n`;
-            csvContent += `Within 2 Days,${within2Days}\n`;
-            csvContent += `Resolution Rate,${resolutionRate}\n\n`;
+            csvContent += `Resolved in 2 Days,${resolvedIn2Days}\n`;
+            csvContent += `Resolved After 2 Days,${resolvedAfter2Days}\n`;
+            csvContent += `Success Rate,${successRate}\n\n`;
             csvContent += 'DETAILED STATISTICS\n';
-            csvContent += 'Project Name,Total,Resolved,Within 2 Days,Resolution %\n';
+            csvContent += 'Month,Total Tickets,Resolved in 2 Days,Resolved After 2 Days,Success Rate\n';
 
             // Add table data
             const table = document.querySelector('.stats-table tbody');
             table.querySelectorAll('tr').forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells.length > 0) {
-                    const projectName = cells[0].innerText;
+                if (cells.length > 1) {
+                    const month = cells[0].innerText;
                     const total = cells[1].innerText;
                     const resolved = cells[2].innerText;
-                    const within = cells[3].innerText;
-                    const percentage = cells[4].innerText;
-                    csvContent += `${projectName},${total},${resolved},${within},${percentage}\n`;
+                    const after = cells[3].innerText;
+                    const rate = cells[4].innerText;
+                    csvContent += `${month},${total},${resolved},${after},${rate}\n`;
                 }
             });
 
@@ -747,7 +954,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement('a');
             link.setAttribute('href', encodedUri);
-            link.setAttribute('download', `statistics_report_${new Date().getTime()}.csv`);
+            link.setAttribute('download', `statistics_${selectedProject.name}_${new Date().getTime()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -759,11 +966,18 @@
         // Set current year in footer
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Load initial data
+        // Load projects on page load
         window.addEventListener('load', () => {
             loadProjects();
-            applyFilters();
         });
+
+        // Prevent closing modal by clicking outside when no project is selected
+        window.onclick = function(event) {
+            const modal = document.getElementById('projectModal');
+            if (event.target === modal && selectedProject) {
+                closeProjectModal();
+            }
+        }
     </script>
 </body>
 </html>
