@@ -463,6 +463,155 @@ app.delete('/api/records', (req, res) => {
     });
 });
 
+// ==================== STATISTICS API ====================
+
+// Get statistics with flexible time period comparison
+app.get('/api/statistics/compare', (req, res) => {
+    const projectId = req.query.projectId;
+
+    // Primary period parameters
+    const primaryYear = req.query.primaryYear ? parseInt(req.query.primaryYear) : null;
+    const primaryQuarter = req.query.primaryQuarter; // Q1, Q2, Q3, Q4
+    const primaryMonth = req.query.primaryMonth; // 1-12
+
+    // Comparison period parameters
+    const compareYear = req.query.compareYear ? parseInt(req.query.compareYear) : null;
+    const compareQuarter = req.query.compareQuarter;
+    const compareMonth = req.query.compareMonth;
+
+    if (!projectId) {
+        return res.status(400).json({ error: 'Project ID is required' });
+    }
+
+    // Helper function to get quarter months
+    const getQuarterMonths = (quarter) => {
+        const quarters = {
+            'Q1': [1, 2, 3],
+            'Q2': [4, 5, 6],
+            'Q3': [7, 8, 9],
+            'Q4': [10, 11, 12]
+        };
+        return quarters[quarter] || [];
+    };
+
+    // Helper function to filter records by period
+    const filterByPeriod = (records, year, quarter, month) => {
+        return records.filter(record => {
+            if (year && record.year !== year) return false;
+
+            if (quarter) {
+                const quarterMonths = getQuarterMonths(quarter);
+                if (!quarterMonths.includes(record.month)) return false;
+            }
+
+            if (month && record.month !== parseInt(month)) return false;
+
+            return true;
+        });
+    };
+
+    // Helper function to calculate statistics
+    const calculateStats = (records) => {
+        const totalTickets = records.reduce((sum, r) => sum + (r.total_tickets || 0), 0);
+        const resolvedIn2Days = records.reduce((sum, r) => sum + (r.resolved_in_2days || 0), 0);
+        const resolvedAfter2Days = records.reduce((sum, r) => sum + (r.resolved_after_2days || 0), 0);
+        const successRate = totalTickets > 0 ? ((resolvedIn2Days / totalTickets) * 100).toFixed(2) : 0;
+
+        return {
+            totalTickets,
+            resolvedIn2Days,
+            resolvedAfter2Days,
+            successRate: parseFloat(successRate),
+            records
+        };
+    };
+
+    // Query to get all records for the project
+    const query = `
+        SELECT
+            r.*,
+            p.name as project_name
+        FROM analysis_records r
+        LEFT JOIN projects p ON r.project_id = p.id
+        WHERE r.project_id = ?
+        ORDER BY r.year DESC, r.created_at DESC
+    `;
+
+    db.all(query, [projectId], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        // Transform records into monthly breakdown
+        const allRecords = [];
+        rows.forEach(row => {
+            try {
+                const analysisData = JSON.parse(row.analysis_data || '[]');
+
+                if (Array.isArray(analysisData)) {
+                    analysisData.forEach(monthData => {
+                        allRecords.push({
+                            id: row.id,
+                            project_id: row.project_id,
+                            project_name: row.project_name,
+                            filename: row.filename,
+                            created_at: row.created_at,
+                            year: row.year,
+                            month: monthData.month,
+                            displayName: monthData.displayName,
+                            total_tickets: monthData.totalTickets || 0,
+                            resolved_in_2days: monthData.resolvedIn2Days || 0,
+                            resolved_after_2days: monthData.resolvedAfter2Days || 0,
+                            success_rate: parseFloat(monthData.successRate) || 0
+                        });
+                    });
+                }
+            } catch (e) {
+                console.error('Error parsing analysis data:', e);
+            }
+        });
+
+        // Filter and calculate primary period statistics
+        const primaryRecords = filterByPeriod(allRecords, primaryYear, primaryQuarter, primaryMonth);
+        const primaryStats = calculateStats(primaryRecords);
+
+        // Filter and calculate comparison period statistics if specified
+        let compareStats = null;
+        if (compareYear || compareQuarter || compareMonth) {
+            const compareRecords = filterByPeriod(allRecords, compareYear, compareQuarter, compareMonth);
+            compareStats = calculateStats(compareRecords);
+        }
+
+        // Calculate changes between periods
+        let changes = null;
+        if (compareStats) {
+            const totalTicketsChange = primaryStats.totalTickets - compareStats.totalTickets;
+            const resolvedIn2DaysChange = primaryStats.resolvedIn2Days - compareStats.resolvedIn2Days;
+            const successRateChange = primaryStats.successRate - compareStats.successRate;
+
+            changes = {
+                totalTickets: totalTicketsChange,
+                totalTicketsPercent: compareStats.totalTickets > 0
+                    ? ((totalTicketsChange / compareStats.totalTickets) * 100).toFixed(2)
+                    : 0,
+                resolvedIn2Days: resolvedIn2DaysChange,
+                resolvedIn2DaysPercent: compareStats.resolvedIn2Days > 0
+                    ? ((resolvedIn2DaysChange / compareStats.resolvedIn2Days) * 100).toFixed(2)
+                    : 0,
+                successRate: successRateChange.toFixed(2),
+                successRatePercent: successRateChange.toFixed(2)
+            };
+        }
+
+        res.json({
+            success: true,
+            primary: primaryStats,
+            compare: compareStats,
+            changes: changes
+        });
+    });
+});
+
 // ==================== DASHBOARD API ====================
 
 // Get dashboard statistics with filtering
