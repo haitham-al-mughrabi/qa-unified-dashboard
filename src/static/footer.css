@@ -9,6 +9,10 @@ footer {
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(10px);
   margin-top: var(--spacing-2xl);
+  position:relative;
+  bottom:0;
+  left:0;
+  right:0;
 }
 
 .footer-container {
