@@ -148,6 +148,9 @@ async function selectProject(projectId, projectName, projectDescription) {
 
     // Close modal
     closeProjectModal();
+
+    // Hide "Back to Dashboard" button and show close button
+    document.getElementById('backToDashboardBtn').style.display = 'none';
     document.getElementById('closeModalBtn').style.display = 'flex';
 
     // Load available years
@@ -196,6 +199,16 @@ async function loadAvailableYears(projectId) {
 
 function openProjectModal() {
     document.getElementById('projectModal').style.display = 'flex';
+
+    // When reopening the modal (to change project), show back button and hide close button
+    if (selectedProject) {
+        document.getElementById('backToDashboardBtn').style.display = 'none';
+        document.getElementById('closeModalBtn').style.display = 'flex';
+    } else {
+        // First time opening, show back button
+        document.getElementById('backToDashboardBtn').style.display = 'inline-flex';
+        document.getElementById('closeModalBtn').style.display = 'none';
+    }
 }
 
 function closeProjectModal() {
