@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Statistics - QA Analytics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="src/static/dashboard.css">
+    <link rel="stylesheet" href="src/static/project-statistics.css">
+    <link rel="stylesheet" href="src/static/footer.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard.html" class="navbar-brand">
+                <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+                <span>QA Analytics</span>
+            </a>
+            <div class="navbar-links">
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                <a href="/projects.html" class="nav-btn"><i class="fas fa-sitemap"></i> Projects</a>
+                <a href="/project-statistics.html" class="nav-btn active"><i class="fas fa-chart-line"></i> Project Statistics</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero -->
+        <div class="hero">
+            <h1><i class="fas fa-chart-pie"></i> <span id="heroTitle">Project Statistics</span></h1>
+            <p id="heroSubtitle">Comprehensive analytics with advanced comparison tools</p>
+        </div>
+
+        <!-- Selected Project Info -->
+        <div id="selectedProjectInfo" style="display: none; background: white; border-radius: var(--radius-2xl); padding: var(--spacing-lg); margin-bottom: var(--spacing-2xl); box-shadow: var(--shadow-md); border: 1px solid var(--gray-200);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md);">
+                <div>
+                    <h3 style="margin: 0; color: var(--primary); font-size: 1.25rem;">
+                        <i class="fas fa-folder-open"></i> <span id="selectedProjectName"></span>
+                    </h3>
+                    <p style="margin: 0.5rem 0 0 0; color: var(--gray-600);" id="selectedProjectDescription"></p>
+                </div>
+                <button class="btn-filter" onclick="openProjectModal()" style="padding: 0.75rem 1.5rem;">
+                    <i class="fas fa-exchange-alt"></i> Change Project
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Tabs -->
+        <div id="mainTabs" style="display: none;">
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchMainTab('overview')">
+                    <i class="fas fa-chart-area"></i> Overview
+                </button>
+                <button class="tab-btn" onclick="switchMainTab('compare')">
+                    <i class="fas fa-exchange-alt"></i> Compare Data
+                </button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="overviewTab" class="tab-content active">
+                <!-- Year Selector -->
+                <div class="year-selector-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md);">
+                        <h3 style="margin: 0; color: var(--primary);">
+                            <i class="fas fa-calendar"></i> Select Year
+                        </h3>
+                        <div style="display: flex; gap: var(--spacing-md); align-items: center;">
+                            <select id="yearSelect" class="filter-select" onchange="loadYearData()" style="min-width: 150px;">
+                                <option value="">Select Year...</option>
+                            </select>
+                            <button class="btn-export" onclick="exportOverviewReport()">
+                                <i class="fas fa-download"></i> Export Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overview Stats Content -->
+                <div id="overviewStatsContent" style="display: none;">
+                    <!-- Year Overview Stats Cards -->
+                    <div class="section-header">
+                        <h2><i class="fas fa-calendar-alt"></i> Year Overview - <span id="currentYearLabel"></span></h2>
+                        <p>Annual statistics and performance metrics</p>
+                    </div>
+
+                    <div class="stats-cards-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                            <div class="stat-content">
+                                <h3>Total Tickets</h3>
+                                <p class="stat-value" id="yearTotalTickets">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="stat-content">
+                                <h3>Resolved in 2 Days</h3>
+                                <p class="stat-value" id="yearResolvedIn2Days">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                            <div class="stat-content">
+                                <h3>Resolved After 2 Days</h3>
+                                <p class="stat-value" id="yearResolvedAfter2Days">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+                            <div class="stat-content">
+                                <h3>Success Rate</h3>
+                                <p class="stat-value" id="yearSuccessRate">0%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Year Charts -->
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h2><i class="fas fa-chart-pie"></i> Resolution Distribution</h2>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="yearResolutionChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h2><i class="fas fa-chart-bar"></i> Metrics Breakdown</h2>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="yearMetricsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quarterly Breakdown -->
+                    <div class="section-header">
+                        <h2><i class="fas fa-calendar-week"></i> Quarterly Breakdown</h2>
+                        <p>Performance metrics by quarter</p>
+                    </div>
+
+                    <div id="quarterlyCardsGrid" class="stats-cards-grid">
+                        <!-- Quarterly cards will be inserted here -->
+                    </div>
+
+                    <!-- Quarterly Charts -->
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h2><i class="fas fa-chart-line"></i> Quarterly Trend</h2>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="quarterlyTrendChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h2><i class="fas fa-chart-area"></i> Quarterly Success Rate</h2>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="quarterlySuccessChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Breakdown -->
+                    <div class="section-header">
+                        <h2><i class="fas fa-calendar-day"></i> Monthly Breakdown</h2>
+                        <p>Detailed monthly statistics</p>
+                    </div>
+
+                    <!-- Monthly Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2><i class="fas fa-chart-line"></i> Monthly Performance</h2>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Table -->
+                    <div class="detailed-stats-section">
+                        <div class="stats-table-wrapper">
+                            <table class="stats-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-calendar"></i> Month</th>
+                                        <th><i class="fas fa-tasks"></i> Total Tickets</th>
+                                        <th><i class="fas fa-check"></i> Resolved in 2 Days</th>
+                                        <th><i class="fas fa-clock"></i> Resolved After 2 Days</th>
+                                        <th><i class="fas fa-percentage"></i> Success Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="monthlyTableBody">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; padding: var(--spacing-lg); color: var(--gray-500);">
+                                            No monthly data available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compare Data Tab -->
+            <div id="compareTab" class="tab-content">
+                <!-- Comparison Type Selector -->
+                <div class="comparison-type-selector">
+                    <button class="comparison-type-btn active" onclick="switchComparisonType('quarter')">
+                        <i class="fas fa-calendar-week"></i> Compare Quarters
+                    </button>
+                    <button class="comparison-type-btn" onclick="switchComparisonType('year')">
+                        <i class="fas fa-calendar-alt"></i> Compare Years
+                    </button>
+                    <button class="comparison-type-btn" onclick="switchComparisonType('month')">
+                        <i class="fas fa-calendar-day"></i> Compare Months
+                    </button>
+                </div>
+
+                <!-- Quarter Comparison Section -->
+                <div id="quarterCompareSection" class="compare-section active">
+                    <div class="comparison-selector-grid">
+                        <div class="period-selector">
+                            <h3><i class="fas fa-calendar-check"></i> Period 1</h3>
+                            <div class="filter-group">
+                                <label class="filter-label">Year</label>
+                                <select id="q1Year" class="filter-select"></select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Quarter</label>
+                                <select id="q1Quarter" class="filter-select">
+                                    <option value="Q1">Q1 (Jan-Mar)</option>
+                                    <option value="Q2">Q2 (Apr-Jun)</option>
+                                    <option value="Q3">Q3 (Jul-Sep)</option>
+                                    <option value="Q4">Q4 (Oct-Dec)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="period-selector">
+                            <h3><i class="fas fa-calendar-plus"></i> Period 2</h3>
+                            <div class="filter-group">
+                                <label class="filter-label">Year</label>
+                                <select id="q2Year" class="filter-select"></select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Quarter</label>
+                                <select id="q2Quarter" class="filter-select">
+                                    <option value="Q1">Q1 (Jan-Mar)</option>
+                                    <option value="Q2">Q2 (Apr-Jun)</option>
+                                    <option value="Q3">Q3 (Jul-Sep)</option>
+                                    <option value="Q4">Q4 (Oct-Dec)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: var(--spacing-lg);">
+                        <button class="btn-filter" onclick="compareQuarters()" style="padding: 1rem 3rem;">
+                            <i class="fas fa-chart-line"></i> Compare Quarters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Year Comparison Section -->
+                <div id="yearCompareSection" class="compare-section">
+                    <div class="comparison-selector-grid">
+                        <div class="period-selector">
+                            <h3><i class="fas fa-calendar-check"></i> Year 1</h3>
+                            <div class="filter-group">
+                                <label class="filter-label">Year</label>
+                                <select id="y1Year" class="filter-select"></select>
+                            </div>
+                        </div>
+                        <div class="period-selector">
+                            <h3><i class="fas fa-calendar-plus"></i> Year 2</h3>
+                            <div class="filter-group">
+                                <label class="filter-label">Year</label>
+                                <select id="y2Year" class="filter-select"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: var(--spacing-lg);">
+                        <button class="btn-filter" onclick="compareYears()" style="padding: 1rem 3rem;">
+                            <i class="fas fa-chart-line"></i> Compare Years
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Month Comparison Section -->
+                <div id="monthCompareSection" class="compare-section">
+                    <div class="comparison-selector-grid">
+                        <div class="period-selector">
+                            <h3><i class="fas fa-calendar-check"></i> Period 1</h3>
+                            <div class="filter-group">
+                                <label class="filter-label">Year</label>
+                                <select id="m1Year" class="filter-select"></select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Month</label>
+                                <select id="m1Month" class="filter-select">
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="period-selector">
+                            <h3><i class="fas fa-calendar-plus"></i> Period 2</h3>
+                            <div class="filter-group">
+                                <label class="filter-label">Year</label>
+                                <select id="m2Year" class="filter-select"></select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Month</label>
+                                <select id="m2Month" class="filter-select">
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: var(--spacing-lg);">
+                        <button class="btn-filter" onclick="compareMonths()" style="padding: 1rem 3rem;">
+                            <i class="fas fa-chart-line"></i> Compare Months
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Comparison Results -->
+                <div id="comparisonResults" style="display: none;">
+                    <!-- Visualization Options -->
+                    <div class="visualization-options">
+                        <h3><i class="fas fa-eye"></i> Visualization Style</h3>
+                        <div class="viz-btn-group">
+                            <button class="viz-btn active" onclick="switchVisualization('side-by-side')">
+                                <i class="fas fa-chart-bar"></i> Side by Side
+                            </button>
+                            <button class="viz-btn" onclick="switchVisualization('overlaid')">
+                                <i class="fas fa-layer-group"></i> Overlaid
+                            </button>
+                            <button class="viz-btn" onclick="switchVisualization('table')">
+                                <i class="fas fa-table"></i> Table View
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Stats Cards -->
+                    <div class="comparison-stats-grid">
+                        <div class="comparison-col">
+                            <div class="comparison-header period1-header">
+                                <h3><i class="fas fa-calendar-check"></i> <span id="period1Label">Period 1</span></h3>
+                            </div>
+                            <div class="stats-cards-grid">
+                                <div class="stat-card mini">
+                                    <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                                    <div class="stat-content">
+                                        <h4>Total Tickets</h4>
+                                        <p class="stat-value" id="p1TotalTickets">0</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card mini">
+                                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                                    <div class="stat-content">
+                                        <h4>Resolved in 2 Days</h4>
+                                        <p class="stat-value" id="p1ResolvedIn2Days">0</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card mini">
+                                    <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+                                    <div class="stat-content">
+                                        <h4>Success Rate</h4>
+                                        <p class="stat-value" id="p1SuccessRate">0%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-col">
+                            <div class="comparison-header period2-header">
+                                <h3><i class="fas fa-calendar-plus"></i> <span id="period2Label">Period 2</span></h3>
+                            </div>
+                            <div class="stats-cards-grid">
+                                <div class="stat-card mini">
+                                    <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                                    <div class="stat-content">
+                                        <h4>Total Tickets</h4>
+                                        <p class="stat-value" id="p2TotalTickets">0</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card mini">
+                                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                                    <div class="stat-content">
+                                        <h4>Resolved in 2 Days</h4>
+                                        <p class="stat-value" id="p2ResolvedIn2Days">0</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card mini">
+                                    <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+                                    <div class="stat-content">
+                                        <h4>Success Rate</h4>
+                                        <p class="stat-value" id="p2SuccessRate">0%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Side by Side Charts -->
+                    <div id="sideBySideViz" class="viz-section active">
+                        <div class="charts-container">
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <h2><i class="fas fa-chart-bar"></i> Comparison</h2>
+                                </div>
+                                <div class="chart-wrapper">
+                                    <canvas id="comparisonBarChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <h2><i class="fas fa-percentage"></i> Success Rate Comparison</h2>
+                                </div>
+                                <div class="chart-wrapper">
+                                    <canvas id="comparisonSuccessChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overlaid Charts -->
+                    <div id="overlaidViz" class="viz-section">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h2><i class="fas fa-layer-group"></i> Overlaid Comparison</h2>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="overlaidChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table View -->
+                    <div id="tableViz" class="viz-section">
+                        <div class="detailed-stats-section">
+                            <div class="stats-table-wrapper">
+                                <table class="stats-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Metric</th>
+                                            <th id="tableP1Header">Period 1</th>
+                                            <th id="tableP2Header">Period 2</th>
+                                            <th>Difference</th>
+                                            <th>% Change</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="comparisonTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export Button -->
+                    <div style="text-align: center; margin-top: var(--spacing-2xl);">
+                        <button class="btn-export" onclick="exportComparisonReport()">
+                            <i class="fas fa-download"></i> Export Comparison Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading">
+            <div class="spinner"></div>
+            <h3>Loading statistics...</h3>
+            <p>Please wait</p>
+        </div>
+    </div>
+
+    <!-- Project Selection Modal -->
+    <div class="modal modal-project" id="projectModal" style="display: flex;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-folder-open"></i> Select Project</h2>
+                <button class="close-btn" onclick="closeProjectModal()" id="closeModalBtn" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="projects-grid" id="projectsGrid">
+                    <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-2xl);">
+                        <div class="spinner" style="margin: 0 auto var(--spacing-lg);"></div>
+                        <p style="color: var(--gray-600);">Loading projects...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-developer">
+                    <i class="fas fa-user-tie"></i> Developed by: <strong>Haitham Al Mughrabi</strong>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-company">
+                    <div class="footer-company-header">
+                        <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
+                    </div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="src/static/project-statistics.js"></script>
+</body>
+</html>
