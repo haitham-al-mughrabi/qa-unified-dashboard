@@ -82,16 +82,63 @@
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 
+        // Helper function to safely parse JSON responses
+        async function fetchJSON(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+
+                // Check if response is OK (status 200-299)
+                if (!response.ok) {
+                    // Try to get error message from response
+                    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    try {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorData.message || errorMessage;
+                        } else {
+                            const text = await response.text();
+                            // If it's HTML, don't include the full HTML in the error
+                            if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
+                                errorMessage = `Server returned HTML error page (${response.status}). The API endpoint may not exist or the server encountered an error.`;
+                            } else {
+                                errorMessage = text || errorMessage;
+                            }
+                        }
+                    } catch (e) {
+                        // If we can't parse the error, use the default message
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                // Check content-type before parsing JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
+                        throw new Error('Server returned HTML instead of JSON. The API endpoint may not exist or the server is not running.');
+                    }
+                    throw new Error('Server did not return JSON. Received content-type: ' + (contentType || 'unknown'));
+                }
+
+                return await response.json();
+            } catch (error) {
+                // Re-throw with more context if it's a network error
+                if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+                    throw new Error('Cannot connect to API server. Please ensure the server is running at ' + API_URL);
+                }
+                throw error;
+            }
+        }
+
         async function loadDashboard() {
             showLoading();
             try {
                 // Fetch all projects first
-                const projectsResponse = await fetch(`${API_URL}/projects`);
-                const projectsData = await projectsResponse.json();
+                const projectsData = await fetchJSON(`${API_URL}/projects`);
 
                 // Fetch aggregated records data
-                const recordsResponse = await fetch(`${API_URL}/records/aggregated`);
-                const recordsData = await recordsResponse.json();
+                const recordsData = await fetchJSON(`${API_URL}/records/aggregated`);
 
                 dashboardData = recordsData.aggregated;
 
@@ -645,20 +692,14 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/records/${recordId}`, {
+                const data = await fetchJSON(`${API_URL}/records/${recordId}`, {
                     method: 'DELETE'
                 });
 
-                const data = await response.json();
+                // Reload the dashboard to update all data
+                await loadDashboard();
 
-                if (response.ok) {
-                    // Reload the dashboard to update all data
-                    await loadDashboard();
-
-                    alert('Record deleted successfully');
-                } else {
-                    alert('Error deleting record: ' + data.error);
-                }
+                alert('Record deleted successfully');
             } catch (error) {
                 console.error('Error deleting record:', error);
                 alert('Error deleting record: ' + error.message);

@@ -174,19 +174,13 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/projects`, {
+                const data = await fetchJSON(`${API_URL}/projects`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ name, description })
                 });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to create project');
-                }
 
                 showSuccess('Project created successfully!');
                 document.getElementById('projectForm').reset();
@@ -206,12 +200,60 @@
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 
+        // Helper function to safely parse JSON responses
+        async function fetchJSON(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+
+                // Check if response is OK (status 200-299)
+                if (!response.ok) {
+                    // Try to get error message from response
+                    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    try {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorData.message || errorMessage;
+                        } else {
+                            const text = await response.text();
+                            // If it's HTML, don't include the full HTML in the error
+                            if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
+                                errorMessage = `Server returned HTML error page (${response.status}). The API endpoint may not exist or the server encountered an error.`;
+                            } else {
+                                errorMessage = text || errorMessage;
+                            }
+                        }
+                    } catch (e) {
+                        // If we can't parse the error, use the default message
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                // Check content-type before parsing JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
+                        throw new Error('Server returned HTML instead of JSON. The API endpoint may not exist or the server is not running.');
+                    }
+                    throw new Error('Server did not return JSON. Received content-type: ' + (contentType || 'unknown'));
+                }
+
+                return await response.json();
+            } catch (error) {
+                // Re-throw with more context if it's a network error
+                if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+                    throw new Error('Cannot connect to API server. Please ensure the server is running at ' + API_URL);
+                }
+                throw error;
+            }
+        }
+
         // Load projects
         async function loadProjects() {
             showLoading();
             try {
-                const response = await fetch(`${API_URL}/projects`);
-                const data = await response.json();
+                const data = await fetchJSON(`${API_URL}/projects`);
 
                 const tableBody = document.getElementById('projectsTableBody');
 
@@ -320,15 +362,9 @@
             if (!pendingDelete.id) return;
 
             try {
-                const response = await fetch(`${API_URL}/projects/${pendingDelete.id}`, {
+                const data = await fetchJSON(`${API_URL}/projects/${pendingDelete.id}`, {
                     method: 'DELETE'
                 });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to delete project');
-                }
 
                 closeConfirmModal();
                 showSuccess('Project deleted successfully!');
