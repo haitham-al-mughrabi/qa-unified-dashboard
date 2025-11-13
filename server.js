@@ -695,6 +695,29 @@ app.get('/api/dashboard', (req, res) => {
 
 // ==================== PROJECT STATISTICS API ====================
 
+// Helper function to convert month name to number
+function getMonthNumber(month) {
+    if (typeof month === 'number') return month;
+
+    const monthMap = {
+        'january': 1, 'jan': 1,
+        'february': 2, 'feb': 2,
+        'march': 3, 'mar': 3,
+        'april': 4, 'apr': 4,
+        'may': 5,
+        'june': 6, 'jun': 6,
+        'july': 7, 'jul': 7,
+        'august': 8, 'aug': 8,
+        'september': 9, 'sep': 9, 'sept': 9,
+        'october': 10, 'oct': 10,
+        'november': 11, 'nov': 11,
+        'december': 12, 'dec': 12
+    };
+
+    const monthLower = String(month).toLowerCase().trim();
+    return monthMap[monthLower] || parseInt(month) || 0;
+}
+
 // Get comprehensive project statistics
 app.get('/api/project-statistics/:projectId', (req, res) => {
     const projectId = req.params.projectId;
@@ -728,7 +751,7 @@ app.get('/api/project-statistics/:projectId', (req, res) => {
 
                 if (Array.isArray(analysisData)) {
                     analysisData.forEach(monthData => {
-                        const monthNum = monthData.month;
+                        const monthNum = getMonthNumber(monthData.month);
                         const quarter = Math.ceil(monthNum / 3);
                         const quarterKey = `Q${quarter}`;
                         const recordYear = row.year;
@@ -925,10 +948,11 @@ app.get('/api/project-statistics/:projectId/compare', (req, res) => {
                 const analysisData = JSON.parse(row.analysis_data || '[]');
                 if (Array.isArray(analysisData)) {
                     analysisData.forEach(monthData => {
+                        const monthNum = getMonthNumber(monthData.month);
                         allRecords.push({
                             year: row.year,
-                            month: monthData.month,
-                            quarter: `Q${Math.ceil(monthData.month / 3)}`,
+                            month: monthNum,
+                            quarter: `Q${Math.ceil(monthNum / 3)}`,
                             displayName: monthData.displayName,
                             total_tickets: monthData.totalTickets || 0,
                             resolved_in_2days: monthData.resolvedIn2Days || 0,
