@@ -1,0 +1,649 @@
+/* =================== TABS =================== */
+
+.tabs-container {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-2xl);
+    border-bottom: 2px solid var(--gray-200);
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    bottom: -2px;
+}
+
+.tab-btn:hover {
+    color: var(--primary);
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.tab-btn i {
+    margin-right: var(--spacing-sm);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* =================== YEAR SELECTOR =================== */
+
+.year-selector-card {
+    background: white;
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+}
+
+/* =================== SECTION HEADERS =================== */
+
+.section-header {
+    margin: var(--spacing-3xl) 0 var(--spacing-xl) 0;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    color: var(--gray-800);
+    margin: 0 0 var(--spacing-sm) 0;
+    font-weight: 700;
+}
+
+.section-header p {
+    color: var(--gray-600);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.section-header i {
+    color: var(--primary);
+    margin-right: var(--spacing-sm);
+}
+
+/* =================== COMPARISON TYPE SELECTOR =================== */
+
+.comparison-type-selector {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-2xl);
+    flex-wrap: wrap;
+}
+
+.comparison-type-btn {
+    flex: 1;
+    min-width: 200px;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background: white;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-xl);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.comparison-type-btn:hover {
+    border-color: var(--primary);
+    background: rgba(79, 70, 229, 0.05);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.comparison-type-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: var(--shadow-lg);
+}
+
+.comparison-type-btn i {
+    margin-right: var(--spacing-sm);
+    font-size: 1.1rem;
+}
+
+/* =================== COMPARE SECTIONS =================== */
+
+.compare-section {
+    display: none;
+}
+
+.compare-section.active {
+    display: block;
+}
+
+.comparison-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.period-selector {
+    background: white;
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--gray-200);
+    transition: all 0.3s ease;
+}
+
+.period-selector:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+}
+
+.period-selector h3 {
+    margin: 0 0 var(--spacing-lg) 0;
+    font-size: 1.1rem;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.period-selector h3 i {
+    margin-right: var(--spacing-sm);
+}
+
+/* =================== VISUALIZATION OPTIONS =================== */
+
+.visualization-options {
+    background: white;
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+}
+
+.visualization-options h3 {
+    margin: 0 0 var(--spacing-lg) 0;
+    font-size: 1.1rem;
+    color: var(--gray-800);
+    font-weight: 700;
+}
+
+.visualization-options h3 i {
+    color: var(--primary);
+    margin-right: var(--spacing-sm);
+}
+
+.viz-btn-group {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.viz-btn {
+    flex: 1;
+    min-width: 150px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: white;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.viz-btn:hover {
+    border-color: var(--primary);
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.viz-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.viz-btn i {
+    margin-right: var(--spacing-sm);
+}
+
+.viz-section {
+    display: none;
+}
+
+.viz-section.active {
+    display: block;
+}
+
+/* =================== COMPARISON STATS GRID =================== */
+
+.comparison-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.comparison-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.comparison-header {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+.comparison-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.period1-header {
+    border: 2px solid var(--primary);
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.period1-header h3 {
+    color: var(--primary);
+}
+
+.period2-header {
+    border: 2px solid var(--secondary);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.period2-header h3 {
+    color: var(--secondary);
+}
+
+/* =================== MINI STAT CARDS =================== */
+
+.stat-card.mini {
+    padding: var(--spacing-md);
+}
+
+.stat-card.mini .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+}
+
+.stat-card.mini .stat-content h4 {
+    font-size: 0.85rem;
+    margin: 0 0 var(--spacing-xs) 0;
+    color: var(--gray-600);
+    font-weight: 600;
+}
+
+.stat-card.mini .stat-value {
+    font-size: 1.5rem;
+}
+
+/* =================== QUARTERLY CARDS =================== */
+
+#quarterlyCardsGrid .stat-card {
+    cursor: default;
+}
+
+#quarterlyCardsGrid .stat-card:hover {
+    transform: translateY(-5px);
+}
+
+/* =================== RESPONSIVE DESIGN =================== */
+
+@media (max-width: 768px) {
+    .tabs-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+        white-space: nowrap;
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: 0.9rem;
+    }
+
+    .comparison-type-selector {
+        flex-direction: column;
+    }
+
+    .comparison-type-btn {
+        min-width: 100%;
+    }
+
+    .comparison-selector-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .comparison-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .viz-btn-group {
+        flex-direction: column;
+    }
+
+    .viz-btn {
+        min-width: 100%;
+    }
+
+    .year-selector-card > div {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .year-selector-card select,
+    .year-selector-card button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .section-header {
+        margin: var(--spacing-2xl) 0 var(--spacing-lg) 0;
+    }
+
+    .comparison-header h3 {
+        font-size: 1rem;
+    }
+
+    .stat-card.mini .stat-value {
+        font-size: 1.25rem;
+    }
+}
+
+/* =================== TABLE STYLING ENHANCEMENTS =================== */
+
+.stats-table td.positive {
+    color: var(--secondary);
+}
+
+.stats-table td.negative {
+    color: var(--danger);
+}
+
+.percentage {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* =================== CHART CARDS =================== */
+
+.chart-card {
+    background: white;
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.chart-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.chart-header h2 {
+    font-size: 1.2rem;
+    color: var(--gray-800);
+    margin: 0;
+    font-weight: 700;
+}
+
+.chart-header h2 i {
+    color: var(--primary);
+    margin-right: var(--spacing-sm);
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 400px;
+}
+
+@media (max-width: 768px) {
+    .chart-wrapper {
+        height: 300px;
+    }
+}
+
+/* =================== LOADING OVERLAY =================== */
+
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.loading {
+    text-align: center;
+    color: white;
+}
+
+.loading h3 {
+    margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+    font-size: 1.5rem;
+}
+
+.loading p {
+    margin: 0;
+    color: var(--gray-300);
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* =================== PROJECT MODAL STYLING =================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-lg);
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-2xl);
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-large {
+    max-width: 1000px;
+}
+
+.modal-header {
+    padding: var(--spacing-xl);
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--gray-800);
+    font-weight: 700;
+}
+
+.modal-header h2 i {
+    color: var(--primary);
+    margin-right: var(--spacing-sm);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--gray-500);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: var(--gray-100);
+    color: var(--gray-800);
+}
+
+.modal-body {
+    padding: var(--spacing-xl);
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.project-card-modal {
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.project-card-modal:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-5px);
+}
+
+.project-card-header {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.project-card-header i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.project-card-modal h3 {
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: 1.1rem;
+    color: var(--gray-800);
+    font-weight: 700;
+}
+
+.project-card-modal p {
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.project-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    color: var(--gray-500);
+    font-size: 0.85rem;
+}
+
+.project-meta i {
+    color: var(--primary);
+}
+
+/* =================== ADDITIONAL UTILITIES =================== */
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--secondary);
+    border: 1px solid var(--secondary);
+}
+
+.badge-info {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}

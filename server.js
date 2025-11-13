@@ -693,6 +693,336 @@ app.get('/api/dashboard', (req, res) => {
     });
 });
 
+// ==================== PROJECT STATISTICS API ====================
+
+// Get comprehensive project statistics
+app.get('/api/project-statistics/:projectId', (req, res) => {
+    const projectId = req.params.projectId;
+    const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+
+    const query = `
+        SELECT
+            r.*,
+            p.name as project_name,
+            p.description as project_description
+        FROM analysis_records r
+        LEFT JOIN projects p ON r.project_id = p.id
+        WHERE r.project_id = ?
+        ORDER BY r.year DESC, r.created_at DESC
+    `;
+
+    db.all(query, [projectId], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        // Transform records into monthly breakdown
+        const allRecords = [];
+        const yearlyData = {};
+        const quarterlyData = {};
+        const monthlyData = {};
+
+        rows.forEach(row => {
+            try {
+                const analysisData = JSON.parse(row.analysis_data || '[]');
+
+                if (Array.isArray(analysisData)) {
+                    analysisData.forEach(monthData => {
+                        const monthNum = monthData.month;
+                        const quarter = Math.ceil(monthNum / 3);
+                        const quarterKey = `Q${quarter}`;
+                        const recordYear = row.year;
+
+                        const record = {
+                            id: row.id,
+                            project_id: row.project_id,
+                            project_name: row.project_name,
+                            filename: row.filename,
+                            created_at: row.created_at,
+                            year: recordYear,
+                            month: monthNum,
+                            quarter: quarterKey,
+                            displayName: monthData.displayName,
+                            total_tickets: monthData.totalTickets || 0,
+                            resolved_in_2days: monthData.resolvedIn2Days || 0,
+                            resolved_after_2days: monthData.resolvedAfter2Days || 0,
+                            success_rate: parseFloat(monthData.successRate) || 0
+                        };
+
+                        allRecords.push(record);
+
+                        // Aggregate by year
+                        if (!yearlyData[recordYear]) {
+                            yearlyData[recordYear] = {
+                                year: recordYear,
+                                total_tickets: 0,
+                                resolved_in_2days: 0,
+                                resolved_after_2days: 0,
+                                success_rate: 0
+                            };
+                        }
+                        yearlyData[recordYear].total_tickets += record.total_tickets;
+                        yearlyData[recordYear].resolved_in_2days += record.resolved_in_2days;
+                        yearlyData[recordYear].resolved_after_2days += record.resolved_after_2days;
+
+                        // Aggregate by quarter
+                        const qKey = `${recordYear}-${quarterKey}`;
+                        if (!quarterlyData[qKey]) {
+                            quarterlyData[qKey] = {
+                                year: recordYear,
+                                quarter: quarterKey,
+                                total_tickets: 0,
+                                resolved_in_2days: 0,
+                                resolved_after_2days: 0,
+                                success_rate: 0,
+                                months: []
+                            };
+                        }
+                        quarterlyData[qKey].total_tickets += record.total_tickets;
+                        quarterlyData[qKey].resolved_in_2days += record.resolved_in_2days;
+                        quarterlyData[qKey].resolved_after_2days += record.resolved_after_2days;
+
+                        // Aggregate by month
+                        const mKey = `${recordYear}-${monthNum}`;
+                        if (!monthlyData[mKey]) {
+                            monthlyData[mKey] = {
+                                year: recordYear,
+                                month: monthNum,
+                                displayName: monthData.displayName,
+                                total_tickets: 0,
+                                resolved_in_2days: 0,
+                                resolved_after_2days: 0,
+                                success_rate: 0
+                            };
+                        }
+                        monthlyData[mKey].total_tickets += record.total_tickets;
+                        monthlyData[mKey].resolved_in_2days += record.resolved_in_2days;
+                        monthlyData[mKey].resolved_after_2days += record.resolved_after_2days;
+                    });
+                }
+            } catch (e) {
+                console.error('Error parsing analysis data:', e);
+            }
+        });
+
+        // Calculate success rates
+        Object.values(yearlyData).forEach(data => {
+            if (data.total_tickets > 0) {
+                data.success_rate = parseFloat(((data.resolved_in_2days / data.total_tickets) * 100).toFixed(2));
+            }
+        });
+
+        Object.values(quarterlyData).forEach(data => {
+            if (data.total_tickets > 0) {
+                data.success_rate = parseFloat(((data.resolved_in_2days / data.total_tickets) * 100).toFixed(2));
+            }
+        });
+
+        Object.values(monthlyData).forEach(data => {
+            if (data.total_tickets > 0) {
+                data.success_rate = parseFloat(((data.resolved_in_2days / data.total_tickets) * 100).toFixed(2));
+            }
+        });
+
+        // Get current year data
+        const currentYearData = yearlyData[year] || {
+            year: year,
+            total_tickets: 0,
+            resolved_in_2days: 0,
+            resolved_after_2days: 0,
+            success_rate: 0
+        };
+
+        // Get current year quarters
+        const currentQuarters = Object.values(quarterlyData)
+            .filter(q => q.year === year)
+            .sort((a, b) => {
+                const qA = parseInt(a.quarter.substring(1));
+                const qB = parseInt(b.quarter.substring(1));
+                return qA - qB;
+            });
+
+        // Get current year months
+        const currentMonths = Object.values(monthlyData)
+            .filter(m => m.year === year)
+            .sort((a, b) => a.month - b.month);
+
+        res.json({
+            success: true,
+            project: rows.length > 0 ? {
+                id: rows[0].project_id,
+                name: rows[0].project_name,
+                description: rows[0].project_description
+            } : null,
+            currentYear: {
+                year: year,
+                data: currentYearData,
+                quarters: currentQuarters,
+                months: currentMonths
+            },
+            allYears: Object.values(yearlyData).sort((a, b) => b.year - a.year),
+            allQuarters: Object.values(quarterlyData).sort((a, b) => {
+                if (a.year !== b.year) return b.year - a.year;
+                return parseInt(b.quarter.substring(1)) - parseInt(a.quarter.substring(1));
+            }),
+            allMonths: Object.values(monthlyData).sort((a, b) => {
+                if (a.year !== b.year) return b.year - a.year;
+                return b.month - a.month;
+            })
+        });
+    });
+});
+
+// Enhanced comparison endpoint for project statistics
+app.get('/api/project-statistics/:projectId/compare', (req, res) => {
+    const projectId = req.params.projectId;
+    const comparisonType = req.query.type; // 'quarter', 'year', 'month'
+
+    // Period 1 parameters
+    const period1Year = req.query.period1Year ? parseInt(req.query.period1Year) : null;
+    const period1Quarter = req.query.period1Quarter; // Q1, Q2, Q3, Q4
+    const period1Month = req.query.period1Month ? parseInt(req.query.period1Month) : null;
+
+    // Period 2 parameters
+    const period2Year = req.query.period2Year ? parseInt(req.query.period2Year) : null;
+    const period2Quarter = req.query.period2Quarter;
+    const period2Month = req.query.period2Month ? parseInt(req.query.period2Month) : null;
+
+    if (!projectId || !comparisonType) {
+        return res.status(400).json({ error: 'Project ID and comparison type are required' });
+    }
+
+    const query = `
+        SELECT
+            r.*,
+            p.name as project_name
+        FROM analysis_records r
+        LEFT JOIN projects p ON r.project_id = p.id
+        WHERE r.project_id = ?
+        ORDER BY r.year DESC, r.created_at DESC
+    `;
+
+    db.all(query, [projectId], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        // Helper function to get quarter months
+        const getQuarterMonths = (quarter) => {
+            const quarters = {
+                'Q1': [1, 2, 3],
+                'Q2': [4, 5, 6],
+                'Q3': [7, 8, 9],
+                'Q4': [10, 11, 12]
+            };
+            return quarters[quarter] || [];
+        };
+
+        // Transform records into monthly breakdown
+        const allRecords = [];
+        rows.forEach(row => {
+            try {
+                const analysisData = JSON.parse(row.analysis_data || '[]');
+                if (Array.isArray(analysisData)) {
+                    analysisData.forEach(monthData => {
+                        allRecords.push({
+                            year: row.year,
+                            month: monthData.month,
+                            quarter: `Q${Math.ceil(monthData.month / 3)}`,
+                            displayName: monthData.displayName,
+                            total_tickets: monthData.totalTickets || 0,
+                            resolved_in_2days: monthData.resolvedIn2Days || 0,
+                            resolved_after_2days: monthData.resolvedAfter2Days || 0,
+                            success_rate: parseFloat(monthData.successRate) || 0
+                        });
+                    });
+                }
+            } catch (e) {
+                console.error('Error parsing analysis data:', e);
+            }
+        });
+
+        // Filter records based on comparison type
+        let period1Records = [];
+        let period2Records = [];
+
+        if (comparisonType === 'quarter') {
+            const quarter1Months = getQuarterMonths(period1Quarter);
+            const quarter2Months = getQuarterMonths(period2Quarter);
+
+            period1Records = allRecords.filter(r =>
+                r.year === period1Year && quarter1Months.includes(r.month)
+            );
+            period2Records = allRecords.filter(r =>
+                r.year === period2Year && quarter2Months.includes(r.month)
+            );
+        } else if (comparisonType === 'year') {
+            period1Records = allRecords.filter(r => r.year === period1Year);
+            period2Records = allRecords.filter(r => r.year === period2Year);
+        } else if (comparisonType === 'month') {
+            period1Records = allRecords.filter(r =>
+                r.year === period1Year && r.month === period1Month
+            );
+            period2Records = allRecords.filter(r =>
+                r.year === period2Year && r.month === period2Month
+            );
+        }
+
+        // Calculate statistics for each period
+        const calculateStats = (records) => {
+            const total_tickets = records.reduce((sum, r) => sum + r.total_tickets, 0);
+            const resolved_in_2days = records.reduce((sum, r) => sum + r.resolved_in_2days, 0);
+            const resolved_after_2days = records.reduce((sum, r) => sum + r.resolved_after_2days, 0);
+            const success_rate = total_tickets > 0
+                ? parseFloat(((resolved_in_2days / total_tickets) * 100).toFixed(2))
+                : 0;
+
+            return {
+                total_tickets,
+                resolved_in_2days,
+                resolved_after_2days,
+                success_rate,
+                records: records.sort((a, b) => a.month - b.month)
+            };
+        };
+
+        const period1Stats = calculateStats(period1Records);
+        const period2Stats = calculateStats(period2Records);
+
+        // Calculate differences
+        const difference = {
+            total_tickets: period1Stats.total_tickets - period2Stats.total_tickets,
+            resolved_in_2days: period1Stats.resolved_in_2days - period2Stats.resolved_in_2days,
+            resolved_after_2days: period1Stats.resolved_after_2days - period2Stats.resolved_after_2days,
+            success_rate: period1Stats.success_rate - period2Stats.success_rate,
+            total_tickets_percent: period2Stats.total_tickets > 0
+                ? parseFloat((((period1Stats.total_tickets - period2Stats.total_tickets) / period2Stats.total_tickets) * 100).toFixed(2))
+                : 0,
+            resolved_in_2days_percent: period2Stats.resolved_in_2days > 0
+                ? parseFloat((((period1Stats.resolved_in_2days - period2Stats.resolved_in_2days) / period2Stats.resolved_in_2days) * 100).toFixed(2))
+                : 0
+        };
+
+        res.json({
+            success: true,
+            comparisonType,
+            period1: {
+                label: comparisonType === 'quarter' ? `${period1Year} ${period1Quarter}` :
+                       comparisonType === 'year' ? `${period1Year}` :
+                       `${period1Year} Month ${period1Month}`,
+                ...period1Stats
+            },
+            period2: {
+                label: comparisonType === 'quarter' ? `${period2Year} ${period2Quarter}` :
+                       comparisonType === 'year' ? `${period2Year}` :
+                       `${period2Year} Month ${period2Month}`,
+                ...period2Stats
+            },
+            difference
+        });
+    });
+});
+
 // ==================== SERVE HTML PAGES ====================
 
 app.get('/', (req, res) => {
@@ -709,6 +1039,10 @@ app.get('/projects', (req, res) => {
 
 app.get('/statistics', (req, res) => {
     res.sendFile(path.join(__dirname, 'statistics.html'));
+});
+
+app.get('/project-statistics', (req, res) => {
+    res.sendFile(path.join(__dirname, 'project-statistics.html'));
 });
 
 // Start server
