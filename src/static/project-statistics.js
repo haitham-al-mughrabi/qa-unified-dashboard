@@ -188,7 +188,7 @@ async function loadAvailableYears(projectId) {
         }
     } catch (error) {
         console.error('Error loading available years:', error);
-        alert('Error loading years: ' + error.message);
+        showToast('Error loading years: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
@@ -281,12 +281,13 @@ async function loadYearData() {
             currentYearData = data.currentYear;
             updateOverviewDisplay(data.currentYear);
             document.getElementById('overviewStatsContent').style.display = 'block';
+            showToast('Year data loaded successfully!', 'success', 2000);
         } else {
-            alert('Error loading year data');
+            showToast('Error loading year data', 'error');
         }
     } catch (error) {
         console.error('Error loading year data:', error);
-        alert('Error loading year data: ' + error.message);
+        showToast('Error loading year data: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
@@ -650,12 +651,12 @@ async function compareQuarters() {
     const q2Quarter = document.getElementById('q2Quarter').value;
 
     if (!q1Year || !q1Quarter || !q2Year || !q2Quarter) {
-        alert('Please select both quarters to compare');
+        showToast('Please select both quarters to compare', 'warning');
         return;
     }
 
     if (!selectedProject) {
-        alert('Please select a project first');
+        showToast('Please select a project first', 'warning');
         return;
     }
 
@@ -667,12 +668,13 @@ async function compareQuarters() {
         if (data.success) {
             currentComparisonData = data;
             displayComparisonResults(data);
+            showToast('Quarters compared successfully!', 'success', 2000);
         } else {
-            alert('Error loading comparison data');
+            showToast('Error loading comparison data', 'error');
         }
     } catch (error) {
         console.error('Error comparing quarters:', error);
-        alert('Error comparing quarters: ' + error.message);
+        showToast('Error comparing quarters: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
@@ -683,12 +685,12 @@ async function compareYears() {
     const y2Year = document.getElementById('y2Year').value;
 
     if (!y1Year || !y2Year) {
-        alert('Please select both years to compare');
+        showToast('Please select both years to compare', 'warning');
         return;
     }
 
     if (!selectedProject) {
-        alert('Please select a project first');
+        showToast('Please select a project first', 'warning');
         return;
     }
 
@@ -700,12 +702,13 @@ async function compareYears() {
         if (data.success) {
             currentComparisonData = data;
             displayComparisonResults(data);
+            showToast('Years compared successfully!', 'success', 2000);
         } else {
-            alert('Error loading comparison data');
+            showToast('Error loading comparison data', 'error');
         }
     } catch (error) {
         console.error('Error comparing years:', error);
-        alert('Error comparing years: ' + error.message);
+        showToast('Error comparing years: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
@@ -718,12 +721,12 @@ async function compareMonths() {
     const m2Month = document.getElementById('m2Month').value;
 
     if (!m1Year || !m1Month || !m2Year || !m2Month) {
-        alert('Please select both months to compare');
+        showToast('Please select both months to compare', 'warning');
         return;
     }
 
     if (!selectedProject) {
-        alert('Please select a project first');
+        showToast('Please select a project first', 'warning');
         return;
     }
 
@@ -735,12 +738,13 @@ async function compareMonths() {
         if (data.success) {
             currentComparisonData = data;
             displayComparisonResults(data);
+            showToast('Months compared successfully!', 'success', 2000);
         } else {
-            alert('Error loading comparison data');
+            showToast('Error loading comparison data', 'error');
         }
     } catch (error) {
         console.error('Error comparing months:', error);
-        alert('Error comparing months: ' + error.message);
+        showToast('Error comparing months: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
@@ -999,7 +1003,7 @@ function updateComparisonTable(period1, period2, difference) {
 
 function exportOverviewReport() {
     if (!currentYearData || !selectedProject) {
-        alert('Please load year data first');
+        showToast('Please load year data first', 'warning');
         return;
     }
 
@@ -1038,12 +1042,12 @@ function exportOverviewReport() {
     link.click();
     document.body.removeChild(link);
 
-    alert('Report exported successfully!');
+    showToast('Report exported successfully!', 'success');
 }
 
 function exportComparisonReport() {
     if (!currentComparisonData || !selectedProject) {
-        alert('Please run a comparison first');
+        showToast('Please run a comparison first', 'warning');
         return;
     }
 
@@ -1072,7 +1076,230 @@ function exportComparisonReport() {
     link.click();
     document.body.removeChild(link);
 
-    alert('Comparison report exported successfully!');
+    showToast('Comparison report exported successfully!', 'success');
+}
+
+// =================== UI ENHANCEMENTS ===================
+
+// Scroll Progress Indicator
+function updateScrollProgress() {
+    const scrollProgress = document.querySelector('.scroll-progress');
+    if (!scrollProgress) {
+        const progress = document.createElement('div');
+        progress.className = 'scroll-progress';
+        document.body.appendChild(progress);
+    }
+
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height);
+
+    const progressBar = document.querySelector('.scroll-progress');
+    if (progressBar) {
+        progressBar.style.transform = `scaleX(${scrolled})`;
+    }
+}
+
+// Ripple Effect for Buttons
+function createRipple(event) {
+    const button = event.currentTarget;
+    const ripple = document.createElement('span');
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+
+    button.appendChild(ripple);
+
+    setTimeout(() => {
+        ripple.remove();
+    }, 600);
+}
+
+// Toast Notification System
+let toastContainer = null;
+
+function showToast(message, type = 'info', duration = 4000) {
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+
+    const titles = {
+        success: 'Success',
+        error: 'Error',
+        warning: 'Warning',
+        info: 'Info'
+    };
+
+    toast.innerHTML = `
+        <i class="fas ${icons[type]} toast-icon"></i>
+        <div class="toast-content">
+            <div class="toast-title">${titles[type]}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close"><i class="fas fa-times"></i></button>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+        removeToast(toast);
+    });
+
+    if (duration > 0) {
+        setTimeout(() => {
+            removeToast(toast);
+        }, duration);
+    }
+}
+
+function removeToast(toast) {
+    toast.classList.add('toast-out');
+    setTimeout(() => {
+        toast.remove();
+        if (toastContainer && toastContainer.children.length === 0) {
+            toastContainer.remove();
+            toastContainer = null;
+        }
+    }, 300);
+}
+
+// Enhanced Chart Configuration with Better Tooltips
+function getEnhancedChartOptions(baseOptions = {}) {
+    return {
+        ...baseOptions,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        plugins: {
+            ...baseOptions.plugins,
+            tooltip: {
+                enabled: true,
+                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: 'rgba(79, 70, 229, 0.5)',
+                borderWidth: 2,
+                padding: 12,
+                displayColors: true,
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        if (context.parsed.y !== null) {
+                            label += context.parsed.y;
+                        }
+                        return label;
+                    }
+                }
+            }
+        }
+    };
+}
+
+// Number Count-Up Animation
+function animateValue(element, start, end, duration = 1000) {
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            current = end;
+            clearInterval(timer);
+        }
+
+        if (element.classList.contains('percentage')) {
+            element.textContent = current.toFixed(2) + '%';
+        } else {
+            element.textContent = Math.round(current);
+        }
+    }, 16);
+}
+
+// Highlight High-Performing Stats
+function highlightTopStats() {
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+        const value = card.querySelector('.stat-value');
+        if (value) {
+            const text = value.textContent.trim();
+            if (text.includes('%')) {
+                const percentage = parseFloat(text);
+                if (percentage >= 80) {
+                    card.classList.add('highlight');
+                    value.classList.add('animated');
+                }
+            }
+        }
+    });
+}
+
+// Add Ripple Effect to All Interactive Buttons
+function initializeRippleEffects() {
+    const buttons = document.querySelectorAll('.btn-filter, .btn-export, .viz-btn, .comparison-type-btn, .tab-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', createRipple);
+    });
+}
+
+// Enhanced Loading with Skeleton
+function showEnhancedLoading(message = 'Loading statistics...') {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        const loadingText = overlay.querySelector('h3');
+        if (loadingText) {
+            loadingText.textContent = message;
+        }
+        overlay.classList.add('active');
+    }
+}
+
+// Copy to Clipboard Functionality
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('Copied to clipboard!', 'success', 2000);
+        }).catch(() => {
+            showToast('Failed to copy to clipboard', 'error', 2000);
+        });
+    } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showToast('Copied to clipboard!', 'success', 2000);
+        } catch (err) {
+            showToast('Failed to copy to clipboard', 'error', 2000);
+        }
+        document.body.removeChild(textArea);
+    }
 }
 
 // =================== INITIALIZATION ===================
@@ -1081,6 +1308,13 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
 window.addEventListener('load', () => {
     loadProjects();
+    initializeRippleEffects();
+
+    // Add scroll progress listener
+    window.addEventListener('scroll', updateScrollProgress);
+
+    // Initial scroll progress update
+    updateScrollProgress();
 });
 
 window.onclick = function(event) {
