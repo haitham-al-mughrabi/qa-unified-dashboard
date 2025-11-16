@@ -493,13 +493,18 @@
                                 </div>
                             ` : ''}
 
-                            <div class="records-header" onclick="toggleRecordsSection()">
-                                <h4>
-                                    <i class="fas fa-database"></i> Records in this quarter (${quarterData.records.length})
-                                </h4>
-                                <span class="records-toggle-icon" id="records-toggle-icon">
-                                    <i class="fas fa-chevron-down"></i>
-                                </span>
+                            <div class="records-header">
+                                <div onclick="toggleRecordsSection()" style="cursor: pointer; flex: 1; display: flex; align-items: center; gap: 10px;">
+                                    <h4>
+                                        <i class="fas fa-database"></i> Records in this quarter (${quarterData.records.length})
+                                    </h4>
+                                    <span class="records-toggle-icon" id="records-toggle-icon">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </span>
+                                </div>
+                                <button class="btn-delete-all-records" onclick="openDeleteAllModal()">
+                                    <i class="fas fa-trash"></i> Delete All
+                                </button>
                             </div>
                             <div class="records-content" id="records-content">
                                 ${quarterData.records.map(record => {
@@ -752,6 +757,64 @@
             }
         });
 
+        // Delete All Records Functions
+        function openDeleteAllModal() {
+            document.getElementById('deleteAllConfirmInput').value = '';
+            document.getElementById('confirmDeleteAllBtn').disabled = true;
+            document.getElementById('deleteAllConfirmModal').classList.add('active');
+
+            // Focus on the input field after a short delay to allow modal animation
+            setTimeout(() => {
+                document.getElementById('deleteAllConfirmInput').focus();
+            }, 100);
+        }
+
+        function closeDeleteAllModal() {
+            document.getElementById('deleteAllConfirmModal').classList.remove('active');
+            document.getElementById('deleteAllConfirmInput').value = '';
+            document.getElementById('confirmDeleteAllBtn').disabled = true;
+        }
+
+        // Enable/disable delete all button based on input
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteAllConfirmInput = document.getElementById('deleteAllConfirmInput');
+            const confirmDeleteAllBtn = document.getElementById('confirmDeleteAllBtn');
+
+            if (deleteAllConfirmInput && confirmDeleteAllBtn) {
+                deleteAllConfirmInput.addEventListener('input', (e) => {
+                    const inputValue = e.target.value.trim();
+                    if (inputValue === 'delete all') {
+                        confirmDeleteAllBtn.disabled = false;
+                    } else {
+                        confirmDeleteAllBtn.disabled = true;
+                    }
+                });
+            }
+        });
+
+        async function confirmDeleteAllRecords() {
+            try {
+                const data = await fetchJSON(`${API_URL}/records`, {
+                    method: 'DELETE'
+                });
+
+                closeDeleteAllModal();
+                // Reload the dashboard to update all data
+                await loadDashboard();
+            } catch (error) {
+                console.error('Error deleting all records:', error);
+                closeDeleteAllModal();
+            }
+        }
+
+        // Close delete all modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const deleteAllModal = document.getElementById('deleteAllConfirmModal');
+            if (deleteAllModal && event.target === deleteAllModal) {
+                closeDeleteAllModal();
+            }
+        });
+
         // Load dashboard on page load
         loadDashboard();
 
@@ -797,6 +860,44 @@
                 <button class="btn-confirm-delete" id="confirmDeleteBtn" onclick="confirmDeleteRecord()" disabled>
                     <i class="fas fa-trash-alt"></i>
                     Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete All Records Confirmation Modal -->
+    <div class="confirm-modal" id="deleteAllConfirmModal">
+        <div class="confirm-content">
+            <div class="confirm-header">
+                <div class="confirm-icon" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="confirm-header-text">
+                    <h3>Delete All Records</h3>
+                    <p>This action is permanent and cannot be undone</p>
+                </div>
+            </div>
+            <div class="confirm-body">
+                <p>This will permanently delete <strong>all records</strong> from the database.</p>
+                <p style="margin-top: 0.75rem; color: var(--danger); font-size: 0.9rem; font-weight: 600;">
+                    <i class="fas fa-warning"></i> All data associated with these records will be permanently removed.
+                </p>
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label" style="color: var(--gray-900); font-size: 0.875rem;">
+                        <i class="fas fa-keyboard"></i>
+                        Type <strong>delete all</strong> to confirm this action
+                    </label>
+                    <input type="text" id="deleteAllConfirmInput" class="form-input" placeholder="Type 'delete all' to confirm" autocomplete="off">
+                </div>
+            </div>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeDeleteAllModal()">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button class="btn-confirm-delete" id="confirmDeleteAllBtn" onclick="confirmDeleteAllRecords()" disabled>
+                    <i class="fas fa-trash-alt"></i>
+                    Delete All Records
                 </button>
             </div>
         </div>

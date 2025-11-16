@@ -1009,6 +1009,32 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+.btn-delete-all-records {
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  white-space: nowrap;
+}
+
+.btn-delete-all-records:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+}
+
+.btn-delete-all-records:active {
+  transform: translateY(0);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .period-navigation {

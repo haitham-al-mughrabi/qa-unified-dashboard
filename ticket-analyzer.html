@@ -43,22 +43,53 @@
             <div class="upload-area" id="uploadArea">
                 <div class="upload-icon"><i class="fas fa-file-excel"></i></div>
                 <div class="upload-text">
-                    <h3>Upload Excel File</h3>
-                    <p>Drag and drop your file here or click to browse</p>
+                    <h3>Upload Excel Files</h3>
+                    <p>Drag and drop one or more files here or click to browse</p>
                 </div>
-                <input type="file" id="fileInput" class="file-input" accept=".xlsx, .xls">
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx, .xls" multiple>
                 <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                    <i class="fas fa-upload"></i> Choose File
+                    <i class="fas fa-upload"></i> Choose Files
                 </button>
             </div>
+
+            <!-- File Queue Display -->
+            <div class="file-queue" id="fileQueue" style="display: none;">
+                <div class="queue-header">
+                    <h4><i class="fas fa-list"></i> Selected Files</h4>
+                    <button class="btn-clear-queue" onclick="clearFileQueue()" title="Clear all files">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                <div class="queue-list" id="queueList"></div>
+                <div class="queue-actions">
+                    <button class="btn-cancel-queue" onclick="clearFileQueue()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-process-queue" onclick="processFileQueue()">
+                        <i class="fas fa-play"></i> Process Files
+                    </button>
+                </div>
+            </div>
+
             <div class="file-name" id="fileName"></div>
         </div>
 
         <!-- Loading State -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <h3>Processing your file...</h3>
-            <p>This may take a moment</p>
+            <h3 id="loadingTitle">Processing your file...</h3>
+            <p id="loadingText">This may take a moment</p>
+
+            <!-- Progress Indicator for Multiple Files -->
+            <div class="file-progress" id="fileProgress" style="display: none;">
+                <div class="progress-info">
+                    <span id="progressCounter">0 of 0</span>
+                    <span id="currentFileName" class="current-file"></span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Messages -->
@@ -175,8 +206,13 @@
             }
         }
 
+        // File queue management
+        let fileQueue = [];
+        let currentFileIndex = 0;
+        let allAggregatedResults = [];
+
         // File input event listener
-        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+        document.getElementById('fileInput').addEventListener('change', handleFileSelection);
 
         // Drag and drop functionality
         const uploadArea = document.getElementById('uploadArea');
@@ -197,17 +233,61 @@
             const files = e.dataTransfer.files;
             if (files.length > 0) {
                 document.getElementById('fileInput').files = files;
-                handleFileUpload({ target: { files } });
+                handleFileSelection({ target: { files } });
             }
         });
 
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        function handleFileSelection(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
 
-            currentFileName = file.name;
-            document.getElementById('fileName').textContent = `Selected: ${file.name}`;
-            document.getElementById('loading').classList.add('active');
+            fileQueue = Array.from(files);
+            displayFileQueue();
+        }
+
+        function displayFileQueue() {
+            const queueElement = document.getElementById('fileQueue');
+            const queueList = document.getElementById('queueList');
+
+            if (fileQueue.length === 0) {
+                queueElement.style.display = 'none';
+                document.getElementById('fileName').textContent = '';
+                return;
+            }
+
+            queueList.innerHTML = fileQueue.map((file, index) => `
+                <div class="queue-item">
+                    <div class="queue-item-info">
+                        <i class="fas fa-file-excel"></i>
+                        <span class="queue-item-name">${file.name}</span>
+                        <span class="queue-item-size">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    </div>
+                    <button class="queue-item-remove" onclick="removeFileFromQueue(${index})" title="Remove file">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            queueElement.style.display = 'block';
+            document.getElementById('fileName').textContent = `${fileQueue.length} file${fileQueue.length !== 1 ? 's' : ''} selected`;
+        }
+
+        function removeFileFromQueue(index) {
+            fileQueue.splice(index, 1);
+            displayFileQueue();
+        }
+
+        function clearFileQueue() {
+            fileQueue = [];
+            document.getElementById('fileInput').value = '';
+            displayFileQueue();
+        }
+
+        function processFileQueue() {
+            if (fileQueue.length === 0) return;
+
+            currentFileIndex = 0;
+            allAggregatedResults = [];
             document.getElementById('errorMessage').classList.remove('active');
             document.getElementById('successMessage').classList.remove('active');
             document.getElementById('summaryContainer').innerHTML = '';
@@ -216,21 +296,128 @@
             document.getElementById('saveBtn').classList.remove('active');
             currentAnalysisData = null;
 
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('fileProgress').style.display = 'block';
+
+            processNextFile();
+        }
+
+        function processNextFile() {
+            if (currentFileIndex >= fileQueue.length) {
+                // All files processed
+                completeFileProcessing();
+                return;
+            }
+
+            const file = fileQueue[currentFileIndex];
+            const fileNumber = currentFileIndex + 1;
+            const totalFiles = fileQueue.length;
+
+            document.getElementById('loadingTitle').textContent = `Processing files...`;
+            document.getElementById('loadingText').textContent = `File ${fileNumber} of ${totalFiles}`;
+            document.getElementById('progressCounter').textContent = `${fileNumber} of ${totalFiles}`;
+            document.getElementById('currentFileName').textContent = file.name;
+            const progressPercent = (fileNumber / totalFiles) * 100;
+            document.getElementById('progressBarFill').style.width = `${progressPercent}%`;
+
             const reader = new FileReader();
 
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-                    processWorkbook(workbook);
-                    document.getElementById('loading').classList.remove('active');
+                    processWorkbookForQueue(workbook, file.name);
+                    currentFileIndex++;
+                    processNextFile();
                 } catch (error) {
-                    showError('Error processing file: ' + error.message);
-                    document.getElementById('loading').classList.remove('active');
+                    showError(`Error processing file "${file.name}": ${error.message}`);
+                    currentFileIndex++;
+                    processNextFile();
                 }
             };
 
             reader.readAsArrayBuffer(file);
+        }
+
+        function processWorkbookForQueue(workbook, fileName) {
+            workbook.SheetNames.forEach(sheetName => {
+                const sheet = workbook.Sheets[sheetName];
+                const data = XLSX.utils.sheet_to_json(sheet);
+
+                const result = analyzeSheet(sheetName, data);
+                if (result) {
+                    result.fileName = fileName;
+                    result.sheetName = sheetName;
+                    allAggregatedResults.push(result);
+                }
+            });
+        }
+
+        function completeFileProcessing() {
+            document.getElementById('loading').classList.remove('active');
+            document.getElementById('fileProgress').style.display = 'none';
+
+            if (allAggregatedResults.length === 0) {
+                showError('No valid data found in any of the Excel files. Please ensure the files contain the required columns.');
+                return;
+            }
+
+            // Aggregate all results
+            let totalTickets = 0;
+            let totalResolvedIn2Days = 0;
+            const aggregatedResults = [];
+            const monthDataMap = {};
+
+            // Combine all sheet results from all files
+            allAggregatedResults.forEach(sheetResult => {
+                totalTickets += sheetResult.totalTickets;
+                totalResolvedIn2Days += sheetResult.resolvedIn2Days;
+
+                // Use display name (which is typically the month name like "April", "May", etc)
+                const monthKey = sheetResult.displayName;
+
+                if (!monthDataMap[monthKey]) {
+                    monthDataMap[monthKey] = {
+                        month: monthKey,
+                        displayName: monthKey,
+                        totalTickets: 0,
+                        resolvedIn2Days: 0,
+                        sourceFiles: []
+                    };
+                }
+
+                monthDataMap[monthKey].totalTickets += sheetResult.totalTickets;
+                monthDataMap[monthKey].resolvedIn2Days += sheetResult.resolvedIn2Days;
+                if (sheetResult.fileName && !monthDataMap[monthKey].sourceFiles.includes(sheetResult.fileName)) {
+                    monthDataMap[monthKey].sourceFiles.push(sheetResult.fileName);
+                }
+            });
+
+            // Convert to array and sort by month order
+            const aggregatedResultsArray = Object.values(monthDataMap);
+            aggregatedResultsArray.forEach(result => {
+                // Calculate success rate for each month
+                result.successRate = result.totalTickets > 0 ? ((result.resolvedIn2Days / result.totalTickets) * 100).toFixed(2) : 0;
+            });
+
+            aggregatedResultsArray.sort((a, b) => {
+                const monthOrder = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
+            });
+
+            displaySummary(totalTickets, totalResolvedIn2Days);
+            displayResults(aggregatedResultsArray);
+
+            currentAnalysisData = {
+                totalTickets,
+                totalResolvedIn2Days,
+                results: aggregatedResultsArray,
+                isMultiFile: true,
+                fileCount: fileQueue.length,
+                files: fileQueue.map(f => f.name)
+            };
+
+            document.getElementById('saveBtn').classList.add('active');
         }
 
         function processWorkbook(workbook) {
@@ -611,6 +798,14 @@
             const successRate = totalTickets > 0 ? ((totalResolvedIn2Days / totalTickets) * 100).toFixed(2) : 0;
 
             try {
+                // Generate filename for multi-file case
+                let filename = currentFileName;
+                if (currentAnalysisData.isMultiFile) {
+                    const fileCount = currentAnalysisData.fileCount;
+                    const timestamp = new Date().toISOString().split('T')[0];
+                    filename = `Multi-File Analysis (${fileCount} files) - ${timestamp}`;
+                }
+
                 const data = await fetchJSON(`${API_URL}/records`, {
                     method: 'POST',
                     headers: {
@@ -618,7 +813,7 @@
                     },
                     body: JSON.stringify({
                         project_id: projectId,
-                        filename: currentFileName,
+                        filename: filename,
                         year: parseInt(year),
                         months: selectedMonths,
                         total_tickets: totalTickets,
