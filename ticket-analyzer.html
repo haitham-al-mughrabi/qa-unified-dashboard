@@ -339,7 +339,46 @@
             reader.readAsArrayBuffer(file);
         }
 
+        function extractMonthFromFileName(fileName) {
+            // Try to extract month from file name patterns like "SLA -Aug-", "SLA -Jul-", etc.
+            const monthNames = ['january', 'february', 'march', 'april', 'may', 'june',
+                              'july', 'august', 'september', 'october', 'november', 'december',
+                              'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+            const lowerFileName = fileName.toLowerCase();
+
+            for (let month of monthNames) {
+                // Look for patterns like "-Aug-", "-Aug ", "Aug-", "Aug "
+                if (lowerFileName.includes(`-${month}-`) ||
+                    lowerFileName.includes(`-${month} `) ||
+                    lowerFileName.includes(` ${month}-`) ||
+                    lowerFileName.includes(` ${month} `)) {
+
+                    // Return properly capitalized month name
+                    const fullMonths = {
+                        'jan': 'January', 'january': 'January',
+                        'feb': 'February', 'february': 'February',
+                        'mar': 'March', 'march': 'March',
+                        'apr': 'April', 'april': 'April',
+                        'may': 'May',
+                        'jun': 'June', 'june': 'June',
+                        'jul': 'July', 'july': 'July',
+                        'aug': 'August', 'august': 'August',
+                        'sep': 'September', 'september': 'September',
+                        'oct': 'October', 'october': 'October',
+                        'nov': 'November', 'november': 'November',
+                        'dec': 'December', 'december': 'December'
+                    };
+                    return fullMonths[month] || null;
+                }
+            }
+
+            return null;
+        }
+
         function processWorkbookForQueue(workbook, fileName) {
+            const monthFromFileName = extractMonthFromFileName(fileName);
+
             workbook.SheetNames.forEach(sheetName => {
                 const sheet = workbook.Sheets[sheetName];
                 const data = XLSX.utils.sheet_to_json(sheet);
@@ -348,6 +387,10 @@
                 if (result) {
                     result.fileName = fileName;
                     result.sheetName = sheetName;
+                    // Use extracted month if available, otherwise use sheet name
+                    if (monthFromFileName) {
+                        result.displayName = monthFromFileName;
+                    }
                     allAggregatedResults.push(result);
                 }
             });
@@ -356,6 +399,13 @@
         function completeFileProcessing() {
             document.getElementById('loading').classList.remove('active');
             document.getElementById('fileProgress').style.display = 'none';
+
+            // Check if allAggregatedResults exists and is an array
+            if (!Array.isArray(allAggregatedResults)) {
+                console.error('Error: allAggregatedResults is not an array', allAggregatedResults);
+                showError('Internal error: allAggregatedResults is not initialized properly.');
+                return;
+            }
 
             if (allAggregatedResults.length === 0) {
                 showError('No valid data found in any of the Excel files. Please ensure the files contain the required columns.');
@@ -369,9 +419,10 @@
             const monthDataMap = {};
 
             // Combine all sheet results from all files
-            allAggregatedResults.forEach(sheetResult => {
-                totalTickets += sheetResult.totalTickets;
-                totalResolvedIn2Days += sheetResult.resolvedIn2Days;
+            try {
+                allAggregatedResults.forEach(sheetResult => {
+                    totalTickets += sheetResult.totalTickets;
+                    totalResolvedIn2Days += sheetResult.resolvedIn2Days;
 
                 // Use display name (which is typically the month name like "April", "May", etc)
                 const monthKey = sheetResult.displayName;
@@ -392,6 +443,11 @@
                     monthDataMap[monthKey].sourceFiles.push(sheetResult.fileName);
                 }
             });
+            } catch (error) {
+                console.error('Error processing aggregated results:', error);
+                showError('Error processing file data: ' + error.message);
+                return;
+            }
 
             // Convert to array and sort by month order
             const aggregatedResultsArray = Object.values(monthDataMap);
