@@ -760,7 +760,15 @@ function getMonthNumber(month) {
     };
 
     const monthLower = String(month).toLowerCase().trim();
-    return monthMap[monthLower] || parseInt(month) || 0;
+
+    // Try to find month in the string (e.g., "Apr 2025" or "April 2025")
+    for (const [monthName, monthNumber] of Object.entries(monthMap)) {
+        if (monthLower.startsWith(monthName)) {
+            return monthNumber;
+        }
+    }
+
+    return parseInt(month) || 0;
 }
 
 // Get comprehensive project statistics
@@ -792,10 +800,15 @@ app.get('/api/project-statistics/:projectId', async (req, res) => {
 
                 if (Array.isArray(analysisData)) {
                     analysisData.forEach(monthData => {
-                        const monthNum = getMonthNumber(monthData.month);
+                        // Use displayName to extract month number, fallback to month field
+                        const monthNum = getMonthNumber(monthData.displayName || monthData.month);
                         const quarter = Math.ceil(monthNum / 3);
                         const quarterKey = `Q${quarter}`;
                         const recordYear = row.year;
+
+                        const totalTickets = monthData.totalTickets || 0;
+                        const resolvedIn2Days = monthData.resolvedIn2Days || 0;
+                        const resolvedAfter2Days = monthData.resolvedAfter2Days || (totalTickets - resolvedIn2Days);
 
                         const record = {
                             id: row.id,
@@ -807,10 +820,10 @@ app.get('/api/project-statistics/:projectId', async (req, res) => {
                             month: monthNum,
                             quarter: quarterKey,
                             displayName: monthData.displayName,
-                            total_tickets: monthData.totalTickets || 0,
-                            resolved_in_2days: monthData.resolvedIn2Days || 0,
-                            resolved_after_2days: monthData.resolvedAfter2Days || 0,
-                            success_rate: parseFloat(monthData.successRate) || 0
+                            total_tickets: totalTickets,
+                            resolved_in_2days: resolvedIn2Days,
+                            resolved_after_2days: resolvedAfter2Days,
+                            success_rate: parseFloat(monthData.percentage || monthData.successRate) || 0
                         };
 
                         allRecords.push(record);
@@ -839,12 +852,14 @@ app.get('/api/project-statistics/:projectId', async (req, res) => {
                                 resolved_in_2days: 0,
                                 resolved_after_2days: 0,
                                 success_rate: 0,
-                                months: []
+                                months: [],
+                                records: []
                             };
                         }
                         quarterlyData[qKey].total_tickets += record.total_tickets;
                         quarterlyData[qKey].resolved_in_2days += record.resolved_in_2days;
                         quarterlyData[qKey].resolved_after_2days += record.resolved_after_2days;
+                        quarterlyData[qKey].records.push(record);
 
                         // Aggregate by month
                         const mKey = `${recordYear}-${monthNum}`;
@@ -897,19 +912,47 @@ app.get('/api/project-statistics/:projectId', async (req, res) => {
             success_rate: 0
         };
 
-        // Get current year quarters
+        // Get current year months
+        const currentMonths = Object.values(monthlyData)
+            .filter(m => m.year === year)
+            .sort((a, b) => a.month - b.month);
+
+        // Get current year quarters and populate with nested months
         const currentQuarters = Object.values(quarterlyData)
             .filter(q => q.year === year)
             .sort((a, b) => {
                 const qA = parseInt(a.quarter.substring(1));
                 const qB = parseInt(b.quarter.substring(1));
                 return qA - qB;
+            })
+            .map(quarter => {
+                // Create months object keyed by displayName for this quarter
+                const quarterMonths = {};
+                currentMonths.forEach(month => {
+                    // Check if month belongs to this quarter
+                    const monthQuarter = Math.ceil(month.month / 3);
+                    if (monthQuarter === parseInt(quarter.quarter.substring(1))) {
+                        quarterMonths[month.displayName] = {
+                            name: month.displayName,
+                            total_tickets: month.total_tickets,
+                            resolved_in_2days: month.resolved_in_2days,
+                            resolved_after_2days: month.resolved_after_2days,
+                            success_rate: month.success_rate,
+                            month: month.month
+                        };
+                    }
+                });
+                return {
+                    ...quarter,
+                    months: quarterMonths
+                };
             });
 
-        // Get current year months
-        const currentMonths = Object.values(monthlyData)
-            .filter(m => m.year === year)
-            .sort((a, b) => a.month - b.month);
+        // Convert quarters array to object indexed by quarter name for dashboard.html
+        const quartersObject = {};
+        currentQuarters.forEach(quarter => {
+            quartersObject[quarter.quarter] = quarter;
+        });
 
         res.json({
             success: true,
@@ -921,7 +964,8 @@ app.get('/api/project-statistics/:projectId', async (req, res) => {
             currentYear: {
                 year: year,
                 data: currentYearData,
-                quarters: currentQuarters,
+                quarters: quartersObject,
+                quartersArray: currentQuarters,
                 months: currentMonths
             },
             allYears: Object.values(yearlyData).sort((a, b) => b.year - a.year),

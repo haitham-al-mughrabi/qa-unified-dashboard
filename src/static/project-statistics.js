@@ -307,7 +307,7 @@ async function loadYearData() {
 }
 
 function updateOverviewDisplay(yearData) {
-    const { year, data, quarters, months } = yearData;
+    const { year, data, quartersArray, months } = yearData;
 
     // Update year label
     document.getElementById('currentYearLabel').textContent = year;
@@ -322,7 +322,7 @@ function updateOverviewDisplay(yearData) {
     updateYearCharts(data);
 
     // Update quarterly breakdown
-    updateQuarterlyDisplay(quarters);
+    updateQuarterlyDisplay(quartersArray);
 
     // Update monthly breakdown
     updateMonthlyDisplay(months);
