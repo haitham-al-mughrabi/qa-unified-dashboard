@@ -66,7 +66,8 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000/api';
+        // Dynamically construct API URL based on current domain (works with localhost, ngrok, etc.)
+        const API_URL = `${window.location.protocol}//${window.location.host}/api`;
         let dashboardData = {};
         let currentYearByProject = {};
         let currentQuarterByProject = {};
