@@ -452,8 +452,8 @@
             // Convert to array and sort by month order
             const aggregatedResultsArray = Object.values(monthDataMap);
             aggregatedResultsArray.forEach(result => {
-                // Calculate success rate for each month
-                result.successRate = result.totalTickets > 0 ? ((result.resolvedIn2Days / result.totalTickets) * 100).toFixed(2) : 0;
+                // Calculate success rate for each month (use 'percentage' for consistency with displayResults)
+                result.percentage = result.totalTickets > 0 ? ((result.resolvedIn2Days / result.totalTickets) * 100).toFixed(2) : 0;
             });
 
             aggregatedResultsArray.sort((a, b) => {
