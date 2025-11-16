@@ -510,8 +510,11 @@
             if (monthName) {
                 const input = document.getElementById(`monthName_${index}`);
                 if (input) {
-                    input.value = monthName;
-                    currentAnalysisData.results[index].displayName = monthName;
+                    // Get the year from the year input field and append it to month name
+                    const year = document.getElementById('yearInput').value;
+                    const monthWithYear = year ? `${monthName} ${year}` : monthName;
+                    input.value = monthWithYear;
+                    currentAnalysisData.results[index].displayName = monthWithYear;
                 }
             }
         }
@@ -555,7 +558,12 @@
             checkboxes.forEach(cb => {
                 const index = parseInt(cb.dataset.index);
                 const monthNameInput = document.getElementById(`monthName_${index}`);
-                const customName = monthNameInput ? monthNameInput.value : currentAnalysisData.results[index].displayName;
+                let customName = monthNameInput ? monthNameInput.value : currentAnalysisData.results[index].displayName;
+
+                // Ensure year is included in month name for proper parsing on backend
+                if (customName && !customName.includes(year)) {
+                    customName = `${customName} ${year}`;
+                }
 
                 selectedMonths.push(customName);
 

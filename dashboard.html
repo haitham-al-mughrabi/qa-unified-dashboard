@@ -338,10 +338,12 @@
             // Check if current quarter has data
             const quarterData = yearData.quarters[currentQuarter];
 
+            const defaultColor = '#6366f1';
+
             let html = `
                 <div class="project-section">
-                    <div class="project-header" style="border-bottom-color: ${project.project_color}">
-                        <div class="project-name" style="color: ${project.project_color}">
+                    <div class="project-header" style="border-bottom-color: ${defaultColor}">
+                        <div class="project-name" style="color: ${defaultColor}">
                             <i class="fas fa-project-diagram"></i>
                             ${project.project_name}
                         </div>
@@ -369,8 +371,8 @@
             const successRate = quarterData.success_rate;
 
             html += `
-                    <div class="quarter-card" style="border-left-color: ${project.project_color}">
-                        <div class="quarter-title" style="color: ${project.project_color}">
+                    <div class="quarter-card" style="border-left-color: ${defaultColor}">
+                        <div class="quarter-title" style="color: ${defaultColor}">
                             <i class="fas fa-calendar-alt"></i>
                             ${currentQuarter}
                         </div>
@@ -415,46 +417,44 @@
                                 <div class="progress-value">${successRate}%</div>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${successRate}%; background: ${project.project_color}"></div>
+                                <div class="progress-fill" style="width: ${successRate}%; background: ${defaultColor}"></div>
                             </div>
                         </div>
 
                         <div class="details-section">
                             ${quarterData.months && Object.keys(quarterData.months).length > 0 ? `
                                 <div class="monthly-breakdown">
-                                    <h4 style="color: ${project.project_color}"><i class="fas fa-calendar-week"></i> Monthly Breakdown</h4>
+                                    <h4 style="color: ${defaultColor}"><i class="fas fa-calendar-week"></i> Monthly Breakdown</h4>
                                     <div class="monthly-tabs">
-                                        ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-                                            .filter(month => quarterData.months[month])
-                                            .map((month, index) => {
-                                                const monthData = quarterData.months[month];
+                                        ${Object.keys(quarterData.months)
+                                            .map((monthKey, index) => {
+                                                const monthData = quarterData.months[monthKey];
                                                 const monthSuccessRate = parseFloat(monthData.success_rate || 0);
                                                 const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
                                                 const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
                                                 return `
                                                     <button class="month-tab-btn ${index === 0 ? 'active' : ''}"
                                                             style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};"
-                                                            onclick="switchMonth('${month}')">
+                                                            onclick="switchMonth('${monthKey}')">
                                                         <i class="fas fa-calendar-day"></i>
-                                                        ${month}
+                                                        ${monthKey}
                                                     </button>
                                                 `;
                                             }).join('')}
                                     </div>
                                     <div class="months-grid">
-                                        ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-                                            .filter(month => quarterData.months[month])
-                                            .map((month, index) => {
-                                                const monthData = quarterData.months[month];
+                                        ${Object.keys(quarterData.months)
+                                            .map((monthKey, index) => {
+                                                const monthData = quarterData.months[monthKey];
                                                 const monthSuccessRate = parseFloat(monthData.success_rate || 0);
                                                 const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
                                                 const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
                                                 return `
-                                                    <div class="month-card ${index === 0 ? 'active' : ''}" id="month-${month}" style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};">
+                                                    <div class="month-card ${index === 0 ? 'active' : ''}" id="month-${monthKey.replace(/\s+/g, '-')}" style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};">
                                                         <div class="month-header">
                                                             <div class="month-title">
                                                                 <i class="fas fa-calendar-day"></i>
-                                                                ${month}
+                                                                ${monthKey}
                                                             </div>
                                                             <div class="month-success-badge">
                                                                 ${monthSuccessRate}%
@@ -586,6 +586,9 @@
         }
 
         function switchMonth(monthName) {
+            // Convert month name to ID format (spaces to hyphens)
+            const monthId = monthName.replace(/\s+/g, '-');
+
             // Hide all month cards
             const allMonthCards = document.querySelectorAll('.month-card');
             allMonthCards.forEach(card => {
@@ -593,7 +596,7 @@
             });
 
             // Show selected month card
-            const selectedMonthCard = document.getElementById(`month-${monthName}`);
+            const selectedMonthCard = document.getElementById(`month-${monthId}`);
             if (selectedMonthCard) {
                 selectedMonthCard.classList.add('active');
             }

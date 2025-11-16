@@ -1,14 +1,21 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const mysql = require('mysql2/promise');
 
-// Database connection
-const db = new sqlite3.Database('./qa_dashboard.db', (err) => {
-    if (err) {
-        console.error('Error opening database:', err);
-        process.exit(1);
-    }
-    console.log('Connected to database');
-});
+// Database configuration (must match Docker compose environment variables)
+const dbConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 3306,
+    user: process.env.DB_USER || 'qa_user',
+    password: process.env.DB_PASSWORD || 'qa_password',
+    database: process.env.DB_NAME || 'qa_dashboard'
+};
+
+let pool;
+
+// Initialize connection pool
+async function initializePool() {
+    pool = mysql.createPool(dbConfig);
+    console.log('Connected to MySQL database');
+}
 
 // Project configurations
 const projects = [
@@ -78,55 +85,42 @@ function generateAnalysisData(months, year) {
 }
 
 // Clear existing data
-function clearData() {
-    return new Promise((resolve, reject) => {
-        db.serialize(() => {
-            db.run('DELETE FROM analysis_records', (err) => {
-                if (err) reject(err);
-            });
-            db.run('DELETE FROM projects', (err) => {
-                if (err) reject(err);
-                else {
-                    console.log('Cleared existing data');
-                    resolve();
-                }
-            });
-        });
-    });
+async function clearData() {
+    const connection = await pool.getConnection();
+    try {
+        await connection.execute('DELETE FROM analysis_records');
+        await connection.execute('DELETE FROM projects');
+        console.log('Cleared existing data');
+    } finally {
+        connection.release();
+    }
 }
 
 // Insert projects
-function insertProjects() {
-    return new Promise((resolve, reject) => {
+async function insertProjects() {
+    const connection = await pool.getConnection();
+    try {
         const projectIds = [];
-        let completed = 0;
 
-        projects.forEach((project, index) => {
-            db.run(
+        for (const project of projects) {
+            const [result] = await connection.execute(
                 'INSERT INTO projects (name, description) VALUES (?, ?)',
-                [project.name, project.description],
-                function(err) {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    projectIds[index] = this.lastID;
-                    completed++;
-
-                    if (completed === projects.length) {
-                        console.log(`Created ${projects.length} projects`);
-                        resolve(projectIds);
-                    }
-                }
+                [project.name, project.description]
             );
-        });
-    });
+            projectIds.push(result.insertId);
+        }
+
+        console.log(`Created ${projects.length} projects`);
+        return projectIds;
+    } finally {
+        connection.release();
+    }
 }
 
 // Generate records for a project
-function generateRecordsForProject(projectId, projectName, startYear, endYear) {
-    return new Promise((resolve, reject) => {
-        const records = [];
+async function generateRecordsForProject(projectId, projectName, startYear, endYear) {
+    const connection = await pool.getConnection();
+    try {
         const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
 
         // Randomly decide which years to cover for this project
@@ -150,28 +144,24 @@ function generateRecordsForProject(projectId, projectName, startYear, endYear) {
             yearsToGenerate.sort();
         }
 
-        let recordsCreated = 0;
-        let totalRecordsToCreate = 0;
-
-        // First, calculate total records to create
+        // Generate quarters to create
         const quartersToGenerate = [];
         yearsToGenerate.forEach(year => {
             quarters.forEach(quarter => {
                 // 75% chance to include this quarter
                 if (Math.random() < 0.75) {
                     quartersToGenerate.push({ year, quarter });
-                    totalRecordsToCreate++;
                 }
             });
         });
 
-        if (totalRecordsToCreate === 0) {
-            resolve();
+        if (quartersToGenerate.length === 0) {
             return;
         }
 
         // Generate records
-        quartersToGenerate.forEach(({ year, quarter }) => {
+        let recordsCreated = 0;
+        for (const { year, quarter } of quartersToGenerate) {
             const months = getRandomMonthsForQuarter(quarter);
             const analysisData = generateAnalysisData(months, year);
 
@@ -181,7 +171,7 @@ function generateRecordsForProject(projectId, projectName, startYear, endYear) {
 
             const filename = `${projectName}_${year}_${quarter}_Report.xlsx`;
 
-            db.run(
+            await connection.execute(
                 `INSERT INTO analysis_records
                 (project_id, filename, year, months, total_tickets, resolved_in_2days, success_rate, analysis_data)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -194,22 +184,15 @@ function generateRecordsForProject(projectId, projectName, startYear, endYear) {
                     resolvedIn2Days,
                     successRate,
                     JSON.stringify(analysisData)
-                ],
-                function(err) {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    recordsCreated++;
-
-                    if (recordsCreated === totalRecordsToCreate) {
-                        console.log(`  - Created ${recordsCreated} records for ${projectName}`);
-                        resolve();
-                    }
-                }
+                ]
             );
-        });
-    });
+            recordsCreated++;
+        }
+
+        console.log(`  - Created ${recordsCreated} records for ${projectName}`);
+    } finally {
+        connection.release();
+    }
 }
 
 // Main execution
@@ -217,6 +200,9 @@ async function generateTestData() {
     console.log('Starting test data generation...\n');
 
     try {
+        // Initialize database connection
+        await initializePool();
+
         // Clear existing data
         await clearData();
 
@@ -240,12 +226,10 @@ async function generateTestData() {
     } catch (error) {
         console.error('Error generating test data:', error);
     } finally {
-        db.close((err) => {
-            if (err) {
-                console.error('Error closing database:', err);
-            }
-            process.exit(0);
-        });
+        if (pool) {
+            await pool.end();
+        }
+        process.exit(0);
     }
 }
 

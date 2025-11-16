@@ -9,14 +9,15 @@ A comprehensive ticket resolution analytics dashboard with project management an
 - **Month Selection**: Choose specific months to save from your analysis
 - **Year Tracking**: Track data across different years
 - **Real-time Dashboard**: View all saved records with filtering options
-- **SQLite Database**: Persistent storage with a real backend server
+- **MySQL Database**: Persistent storage with a real backend server (containerized with Docker)
 - **Beautiful UI**: Modern, responsive design with gradients and animations
 
 ## System Architecture
 
 ### Backend
 - **Node.js + Express**: RESTful API server
-- **SQLite3**: Real database for persistent storage
+- **MySQL 8.0**: Real database for persistent storage (containerized)
+- **Docker & Docker Compose**: Container orchestration
 - **CORS enabled**: For local development
 
 ### Frontend
@@ -26,12 +27,41 @@ A comprehensive ticket resolution analytics dashboard with project management an
 
 ## Installation
 
-1. **Install Dependencies**:
+### Prerequisites
+- Docker and Docker Compose installed
+
+### Setup
+
+1. **Start with Docker Compose**:
+   ```bash
+   docker-compose up -d
+   ```
+
+   This will start both the MySQL database and Node.js application containers.
+
+2. **Access the Application**:
+   - Ticket Analyzer: http://localhost:3000
+   - Dashboard: http://localhost:3000/dashboard
+   - Projects: http://localhost:3000/projects
+
+### (Optional) Local Development Setup
+
+If you prefer to run without Docker:
+
+1. **Install MySQL 8.0** locally and ensure it's running
+2. **Install Node Dependencies**:
    ```bash
    npm install
    ```
-
-2. **Start the Server**:
+3. **Set Database Environment Variables**:
+   ```bash
+   export DB_HOST=localhost
+   export DB_PORT=3306
+   export DB_USER=qa_user
+   export DB_PASSWORD=qa_password
+   export DB_NAME=qa_dashboard
+   ```
+4. **Start the Server**:
    ```bash
    npm start
    ```
@@ -40,11 +70,6 @@ A comprehensive ticket resolution analytics dashboard with project management an
    ```bash
    npm run dev
    ```
-
-3. **Access the Application**:
-   - Ticket Analyzer: http://localhost:3000
-   - Dashboard: http://localhost:3000/dashboard
-   - Projects: http://localhost:3000/projects
 
 ## Usage Guide
 
@@ -154,21 +179,29 @@ Date formats supported:
 
 ```
 qa-unified-dashboard/
-├── server.js              # Backend server
-├── package.json           # Dependencies
-├── qa_dashboard.db        # SQLite database (auto-created)
-├── ticket-analyzer.html   # Main analysis page
-├── dashboard.html         # Records dashboard
-├── projects.html          # Project management
-└── README.md             # This file
+├── server.js                    # Backend server
+├── package.json                 # Dependencies
+├── docker-compose.yml           # Docker Compose configuration
+├── Dockerfile                   # Container image definition
+├── generate-test-data.js        # Test data generator
+├── ticket-analyzer.html         # Main analysis page
+├── dashboard.html               # Records dashboard
+├── projects.html                # Project management
+├── project-statistics.html      # Project statistics page
+├── src/static/                  # Static assets
+│   ├── dashboard.css            # Dashboard styles
+│   ├── footer.css               # Footer styles
+│   └── ...                      # Other stylesheets
+└── README.md                    # This file
 ```
 
 ## Technologies Used
 
-- **Backend**: Node.js, Express, SQLite3, CORS, Body-Parser
+- **Backend**: Node.js, Express, MySQL 8.0, Docker, CORS, Body-Parser
 - **Frontend**: HTML5, CSS3, JavaScript ES6+
 - **Libraries**: XLSX.js for Excel processing
-- **Database**: SQLite
+- **Database**: MySQL 8.0 (containerized)
+- **Container**: Docker & Docker Compose
 
 ## Development
 

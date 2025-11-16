@@ -10,12 +10,12 @@ The QA Unified Dashboard is a comprehensive ticket resolution analytics dashboar
 - **Month Selection**: Choose specific months to save from your analysis
 - **Year Tracking**: Track data across different years
 - **Real-time Dashboard**: View all saved records with filtering options
-- **SQLite Database**: Persistent storage with a real backend server
+- **MySQL Database**: Persistent storage with a real backend server (containerized with Docker)
 - **Beautiful UI**: Modern, responsive design with gradients and animations
 
 ### Architecture:
 - **Backend**: Node.js + Express web server with RESTful API
-- **Database**: SQLite3 for persistent storage
+- **Database**: MySQL 8.0 for persistent storage (containerized)
 - **Frontend**: HTML/CSS/JavaScript with vanilla JavaScript (no frameworks)
 - **Libraries**: XLSX.js for Excel file processing, Font Awesome for icons
 
@@ -23,9 +23,10 @@ The QA Unified Dashboard is a comprehensive ticket resolution analytics dashboar
 
 ```
 qa-unified-dashboard/
-├── server.js              # Backend server with Express and SQLite
+├── server.js              # Backend server with Express and MySQL
 ├── package.json           # Dependencies and scripts
-├── qa_dashboard.db        # SQLite database (auto-created)
+├── docker-compose.yml     # Docker Compose configuration
+├── Dockerfile             # Container image definition
 ├── ticket-analyzer.html   # Main analysis page for Excel uploads
 ├── dashboard.html         # Records dashboard with filtering
 ├── projects.html          # Project management interface
@@ -47,7 +48,7 @@ qa-unified-dashboard/
 ### Backend Technologies
 - **Node.js**: JavaScript runtime environment
 - **Express**: Web application framework
-- **SQLite3**: Lightweight database engine
+- **MySQL2**: Promise-based MySQL client
 - **CORS**: Cross-Origin Resource Sharing middleware
 - **Body Parser**: Middleware for parsing request bodies
 - **Nodemon**: Development tool for auto-restart on file changes
@@ -211,7 +212,7 @@ When saving analysis data, users can customize month names:
 - Database indexing for quick queries
 
 ### Security
-- Local SQLite database (data stays on user's machine)
+- MySQL database in Docker container (centralized data management)
 - No external API calls (except CDN libraries)
 - No authentication required (local use only)
 - Input validation on both client and server
@@ -222,7 +223,7 @@ The application is designed to be easily customizable:
 - CSS variables for consistent theming
 - Clear API structure for backend modifications
 - Modular JavaScript for frontend enhancements
-- SQLite database for simple data management
+- MySQL database with Docker containerization for scalability
 
 ## Testing and Data Generation
 
