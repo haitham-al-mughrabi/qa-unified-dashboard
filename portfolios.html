@@ -174,9 +174,24 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <p>&copy; 2024 QA Analytics Dashboard. All rights reserved.</p>
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-developer">
+                    <i class="fas fa-user-tie"></i> Developed by: <strong>Haitham Al Mughrabi</strong>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-company">
+                    <div class="footer-company-header">
+                        <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
+                    </div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -187,6 +202,8 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Set current year in footer
+            document.getElementById('year').textContent = new Date().getFullYear();
             loadPortfolios();
 
             // Color picker change handler
