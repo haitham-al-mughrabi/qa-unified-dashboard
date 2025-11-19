@@ -254,7 +254,7 @@ app.get('/api/portfolios/:id', async (req, res) => {
 // Create portfolio
 app.post('/api/portfolios', async (req, res) => {
     try {
-        const { name, description, color } = req.body;
+        const { name, description } = req.body;
 
         if (!name) {
             res.status(400).json({ error: 'Portfolio name is required' });
@@ -262,8 +262,8 @@ app.post('/api/portfolios', async (req, res) => {
         }
 
         const result = await query(
-            'INSERT INTO portfolios (name, description, color) VALUES (?, ?, ?)',
-            [name, description, color]
+            'INSERT INTO portfolios (name, description) VALUES (?, ?)',
+            [name, description]
         );
 
         res.json({
@@ -271,8 +271,7 @@ app.post('/api/portfolios', async (req, res) => {
             portfolio: {
                 id: result.insertId,
                 name,
-                description,
-                color
+                description
             }
         });
     } catch (error) {
@@ -287,11 +286,11 @@ app.post('/api/portfolios', async (req, res) => {
 // Update portfolio
 app.put('/api/portfolios/:id', async (req, res) => {
     try {
-        const { name, description, color } = req.body;
+        const { name, description } = req.body;
 
         const result = await query(
-            'UPDATE portfolios SET name = ?, description = ?, color = ? WHERE id = ?',
-            [name, description, color, req.params.id]
+            'UPDATE portfolios SET name = ?, description = ? WHERE id = ?',
+            [name, description, req.params.id]
         );
 
         if (result.affectedRows === 0) {
@@ -409,7 +408,7 @@ app.get('/api/projects/:id', async (req, res) => {
 // Create project
 app.post('/api/projects', async (req, res) => {
     try {
-        const { name, description, portfolio_id, color } = req.body;
+        const { name, description, portfolio_id } = req.body;
 
         if (!name) {
             res.status(400).json({ error: 'Project name is required' });
@@ -426,8 +425,8 @@ app.post('/api/projects', async (req, res) => {
         }
 
         const result = await query(
-            'INSERT INTO projects (name, description, portfolio_id, color) VALUES (?, ?, ?, ?)',
-            [name, description, portfolio_id || null, color]
+            'INSERT INTO projects (name, description, portfolio_id) VALUES (?, ?, ?)',
+            [name, description, portfolio_id || null]
         );
 
         res.json({
@@ -436,8 +435,7 @@ app.post('/api/projects', async (req, res) => {
                 id: result.insertId,
                 name,
                 description,
-                portfolio_id: portfolio_id || null,
-                color
+                portfolio_id: portfolio_id || null
             }
         });
     } catch (error) {
@@ -452,7 +450,7 @@ app.post('/api/projects', async (req, res) => {
 // Update project
 app.put('/api/projects/:id', async (req, res) => {
     try {
-        const { name, description, portfolio_id, color } = req.body;
+        const { name, description, portfolio_id } = req.body;
 
         // Verify portfolio exists if portfolio_id is provided
         if (portfolio_id) {
@@ -464,8 +462,8 @@ app.put('/api/projects/:id', async (req, res) => {
         }
 
         const result = await query(
-            'UPDATE projects SET name = ?, description = ?, portfolio_id = ?, color = ? WHERE id = ?',
-            [name, description, portfolio_id || null, color, req.params.id]
+            'UPDATE projects SET name = ?, description = ?, portfolio_id = ? WHERE id = ?',
+            [name, description, portfolio_id || null, req.params.id]
         );
 
         if (result.affectedRows === 0) {
@@ -1554,6 +1552,10 @@ app.get('/', (req, res) => {
 
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+app.get('/settings', (req, res) => {
+    res.sendFile(path.join(__dirname, 'settings.html'));
 });
 
 app.get('/portfolios', (req, res) => {
