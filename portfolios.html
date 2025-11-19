@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/src/static/projects.css">
     <link rel="stylesheet" href="/src/static/footer.css">
+    <link rel="stylesheet" href="/src/static/toast.css">
 </head>
 <body>
     <!-- Navigation -->
@@ -39,15 +40,6 @@
         </div>
 
         <!-- Messages -->
-        <div class="message message-success" id="successMessage">
-            <i class="fas fa-check-circle"></i>
-            <span id="successText"></span>
-        </div>
-        <div class="message message-error" id="errorMessage">
-            <i class="fas fa-exclamation-circle"></i>
-            <span id="errorText"></span>
-        </div>
-
         <!-- Header Actions -->
         <div class="header-actions">
             <div class="section-header">
@@ -401,25 +393,7 @@
         }
 
         // Messages
-        function showSuccess(message) {
-            const successMessage = document.getElementById('successMessage');
-            const successText = document.getElementById('successText');
-            successText.textContent = message;
-            successMessage.style.display = 'flex';
-            setTimeout(() => {
-                successMessage.style.display = 'none';
-            }, 5000);
-        }
-
-        function showError(message) {
-            const errorMessage = document.getElementById('errorMessage');
-            const errorText = document.getElementById('errorText');
-            errorText.textContent = message;
-            errorMessage.style.display = 'flex';
-            setTimeout(() => {
-                errorMessage.style.display = 'none';
-            }, 5000);
-        }
+        // showSuccess and showError are now provided by toast.js
 
         // Helper functions
         function escapeHtml(text) {
@@ -502,5 +476,6 @@
             font-style: italic;
         }
     </style>
+    <script src="/src/static/toast.js"></script>
 </body>
 </html>
