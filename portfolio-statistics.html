@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Statistics - QA Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="src/static/dashboard.css">
+    <link rel="stylesheet" href="/src/static/nav-dropdown.css">
+    <link rel="stylesheet" href="src/static/footer.css">
+    <link rel="stylesheet" href="/src/static/toast.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard.html" class="navbar-brand">
+                <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+                <span>QA Analytics</span>
+            </a>
+            <div class="navbar-links">
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <div class="nav-dropdown">
+                    <button class="nav-btn"><i class="fas fa-chart-line"></i> Analyzers <i class="fas fa-chevron-down"></i></button>
+                    <div class="nav-dropdown-content">
+                        <a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                        <a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Statistics</a>
+                    </div>
+                </div>
+                <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
+                <div class="nav-dropdown active">
+                    <button class="nav-btn"><i class="fas fa-chart-pie"></i> Statistics <i class="fas fa-chevron-down"></i></button>
+                    <div class="nav-dropdown-content">
+                        <a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Statistics</a>
+                        <a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Statistics</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero -->
+        <div class="hero">
+            <h1><i class="fas fa-briefcase"></i> Portfolio Statistics</h1>
+            <p>Aggregated performance metrics across all projects in each portfolio</p>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <p>Loading portfolio statistics...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-briefcase"></i>
+            <h3>No Portfolio Data Available</h3>
+            <p>There are no portfolios with performance statistics yet.</p>
+            <a href="/performance-statistics" class="btn-primary">
+                <i class="fas fa-upload"></i> Upload Performance Data
+            </a>
+        </div>
+
+        <!-- Portfolios Container -->
+        <div id="portfoliosContainer" style="display: none;">
+            <!-- Portfolio cards will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div class="footer-brand">
+                        <div class="footer-brand-icon"><i class="fas fa-line-chart"></i></div>
+                        <span>QA Analytics</span>
+                    </div>
+                    <p class="footer-copyright">&copy; <span id="year"></span> All rights reserved.</p>
+                </div>
+                <div class="footer-right">
+                    <div class="footer-company">
+                        <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
+                    </div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/src/static/toast.js"></script>
+    <script>
+        // Set current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api';
+
+        // Loading functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Fetch with error handling
+        async function fetchJSON(url, options = {}) {
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ error: 'Request failed' }));
+                throw new Error(error.error || `HTTP ${response.status}`);
+            }
+
+            return response.json();
+        }
+
+        // Load portfolio statistics
+        async function loadPortfolioStatistics() {
+            try {
+                showLoading();
+                const data = await fetchJSON(`${API_URL}/portfolio-statistics`);
+
+                hideLoading();
+
+                if (!data.portfolios || data.portfolios.length === 0) {
+                    document.getElementById('emptyState').style.display = 'flex';
+                    document.getElementById('portfoliosContainer').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('portfoliosContainer').style.display = 'block';
+                renderPortfolios(data.portfolios);
+            } catch (error) {
+                hideLoading();
+                console.error('Error loading portfolio statistics:', error);
+                showError(error.message || 'Failed to load portfolio statistics');
+            }
+        }
+
+        // Render portfolios
+        function renderPortfolios(portfolios) {
+            const container = document.getElementById('portfoliosContainer');
+            let html = '';
+
+            portfolios.forEach(portfolio => {
+                html += renderPortfolioCard(portfolio);
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Render single portfolio card
+        function renderPortfolioCard(portfolio) {
+            let html = `
+                <div class="portfolio-section">
+                    <div class="portfolio-header">
+                        <div class="portfolio-header-content">
+                            <h2>
+                                <i class="fas fa-briefcase"></i>
+                                ${escapeHtml(portfolio.name)}
+                            </h2>
+                            ${portfolio.description ? `<p class="portfolio-description">${escapeHtml(portfolio.description)}</p>` : ''}
+                            <div class="portfolio-meta">
+                                <span class="meta-badge">
+                                    <i class="fas fa-project-diagram"></i>
+                                    ${portfolio.project_count} Project${portfolio.project_count !== 1 ? 's' : ''}
+                                </span>
+                                <span class="meta-badge">
+                                    <i class="fas fa-chart-line"></i>
+                                    ${portfolio.total_data_points} Data Point${portfolio.total_data_points !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="breakdown-cards-container">
+            `;
+
+            // Render year cards
+            const years = Object.keys(portfolio.years).sort((a, b) => b - a);
+
+            years.forEach(year => {
+                const yearData = portfolio.years[year];
+                const quarters = Object.keys(yearData.quarters).sort();
+
+                quarters.forEach(quarter => {
+                    const quarterData = yearData.quarters[quarter];
+                    if (!quarterData || !quarterData.average || quarterData.count === 0) return;
+
+                    html += `
+                        <div class="breakdown-card">
+                            <div class="breakdown-card-header">
+                                <div class="breakdown-card-title">
+                                    <span class="breakdown-year-badge">${year}</span>
+                                    <span class="breakdown-quarter-badge">${quarter}</span>
+                                </div>
+                                <div class="breakdown-card-average">
+                                    <div class="average-display">
+                                        <span class="average-number">${quarterData.average.toLocaleString()}</span>
+                                        <span class="average-label">Average</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="breakdown-card-body">
+                                <div class="breakdown-months">
+                    `;
+
+                    // Render months
+                    if (quarterData.months && quarterData.months.length > 0) {
+                        quarterData.months.forEach(monthData => {
+                            const capitalizedMonth = monthData.month.charAt(0).toUpperCase() + monthData.month.slice(1);
+                            html += `
+                                <div class="breakdown-month-item">
+                                    <div class="month-info">
+                                        <i class="fas fa-calendar-day"></i>
+                                        <span class="month-label">${capitalizedMonth}</span>
+                                    </div>
+                                    <span class="month-value-display">${monthData.average.toLocaleString()}</span>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    html += `
+                                </div>
+                            </div>
+                            <div class="breakdown-card-footer">
+                                <span class="footer-stat">
+                                    <i class="fas fa-hashtag"></i>
+                                    ${quarterData.count} data point${quarterData.count > 1 ? 's' : ''}
+                                </span>
+                                <span class="footer-stat">
+                                    <i class="fas fa-chart-bar"></i>
+                                    ${quarterData.months ? quarterData.months.length : 0} month${quarterData.months && quarterData.months.length > 1 ? 's' : ''}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPortfolioStatistics();
+        });
+    </script>
+
+    <style>
+        .portfolio-section {
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .portfolio-header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            padding: var(--spacing-2xl);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            margin-bottom: var(--spacing-2xl);
+            color: white;
+        }
+
+        .portfolio-header-content h2 {
+            margin: 0 0 var(--spacing-md) 0;
+            font-size: 1.75rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .portfolio-description {
+            margin: 0 0 var(--spacing-lg) 0;
+            opacity: 0.9;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .portfolio-meta {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .meta-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-3xl);
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            min-height: 400px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-300);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .empty-state h3 {
+            margin: 0 0 var(--spacing-md) 0;
+            color: var(--gray-700);
+            font-size: 1.5rem;
+        }
+
+        .empty-state p {
+            margin: 0 0 var(--spacing-xl) 0;
+            color: var(--gray-500);
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-header {
+                padding: var(--spacing-lg);
+            }
+
+            .portfolio-header-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .meta-badge {
+                font-size: 0.8rem;
+                padding: var(--spacing-xs) var(--spacing-md);
+            }
+        }
+    </style>
+</body>
+</html>

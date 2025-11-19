@@ -1475,6 +1475,139 @@ app.get('/api/performance-statistics/dashboard', async (req, res) => {
     }
 });
 
+// Get portfolio statistics - aggregated performance data by portfolio
+app.get('/api/portfolio-statistics', async (req, res) => {
+    try {
+        // Get all portfolios
+        const portfolios = await query(`
+            SELECT
+                p.*,
+                COUNT(DISTINCT proj.id) as project_count
+            FROM portfolios p
+            LEFT JOIN projects proj ON p.id = proj.portfolio_id
+            GROUP BY p.id
+            ORDER BY p.name
+        `);
+
+        // Get all performance statistics with project and portfolio info
+        const allStats = await query(`
+            SELECT
+                ps.*,
+                proj.name as project_name,
+                proj.portfolio_id
+            FROM performance_statistics ps
+            INNER JOIN projects proj ON ps.project_id = proj.id
+            WHERE proj.portfolio_id IS NOT NULL
+            ORDER BY proj.portfolio_id, ps.year DESC, ps.quarter, ps.month
+        `);
+
+        // Group statistics by portfolio
+        const portfolioStats = {};
+
+        portfolios.forEach(portfolio => {
+            portfolioStats[portfolio.id] = {
+                id: portfolio.id,
+                name: portfolio.name,
+                description: portfolio.description,
+                project_count: portfolio.project_count,
+                total_data_points: 0,
+                years: {}
+            };
+        });
+
+        // Aggregate statistics by portfolio
+        allStats.forEach(record => {
+            const portfolioId = record.portfolio_id;
+
+            if (!portfolioStats[portfolioId]) return;
+
+            portfolioStats[portfolioId].total_data_points++;
+
+            const year = record.year;
+            const quarter = record.quarter;
+            const month = record.month.toLowerCase();
+
+            // Initialize year if not exists
+            if (!portfolioStats[portfolioId].years[year]) {
+                portfolioStats[portfolioId].years[year] = {
+                    quarters: {
+                        'Q1': { months: {}, count: 0, sum: 0, average: 0 },
+                        'Q2': { months: {}, count: 0, sum: 0, average: 0 },
+                        'Q3': { months: {}, count: 0, sum: 0, average: 0 },
+                        'Q4': { months: {}, count: 0, sum: 0, average: 0 }
+                    }
+                };
+            }
+
+            const quarterData = portfolioStats[portfolioId].years[year].quarters[quarter];
+
+            // Initialize month if not exists
+            if (!quarterData.months[month]) {
+                quarterData.months[month] = {
+                    sum: 0,
+                    count: 0,
+                    average: 0
+                };
+            }
+
+            // Add value to month
+            quarterData.months[month].sum += record.value;
+            quarterData.months[month].count++;
+
+            // Add to quarter totals
+            quarterData.sum += record.value;
+            quarterData.count++;
+        });
+
+        // Calculate averages
+        Object.keys(portfolioStats).forEach(portfolioId => {
+            const portfolio = portfolioStats[portfolioId];
+
+            Object.keys(portfolio.years).forEach(year => {
+                const yearData = portfolio.years[year];
+
+                Object.keys(yearData.quarters).forEach(quarterKey => {
+                    const quarter = yearData.quarters[quarterKey];
+
+                    // Calculate month averages
+                    Object.keys(quarter.months).forEach(month => {
+                        const monthData = quarter.months[month];
+                        if (monthData.count > 0) {
+                            monthData.average = parseFloat((monthData.sum / monthData.count).toFixed(2));
+                        }
+                    });
+
+                    // Calculate quarter average
+                    if (quarter.count > 0) {
+                        quarter.average = parseFloat((quarter.sum / quarter.count).toFixed(2));
+
+                        // Convert months object to array for easier frontend rendering
+                        quarter.months = Object.keys(quarter.months).map(month => ({
+                            month: month,
+                            average: quarter.months[month].average,
+                            count: quarter.months[month].count
+                        })).sort((a, b) => {
+                            const monthOrder = ['january', 'february', 'march', 'april', 'may', 'june',
+                                              'july', 'august', 'september', 'october', 'november', 'december'];
+                            return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
+                        });
+                    } else {
+                        quarter.months = [];
+                    }
+                });
+            });
+        });
+
+        // Convert to array and filter out portfolios with no data
+        const result = Object.values(portfolioStats).filter(p => p.total_data_points > 0);
+
+        res.json({ portfolios: result });
+    } catch (error) {
+        console.error('Error fetching portfolio statistics:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get performance statistics summary for a specific project
 app.get('/api/projects/:id/performance-statistics', async (req, res) => {
     try {
