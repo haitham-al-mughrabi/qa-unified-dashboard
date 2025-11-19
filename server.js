@@ -1456,14 +1456,33 @@ app.get('/api/performance-statistics/dashboard', async (req, res) => {
             });
         });
 
-        // Calculate averages
+        // Calculate averages and sort months
         Object.keys(grouped).forEach(projectKey => {
             Object.keys(grouped[projectKey].years).forEach(year => {
                 Object.keys(grouped[projectKey].years[year].quarters).forEach(quarter => {
                     const quarterData = grouped[projectKey].years[year].quarters[quarter];
                     if (quarterData.values.length > 0) {
+                        // Create array of month-value pairs
+                        const monthValuePairs = quarterData.months.map((month, index) => ({
+                            month: month,
+                            value: quarterData.values[index]
+                        }));
+
+                        // Sort by month order
+                        const monthOrder = ['january', 'february', 'march', 'april', 'may', 'june',
+                                          'july', 'august', 'september', 'october', 'november', 'december'];
+                        monthValuePairs.sort((a, b) => {
+                            return monthOrder.indexOf(a.month.toLowerCase()) - monthOrder.indexOf(b.month.toLowerCase());
+                        });
+
+                        // Separate back into months and values arrays
+                        quarterData.months = monthValuePairs.map(pair => pair.month);
+                        quarterData.values = monthValuePairs.map(pair => pair.value);
+
+                        // Calculate average
                         const sum = quarterData.values.reduce((a, b) => a + b, 0);
                         quarterData.average = parseFloat((sum / quarterData.values.length).toFixed(2));
+                        quarterData.count = quarterData.values.length;
                     }
                 });
             });
