@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - QA Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/src/static/projects.css">
+    <link rel="stylesheet" href="/src/static/footer.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard.html" class="navbar-brand">
+                <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+                <span>QA Analytics</span>
+            </a>
+            <div class="navbar-links">
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <div class="nav-dropdown">
+                    <button class="nav-btn"><i class="fas fa-chart-line"></i> Analyzers <i class="fas fa-chevron-down"></i></button>
+                    <div class="nav-dropdown-content">
+                        <a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                        <a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Statistics</a>
+                    </div>
+                </div>
+                <a href="/settings" class="nav-btn active"><i class="fas fa-cog"></i> Settings</a>
+                <a href="/project-statistics.html" class="nav-btn"><i class="fas fa-chart-pie"></i> Project Statistics</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-cog"></i> Settings</h1>
+            <p>Manage your portfolios and projects</p>
+        </div>
+
+        <!-- Messages -->
+        <div class="message message-success" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <span id="successText"></span>
+        </div>
+        <div class="message message-error" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab('portfolios')">
+                    <i class="fas fa-briefcase"></i> Portfolios
+                </button>
+                <button class="tab-btn" onclick="switchTab('projects')">
+                    <i class="fas fa-sitemap"></i> Projects
+                </button>
+            </div>
+
+            <!-- Portfolios Tab -->
+            <div id="portfolios-tab" class="tab-content active">
+                <div class="header-actions">
+                    <div class="section-header">
+                        <h2><i class="fas fa-layer-group"></i> Your Portfolios</h2>
+                        <p>Manage and organize all your project portfolios</p>
+                    </div>
+                    <button class="btn-create-project" onclick="openPortfolioModal()">
+                        <i class="fas fa-plus"></i>
+                        New Portfolio
+                    </button>
+                </div>
+
+                <div class="projects-section">
+                    <div class="projects-table-wrapper">
+                        <table class="projects-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-briefcase"></i> Portfolio Name</th>
+                                    <th><i class="fas fa-align-left"></i> Description</th>
+                                    <th><i class="fas fa-folder"></i> Projects</th>
+                                    <th><i class="fas fa-calendar"></i> Created Date</th>
+                                    <th><i class="fas fa-cog"></i> Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="portfoliosTableBody">
+                                <!-- Portfolios will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Tab -->
+            <div id="projects-tab" class="tab-content">
+                <div class="header-actions">
+                    <div class="section-header">
+                        <h2><i class="fas fa-layer-group"></i> Your Projects</h2>
+                        <p>Manage and organize all your QA analysis projects</p>
+                    </div>
+                    <button class="btn-create-project" onclick="openProjectModal()">
+                        <i class="fas fa-plus"></i>
+                        New Project
+                    </button>
+                </div>
+
+                <div class="projects-section">
+                    <div class="projects-table-wrapper">
+                        <table class="projects-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-folder"></i> Project Name</th>
+                                    <th><i class="fas fa-briefcase"></i> Portfolio</th>
+                                    <th><i class="fas fa-align-left"></i> Description</th>
+                                    <th><i class="fas fa-calendar"></i> Created Date</th>
+                                    <th><i class="fas fa-cog"></i> Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectsTableBody">
+                                <!-- Projects will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay active" id="loadingOverlay">
+        <div class="loading">
+            <div class="spinner"></div>
+            <h3>Loading...</h3>
+            <p>Please wait</p>
+        </div>
+    </div>
+
+    <!-- Portfolio Modal -->
+    <div class="modal" id="portfolioModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="portfolioModalTitle"><i class="fas fa-plus-circle"></i> Create New Portfolio</h2>
+                <button class="close-btn" onclick="closePortfolioModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="portfolioForm">
+                <input type="hidden" id="portfolioId">
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tag"></i>
+                        Portfolio Name *
+                    </label>
+                    <input type="text" id="portfolioName" class="form-input" required placeholder="e.g., Enterprise Applications">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <textarea id="portfolioDescription" class="form-textarea" placeholder="Brief description of the portfolio (optional)"></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary" id="portfolioSubmitBtn">
+                    <i class="fas fa-plus"></i>
+                    <span id="portfolioSubmitBtnText">Create Portfolio</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div class="modal" id="projectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="projectModalTitle"><i class="fas fa-plus-circle"></i> Create New Project</h2>
+                <button class="close-btn" onclick="closeProjectModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="projectForm">
+                <input type="hidden" id="projectId">
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-briefcase"></i>
+                        Portfolio *
+                    </label>
+                    <select id="projectPortfolio" class="form-input" required>
+                        <option value="">Select a portfolio...</option>
+                    </select>
+                    <small style="color: var(--gray-500); font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+                        Don't have a portfolio? Create one in the Portfolios tab first.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tag"></i>
+                        Project Name *
+                    </label>
+                    <input type="text" id="projectName" class="form-input" required placeholder="e.g., Customer Support Team">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <textarea id="projectDescription" class="form-textarea" placeholder="Brief description of the project (optional)"></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary" id="projectSubmitBtn">
+                    <i class="fas fa-plus"></i>
+                    <span id="projectSubmitBtnText">Create Project</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-content">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="confirm-header-text">
+                    <h3 id="confirmModalTitle">Delete Item</h3>
+                    <p>This action cannot be undone</p>
+                </div>
+            </div>
+            <div class="confirm-body">
+                <p id="confirmModalText">Are you sure you want to delete this item?</p>
+                <p style="margin-top: 0.75rem; color: var(--gray-600); font-size: 0.875rem;" id="confirmModalWarning"></p>
+                <div class="form-group" style="margin-top: 1.25rem;">
+                    <label class="form-label" style="color: var(--gray-900); font-size: 0.875rem;">
+                        <i class="fas fa-keyboard"></i>
+                        Type <strong id="confirmNameInput"></strong> to confirm
+                    </label>
+                    <input type="text" id="deleteConfirmInput" class="form-input" placeholder="Enter name" autocomplete="off">
+                </div>
+            </div>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button class="btn-confirm-delete" id="confirmDeleteBtn" onclick="confirmDelete()" disabled>
+                    <i class="fas fa-trash-alt"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 QA Analytics Dashboard. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = `${window.location.protocol}//${window.location.host}/api`;
+        let editingPortfolioId = null;
+        let editingProjectId = null;
+        let itemToDelete = null;
+        let deleteType = null; // 'portfolio' or 'project'
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPortfolios();
+            loadProjects();
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tab}-tab`).classList.add('active');
+        }
+
+        // ==================== PORTFOLIOS ====================
+
+        // Portfolio form submission
+        document.getElementById('portfolioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('portfolioName').value.trim();
+            const description = document.getElementById('portfolioDescription').value.trim();
+
+            if (!name) {
+                showError('Portfolio name is required');
+                return;
+            }
+
+            try {
+                const url = editingPortfolioId
+                    ? `${API_URL}/portfolios/${editingPortfolioId}`
+                    : `${API_URL}/portfolios`;
+
+                const method = editingPortfolioId ? 'PUT' : 'POST';
+
+                await fetchJSON(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description })
+                });
+
+                showSuccess(editingPortfolioId ? 'Portfolio updated successfully!' : 'Portfolio created successfully!');
+                closePortfolioModal();
+                loadPortfolios();
+                loadProjectsPortfolioDropdown(); // Refresh project dropdown
+            } catch (error) {
+                showError(error.message);
+            }
+        });
+
+        // Load portfolios
+        async function loadPortfolios() {
+            try {
+                showLoading();
+                const data = await fetchJSON(`${API_URL}/portfolios`);
+                displayPortfolios(data.portfolios || []);
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError('Error loading portfolios: ' + error.message);
+            }
+        }
+
+        // Display portfolios
+        function displayPortfolios(portfolios) {
+            const tbody = document.getElementById('portfoliosTableBody');
+
+            if (portfolios.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fas fa-briefcase"></i>
+                            <p>No portfolios yet. Create your first portfolio!</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = portfolios.map(portfolio => {
+                const createdDate = new Date(portfolio.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(portfolio.name)}</strong></td>
+                        <td>${portfolio.description ? escapeHtml(portfolio.description) : '<span class="text-muted">No description</span>'}</td>
+                        <td><span class="project-count-badge">${portfolio.project_count || 0}</span></td>
+                        <td>${createdDate}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-edit" onclick="editPortfolio(${portfolio.id})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" onclick="deletePortfolio(${portfolio.id}, '${escapeHtml(portfolio.name).replace(/'/g, "\\'")}', ${portfolio.project_count || 0})" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Edit portfolio
+        async function editPortfolio(id) {
+            try {
+                const data = await fetchJSON(`${API_URL}/portfolios/${id}`);
+                const portfolio = data.portfolio;
+
+                editingPortfolioId = id;
+                document.getElementById('portfolioModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Portfolio';
+                document.getElementById('portfolioSubmitBtnText').textContent = 'Update Portfolio';
+
+                document.getElementById('portfolioName').value = portfolio.name;
+                document.getElementById('portfolioDescription').value = portfolio.description || '';
+
+                openPortfolioModal();
+            } catch (error) {
+                showError('Error loading portfolio: ' + error.message);
+            }
+        }
+
+        // Delete portfolio
+        function deletePortfolio(id, name, projectCount) {
+            if (projectCount > 0) {
+                showError(`Cannot delete "${name}". This portfolio has ${projectCount} project(s). Please remove or reassign them first.`);
+                return;
+            }
+
+            itemToDelete = { id, name };
+            deleteType = 'portfolio';
+            document.getElementById('confirmModalTitle').textContent = 'Delete Portfolio';
+            document.getElementById('confirmModalText').textContent = `Are you sure you want to delete ${name}?`;
+            document.getElementById('confirmModalWarning').textContent = '';
+            document.getElementById('confirmNameInput').textContent = name;
+            document.getElementById('deleteConfirmInput').value = '';
+            document.getElementById('confirmDeleteBtn').disabled = true;
+
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        // Portfolio modal functions
+        function openPortfolioModal() {
+            document.getElementById('portfolioModal').classList.add('active');
+        }
+
+        function closePortfolioModal() {
+            document.getElementById('portfolioModal').classList.remove('active');
+            document.getElementById('portfolioForm').reset();
+            editingPortfolioId = null;
+            document.getElementById('portfolioModalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Create New Portfolio';
+            document.getElementById('portfolioSubmitBtnText').textContent = 'Create Portfolio';
+        }
+
+        // ==================== PROJECTS ====================
+
+        // Project form submission
+        document.getElementById('projectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const portfolio_id = document.getElementById('projectPortfolio').value;
+            const name = document.getElementById('projectName').value.trim();
+            const description = document.getElementById('projectDescription').value.trim();
+
+            if (!portfolio_id) {
+                showError('Portfolio selection is required');
+                return;
+            }
+
+            if (!name) {
+                showError('Project name is required');
+                return;
+            }
+
+            try {
+                const url = editingProjectId
+                    ? `${API_URL}/projects/${editingProjectId}`
+                    : `${API_URL}/projects`;
+
+                const method = editingProjectId ? 'PUT' : 'POST';
+
+                await fetchJSON(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ portfolio_id, name, description })
+                });
+
+                showSuccess(editingProjectId ? 'Project updated successfully!' : 'Project created successfully!');
+                closeProjectModal();
+                loadProjects();
+            } catch (error) {
+                showError(error.message);
+            }
+        });
+
+        // Load projects
+        async function loadProjects() {
+            try {
+                showLoading();
+                const data = await fetchJSON(`${API_URL}/projects`);
+                displayProjects(data.projects || []);
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError('Error loading projects: ' + error.message);
+            }
+        }
+
+        // Display projects
+        function displayProjects(projects) {
+            const tbody = document.getElementById('projectsTableBody');
+
+            if (projects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fas fa-folder-plus"></i>
+                            <p>No projects yet. Create your first project!</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = projects.map(project => {
+                const createdDate = new Date(project.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                const portfolioDisplay = project.portfolio_name
+                    ? `<span class="portfolio-badge">${project.portfolio_name}</span>`
+                    : '<span class="text-muted">No Portfolio</span>';
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(project.name)}</strong></td>
+                        <td>${portfolioDisplay}</td>
+                        <td>${project.description ? escapeHtml(project.description) : '<span class="text-muted">No description</span>'}</td>
+                        <td>${createdDate}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-edit" onclick="editProject(${project.id})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" onclick="deleteProject(${project.id}, '${escapeHtml(project.name).replace(/'/g, "\\'")}'))" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Edit project
+        async function editProject(id) {
+            try {
+                const data = await fetchJSON(`${API_URL}/projects/${id}`);
+                const project = data.project;
+
+                editingProjectId = id;
+                document.getElementById('projectModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Project';
+                document.getElementById('projectSubmitBtnText').textContent = 'Update Project';
+
+                await loadProjectsPortfolioDropdown();
+                document.getElementById('projectPortfolio').value = project.portfolio_id || '';
+                document.getElementById('projectName').value = project.name;
+                document.getElementById('projectDescription').value = project.description || '';
+
+                openProjectModal();
+            } catch (error) {
+                showError('Error loading project: ' + error.message);
+            }
+        }
+
+        // Delete project
+        function deleteProject(id, name) {
+            itemToDelete = { id, name };
+            deleteType = 'project';
+            document.getElementById('confirmModalTitle').textContent = 'Delete Project';
+            document.getElementById('confirmModalText').textContent = `Are you sure you want to delete ${name}?`;
+            document.getElementById('confirmModalWarning').textContent = 'This will also delete all associated records.';
+            document.getElementById('confirmNameInput').textContent = name;
+            document.getElementById('deleteConfirmInput').value = '';
+            document.getElementById('confirmDeleteBtn').disabled = true;
+
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        // Load portfolios for project dropdown
+        async function loadProjectsPortfolioDropdown() {
+            try {
+                const data = await fetchJSON(`${API_URL}/portfolios`);
+                const portfolios = data.portfolios || [];
+                const select = document.getElementById('projectPortfolio');
+
+                select.innerHTML = '<option value="">Select a portfolio...</option>';
+
+                if (portfolios.length === 0) {
+                    select.innerHTML = '<option value="">No portfolios available - Create one first</option>';
+                    select.disabled = true;
+                    return;
+                }
+
+                portfolios.forEach(portfolio => {
+                    const option = document.createElement('option');
+                    option.value = portfolio.id;
+                    option.textContent = portfolio.name;
+                    select.appendChild(option);
+                });
+
+                select.disabled = false;
+            } catch (error) {
+                console.error('Error loading portfolios:', error);
+            }
+        }
+
+        // Project modal functions
+        async function openProjectModal() {
+            await loadProjectsPortfolioDropdown();
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.remove('active');
+            document.getElementById('projectForm').reset();
+            editingProjectId = null;
+            document.getElementById('projectModalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Create New Project';
+            document.getElementById('projectSubmitBtnText').textContent = 'Create Project';
+        }
+
+        // ==================== SHARED FUNCTIONS ====================
+
+        // Confirm delete
+        async function confirmDelete() {
+            if (!itemToDelete || !deleteType) return;
+
+            try {
+                const endpoint = deleteType === 'portfolio' ? 'portfolios' : 'projects';
+                await fetchJSON(`${API_URL}/${endpoint}/${itemToDelete.id}`, {
+                    method: 'DELETE'
+                });
+
+                showSuccess(`${deleteType === 'portfolio' ? 'Portfolio' : 'Project'} deleted successfully!`);
+                closeConfirmModal();
+
+                if (deleteType === 'portfolio') {
+                    loadPortfolios();
+                    loadProjectsPortfolioDropdown(); // Refresh project dropdown
+                } else {
+                    loadProjects();
+                }
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Delete confirmation input handler
+        document.getElementById('deleteConfirmInput').addEventListener('input', function(e) {
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const inputValue = e.target.value.trim();
+            const itemName = itemToDelete ? itemToDelete.name : '';
+
+            confirmBtn.disabled = inputValue !== itemName;
+        });
+
+        // Confirm modal functions
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            itemToDelete = null;
+            deleteType = null;
+        }
+
+        // Loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Messages
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            successText.textContent = message;
+            successMessage.style.display = 'flex';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorMessage.style.display = 'flex';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Helper functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function fetchJSON(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+
+                if (!response.ok) {
+                    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    try {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorData.message || errorMessage;
+                        }
+                    } catch (e) {}
+                    throw new Error(errorMessage);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server did not return JSON');
+                }
+
+                return await response.json();
+            } catch (error) {
+                if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+                    throw new Error('Cannot connect to API server. Please ensure the server is running.');
+                }
+                throw error;
+            }
+        }
+    </script>
+
+    <style>
+        .tabs-container {
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid var(--gray-200);
+            background: var(--gray-50);
+            padding: 0;
+        }
+
+        .tabs-header .tab-btn {
+            flex: 1;
+            padding: 1.25rem 2rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tabs-header .tab-btn:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+
+        .tabs-header .tab-btn.active {
+            background: white;
+            color: var(--primary);
+        }
+
+        .tabs-header .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+        }
+
+        .tab-content {
+            display: none;
+            padding: var(--spacing-2xl);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .nav-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .nav-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 220px;
+            box-shadow: var(--shadow-xl);
+            border-radius: var(--radius-lg);
+            z-index: 1000;
+            top: 100%;
+            margin-top: 0.5rem;
+            border: 1px solid var(--gray-200);
+        }
+
+        .nav-dropdown-content a {
+            color: var(--gray-700);
+            padding: 0.875rem 1.25rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-dropdown-content a:first-child {
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .nav-dropdown-content a:last-child {
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+
+        .nav-dropdown-content a:hover {
+            background-color: var(--gray-100);
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .nav-dropdown:hover .nav-dropdown-content {
+            display: block;
+        }
+
+        .nav-dropdown .nav-btn {
+            cursor: pointer;
+        }
+
+        .portfolio-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.375rem 0.75rem;
+            background: var(--gray-100);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .project-count-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .text-muted {
+            color: var(--gray-400);
+            font-style: italic;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-300);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: var(--gray-500);
+            font-size: 1.125rem;
+        }
+    </style>
+</body>
+</html>

@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/src/static/performance-statistics.css">
+    <link rel="stylesheet" href="/src/static/nav-dropdown.css">
     <link rel="stylesheet" href="/src/static/footer.css">
 </head>
 <body>
@@ -20,13 +21,17 @@
                 <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
                 <span>QA Analytics</span>
             </a>
-            <div class="navbar-links">
-                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
-                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
-                <a href="/portfolios" class="nav-btn"><i class="fas fa-briefcase"></i> Portfolios</a>
-                <a href="/projects.html" class="nav-btn"><i class="fas fa-sitemap"></i> Projects</a>
-                <a href="/project-statistics.html" class="nav-btn"><i class="fas fa-chart-line"></i> Project Statistics</a>
-                <a href="/performance-statistics" class="nav-btn active"><i class="fas fa-trophy"></i> Performance Statistics</a>
+                        <div class="navbar-links">
+                <a href="/dashboard.html" class="nav-btn "><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <div class="nav-dropdown active-dropdown">
+                    <button class="nav-btn"><i class="fas fa-chart-line"></i> Analyzers <i class="fas fa-chevron-down"></i></button>
+                    <div class="nav-dropdown-content">
+                        <a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                        <a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Statistics</a>
+                    </div>
+                </div>
+                <a href="/settings" class="nav-btn "><i class="fas fa-cog"></i> Settings</a>
+                <a href="/project-statistics.html" class="nav-btn "><i class="fas fa-chart-pie"></i> Project Statistics</a>
                 <button class="nav-btn nav-btn-success" id="saveBtn" onclick="openSaveModal()" style="display: none;"><i class="fas fa-save"></i> Save Data</button>
             </div>
         </div>
