@@ -56,6 +56,42 @@
             <p>Loading portfolio statistics...</p>
         </div>
 
+        <!-- Tabs -->
+        <div id="mainTabs" style="display: none;">
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab('all')">
+                    <i class="fas fa-th-large"></i> All Portfolios
+                </button>
+                <button class="tab-btn" onclick="switchTab('single')">
+                    <i class="fas fa-briefcase"></i> Select Portfolio
+                </button>
+            </div>
+
+            <!-- All Portfolios Tab -->
+            <div id="allPortfoliosTab" class="tab-content active">
+                <!-- Portfolios Container -->
+                <div id="portfoliosContainer">
+                    <!-- Portfolio cards will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Single Portfolio Tab -->
+            <div id="singlePortfolioTab" class="tab-content" style="display: none;">
+                <div class="selector-card">
+                    <div class="selector-header">
+                        <h3><i class="fas fa-filter"></i> Select Portfolio</h3>
+                        <p>Choose a portfolio to view its detailed statistics</p>
+                    </div>
+                    <select id="portfolioSelector" class="form-select" onchange="loadSinglePortfolio()">
+                        <option value="">Select a portfolio...</option>
+                    </select>
+                </div>
+                <div id="singlePortfolioContainer">
+                    <!-- Single portfolio cards will be inserted here -->
+                </div>
+            </div>
+        </div>
+
         <!-- Empty State -->
         <div class="empty-state" id="emptyState" style="display: none;">
             <i class="fas fa-briefcase"></i>
@@ -64,11 +100,6 @@
             <a href="/performance-statistics" class="btn-primary">
                 <i class="fas fa-upload"></i> Upload Performance Data
             </a>
-        </div>
-
-        <!-- Portfolios Container -->
-        <div id="portfoliosContainer" style="display: none;">
-            <!-- Portfolio cards will be inserted here -->
         </div>
     </div>
 
@@ -127,6 +158,9 @@
             return response.json();
         }
 
+        // Store all portfolios data globally
+        let allPortfoliosData = [];
+
         // Load portfolio statistics
         async function loadPortfolioStatistics() {
             try {
@@ -137,17 +171,69 @@
 
                 if (!data.portfolios || data.portfolios.length === 0) {
                     document.getElementById('emptyState').style.display = 'flex';
-                    document.getElementById('portfoliosContainer').style.display = 'none';
+                    document.getElementById('mainTabs').style.display = 'none';
                     return;
                 }
 
+                // Store data globally
+                allPortfoliosData = data.portfolios;
+
                 document.getElementById('emptyState').style.display = 'none';
-                document.getElementById('portfoliosContainer').style.display = 'block';
+                document.getElementById('mainTabs').style.display = 'block';
+
+                // Populate selector dropdown
+                populatePortfolioSelector(data.portfolios);
+
+                // Render all portfolios
                 renderPortfolios(data.portfolios);
             } catch (error) {
                 hideLoading();
                 console.error('Error loading portfolio statistics:', error);
                 showError(error.message || 'Failed to load portfolio statistics');
+            }
+        }
+
+        // Populate portfolio selector dropdown
+        function populatePortfolioSelector(portfolios) {
+            const selector = document.getElementById('portfolioSelector');
+            let options = '<option value="">Select a portfolio...</option>';
+
+            portfolios.forEach(portfolio => {
+                options += `<option value="${portfolio.id}">${escapeHtml(portfolio.name)}</option>`;
+            });
+
+            selector.innerHTML = options;
+        }
+
+        // Switch between tabs
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.tab-btn').classList.add('active');
+
+            // Update tab content
+            if (tab === 'all') {
+                document.getElementById('allPortfoliosTab').style.display = 'block';
+                document.getElementById('singlePortfolioTab').style.display = 'none';
+            } else if (tab === 'single') {
+                document.getElementById('allPortfoliosTab').style.display = 'none';
+                document.getElementById('singlePortfolioTab').style.display = 'block';
+            }
+        }
+
+        // Load single portfolio
+        function loadSinglePortfolio() {
+            const portfolioId = document.getElementById('portfolioSelector').value;
+            const container = document.getElementById('singlePortfolioContainer');
+
+            if (!portfolioId) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const portfolio = allPortfoliosData.find(p => p.id == portfolioId);
+            if (portfolio) {
+                container.innerHTML = renderPortfolioCard(portfolio);
             }
         }
 
@@ -274,6 +360,105 @@
     </script>
 
     <style>
+        /* Tabs Styles */
+        .tabs-container {
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-sm);
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: none;
+            background: transparent;
+            color: var(--gray-600);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+        }
+
+        .tab-btn:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Selector Card */
+        .selector-card {
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .selector-header {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .selector-header h3 {
+            margin: 0 0 var(--spacing-sm) 0;
+            color: var(--primary);
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .selector-header p {
+            margin: 0;
+            color: var(--gray-600);
+            font-size: 0.9375rem;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .form-select:hover {
+            border-color: var(--primary-light);
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
         /* Portfolio Section Styles */
         .portfolio-section {
             margin-bottom: var(--spacing-3xl);
@@ -356,7 +541,7 @@
         /* Breakdown Cards */
         .breakdown-cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
             gap: var(--spacing-xl);
         }
 
