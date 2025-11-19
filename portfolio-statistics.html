@@ -274,6 +274,7 @@
     </script>
 
     <style>
+        /* Portfolio Section Styles */
         .portfolio-section {
             margin-bottom: var(--spacing-3xl);
         }
@@ -321,6 +322,7 @@
             gap: var(--spacing-sm);
         }
 
+        /* Empty State */
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -351,6 +353,156 @@
             color: var(--gray-500);
         }
 
+        /* Breakdown Cards */
+        .breakdown-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--spacing-xl);
+        }
+
+        .breakdown-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .breakdown-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary);
+        }
+
+        .breakdown-card-header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            padding: var(--spacing-lg);
+            color: white;
+        }
+
+        .breakdown-card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .breakdown-year-badge {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+        }
+
+        .breakdown-quarter-badge {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+        }
+
+        .breakdown-card-average {
+            display: flex;
+            justify-content: center;
+        }
+
+        .average-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .average-number {
+            font-size: 2.25rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .average-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .breakdown-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .breakdown-months {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .breakdown-month-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+
+        .breakdown-month-item:hover {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            transform: translateX(4px);
+        }
+
+        .month-info {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .month-info i {
+            color: var(--primary);
+            font-size: 0.875rem;
+        }
+
+        .month-label {
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.9375rem;
+        }
+
+        .month-value-display {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .breakdown-card-footer {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-around;
+            gap: var(--spacing-md);
+        }
+
+        .footer-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-600);
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+
+        .footer-stat i {
+            color: var(--primary);
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
             .portfolio-header {
                 padding: var(--spacing-lg);
@@ -363,6 +515,20 @@
             .meta-badge {
                 font-size: 0.8rem;
                 padding: var(--spacing-xs) var(--spacing-md);
+            }
+
+            .breakdown-cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .average-number {
+                font-size: 1.875rem;
+            }
+
+            .breakdown-card-footer {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
             }
         }
     </style>
