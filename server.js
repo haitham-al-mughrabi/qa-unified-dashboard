@@ -82,6 +82,25 @@ async function createTables() {
             )
         `);
 
+        // Performance statistics table
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS performance_statistics (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                project_id INT,
+                project_name VARCHAR(255),
+                year INT,
+                quarter VARCHAR(10),
+                month VARCHAR(50),
+                value FLOAT,
+                filename VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                INDEX idx_project_id (project_id),
+                INDEX idx_year (year),
+                INDEX idx_quarter (quarter)
+            )
+        `);
+
         connection.release();
         console.log('Database tables initialized');
     } catch (error) {
@@ -1132,6 +1151,193 @@ app.get('/api/project-statistics/:projectId/compare', async (req, res) => {
     }
 });
 
+// ==================== PERFORMANCE STATISTICS API ====================
+
+// Get all performance statistics
+app.get('/api/performance-statistics', async (req, res) => {
+    try {
+        const records = await query(`
+            SELECT
+                ps.*,
+                p.name as project_name
+            FROM performance_statistics ps
+            LEFT JOIN projects p ON ps.project_id = p.id
+            ORDER BY ps.year DESC, ps.month, ps.created_at DESC
+        `);
+        res.json({ records });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get performance statistics by project
+app.get('/api/performance-statistics/project/:id', async (req, res) => {
+    try {
+        const records = await query(`
+            SELECT * FROM performance_statistics
+            WHERE project_id = ?
+            ORDER BY year DESC, month
+        `, [req.params.id]);
+        res.json({ records });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get aggregated performance statistics for dashboard
+app.get('/api/performance-statistics/dashboard', async (req, res) => {
+    try {
+        const { projectId, year } = req.query;
+
+        let sql = `
+            SELECT
+                ps.*,
+                p.name as project_name
+            FROM performance_statistics ps
+            LEFT JOIN projects p ON ps.project_id = p.id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        if (projectId) {
+            sql += ' AND ps.project_id = ?';
+            params.push(projectId);
+        }
+
+        if (year) {
+            sql += ' AND ps.year = ?';
+            params.push(year);
+        }
+
+        sql += ' ORDER BY ps.project_name, ps.year DESC, ps.month';
+
+        const records = await query(sql, params);
+
+        // Group by project and calculate quarterly averages
+        const grouped = {};
+
+        records.forEach(record => {
+            const projectKey = record.project_id || 'unassigned';
+
+            if (!grouped[projectKey]) {
+                grouped[projectKey] = {
+                    project_id: record.project_id,
+                    project_name: record.project_name || 'Unassigned',
+                    years: {}
+                };
+            }
+
+            const recordYear = record.year;
+            if (!grouped[projectKey].years[recordYear]) {
+                grouped[projectKey].years[recordYear] = {
+                    quarters: {
+                        'Q1': { months: [], values: [], average: 0 },
+                        'Q2': { months: [], values: [], average: 0 },
+                        'Q3': { months: [], values: [], average: 0 },
+                        'Q4': { months: [], values: [], average: 0 }
+                    },
+                    allMonths: []
+                };
+            }
+
+            const quarter = record.quarter;
+            grouped[projectKey].years[recordYear].quarters[quarter].months.push(record.month);
+            grouped[projectKey].years[recordYear].quarters[quarter].values.push(record.value);
+            grouped[projectKey].years[recordYear].allMonths.push({
+                month: record.month,
+                quarter: record.quarter,
+                value: record.value
+            });
+        });
+
+        // Calculate averages
+        Object.keys(grouped).forEach(projectKey => {
+            Object.keys(grouped[projectKey].years).forEach(year => {
+                Object.keys(grouped[projectKey].years[year].quarters).forEach(quarter => {
+                    const quarterData = grouped[projectKey].years[year].quarters[quarter];
+                    if (quarterData.values.length > 0) {
+                        const sum = quarterData.values.reduce((a, b) => a + b, 0);
+                        quarterData.average = parseFloat((sum / quarterData.values.length).toFixed(2));
+                    }
+                });
+            });
+        });
+
+        res.json({ data: grouped });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Save performance statistics (bulk insert)
+app.post('/api/performance-statistics', async (req, res) => {
+    try {
+        const { records } = req.body;
+
+        if (!records || !Array.isArray(records) || records.length === 0) {
+            return res.status(400).json({ error: 'Records array is required' });
+        }
+
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            for (const record of records) {
+                const { project_id, project_name, year, quarter, month, value, filename } = record;
+
+                await connection.execute(
+                    `INSERT INTO performance_statistics
+                    (project_id, project_name, year, quarter, month, value, filename)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [project_id, project_name, year, quarter, month, value, filename]
+                );
+            }
+
+            await connection.commit();
+            res.json({
+                success: true,
+                message: `${records.length} performance statistics saved successfully`
+            });
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete performance statistic
+app.delete('/api/performance-statistics/:id', async (req, res) => {
+    try {
+        const result = await query('DELETE FROM performance_statistics WHERE id = ?', [req.params.id]);
+
+        if (result.affectedRows === 0) {
+            res.status(404).json({ error: 'Record not found' });
+            return;
+        }
+
+        res.json({ message: 'Performance statistic deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete all performance statistics
+app.delete('/api/performance-statistics', async (req, res) => {
+    try {
+        const result = await query('DELETE FROM performance_statistics');
+        res.json({
+            message: 'All performance statistics deleted successfully',
+            deletedCount: result.affectedRows
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ==================== SERVE HTML PAGES ====================
 
 app.get('/', (req, res) => {
@@ -1152,6 +1358,10 @@ app.get('/statistics', (req, res) => {
 
 app.get('/project-statistics', (req, res) => {
     res.sendFile(path.join(__dirname, 'project-statistics.html'));
+});
+
+app.get('/performance-statistics', (req, res) => {
+    res.sendFile(path.join(__dirname, 'performance-statistics.html'));
 });
 
 // Start server

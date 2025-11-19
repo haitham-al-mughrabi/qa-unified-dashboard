@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Statistics - QA Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/src/static/performance-statistics.css">
+    <link rel="stylesheet" href="/src/static/footer.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard.html" class="navbar-brand">
+                <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+                <span>QA Analytics</span>
+            </a>
+            <div class="navbar-links">
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                <a href="/projects.html" class="nav-btn"><i class="fas fa-sitemap"></i> Projects</a>
+                <a href="/project-statistics.html" class="nav-btn"><i class="fas fa-chart-line"></i> Project Statistics</a>
+                <a href="/performance-statistics" class="nav-btn active"><i class="fas fa-trophy"></i> Performance Statistics</a>
+                <button class="nav-btn nav-btn-success" id="saveBtn" onclick="openSaveModal()" style="display: none;"><i class="fas fa-save"></i> Save Data</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1><i class="fas fa-trophy"></i> Performance Statistics</h1>
+            <p>Upload JSON or CSV files to analyze performance metrics by project and quarter</p>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="upload-card">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon"><i class="fas fa-file-import"></i></div>
+                <div class="upload-text">
+                    <h3>Upload JSON or CSV Files</h3>
+                    <p>Drag and drop one or more files here or click to browse</p>
+                    <small>Expected format: [{"title": "ProjectName - Month:", "value": 124.0}]</small>
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept=".json, .csv" multiple>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-upload"></i> Choose Files
+                </button>
+            </div>
+
+            <!-- File Queue Display -->
+            <div class="file-queue" id="fileQueue" style="display: none;">
+                <div class="queue-header">
+                    <h4><i class="fas fa-list"></i> Selected Files</h4>
+                    <button class="btn-clear-queue" onclick="clearFileQueue()" title="Clear all files">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                <div class="queue-list" id="queueList"></div>
+                <div class="queue-actions">
+                    <button class="btn-cancel-queue" onclick="clearFileQueue()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-process-queue" onclick="processFileQueue()">
+                        <i class="fas fa-play"></i> Process Files
+                    </button>
+                </div>
+            </div>
+
+            <div class="file-name" id="fileName"></div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <h3 id="loadingTitle">Processing your file...</h3>
+            <p id="loadingText">This may take a moment</p>
+
+            <!-- Progress Indicator -->
+            <div class="file-progress" id="fileProgress" style="display: none;">
+                <div class="progress-info">
+                    <span id="progressCounter">0 of 0</span>
+                    <span id="currentFileName" class="current-file"></span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="message message-success" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <span id="successText"></span>
+        </div>
+        <div class="message message-error" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <!-- Results Container -->
+        <div class="results-container" id="resultsContainer"></div>
+    </div>
+
+    <!-- Save Modal -->
+    <div class="modal" id="saveModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-save"></i> Save Performance Statistics</h2>
+                <button class="modal-close" onclick="closeSaveModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Select which projects and data to save to the database:</p>
+
+                <!-- Project Selection -->
+                <div class="save-options" id="projectSelection"></div>
+
+                <!-- Save All Toggle -->
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="selectAllProjects" onchange="toggleSelectAll()">
+                        <span>Select All Projects</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeSaveModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-save" onclick="saveSelectedData()">
+                    <i class="fas fa-save"></i> Save Selected
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 QA Analytics Dashboard. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let fileQueue = [];
+        let currentFileIndex = 0;
+        let allParsedData = [];
+        let processedDataByProject = {};
+
+        // Month to quarter mapping
+        const monthToQuarter = {
+            'january': 'Q1', 'february': 'Q1', 'march': 'Q1',
+            'april': 'Q2', 'may': 'Q2', 'june': 'Q2',
+            'july': 'Q3', 'august': 'Q3', 'september': 'Q3',
+            'october': 'Q4', 'november': 'Q4', 'december': 'Q4',
+            'jan': 'Q1', 'feb': 'Q1', 'mar': 'Q1',
+            'apr': 'Q2', 'jun': 'Q2',
+            'jul': 'Q3', 'aug': 'Q3', 'sep': 'Q3', 'sept': 'Q3',
+            'oct': 'Q4', 'nov': 'Q4', 'dec': 'Q4'
+        };
+
+        // Month to number mapping for sorting
+        const monthToNumber = {
+            'january': 1, 'february': 2, 'march': 3,
+            'april': 4, 'may': 5, 'june': 6,
+            'july': 7, 'august': 8, 'september': 9,
+            'october': 10, 'november': 11, 'december': 12,
+            'jan': 1, 'feb': 2, 'mar': 3,
+            'apr': 4, 'jun': 6,
+            'jul': 7, 'aug': 8, 'sep': 9, 'sept': 9,
+            'oct': 10, 'nov': 11, 'dec': 12
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupUploadHandlers();
+        });
+
+        function setupUploadHandlers() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-active'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-active'), false);
+            });
+
+            // Handle dropped files
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            // Handle file input change
+            fileInput.addEventListener('change', handleFileSelect, false);
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            fileQueue = Array.from(files).filter(file => {
+                const ext = file.name.split('.').pop().toLowerCase();
+                return ext === 'json' || ext === 'csv';
+            });
+
+            if (fileQueue.length === 0) {
+                showError('Please select valid JSON or CSV files');
+                return;
+            }
+
+            displayFileQueue();
+        }
+
+        function displayFileQueue() {
+            const queueList = document.getElementById('queueList');
+            const fileQueueDiv = document.getElementById('fileQueue');
+
+            queueList.innerHTML = '';
+
+            fileQueue.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'queue-item';
+                fileItem.innerHTML = `
+                    <div class="queue-item-info">
+                        <i class="fas fa-file"></i>
+                        <span class="queue-item-name">${file.name}</span>
+                        <span class="queue-item-size">(${formatFileSize(file.size)})</span>
+                    </div>
+                    <button class="queue-item-remove" onclick="removeFromQueue(${index})" title="Remove file">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                queueList.appendChild(fileItem);
+            });
+
+            fileQueueDiv.style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function removeFromQueue(index) {
+            fileQueue.splice(index, 1);
+            if (fileQueue.length === 0) {
+                clearFileQueue();
+            } else {
+                displayFileQueue();
+            }
+        }
+
+        function clearFileQueue() {
+            fileQueue = [];
+            document.getElementById('fileQueue').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            allParsedData = [];
+            processedDataByProject = {};
+            document.getElementById('resultsContainer').innerHTML = '';
+            document.getElementById('saveBtn').style.display = 'none';
+        }
+
+        async function processFileQueue() {
+            if (fileQueue.length === 0) return;
+
+            allParsedData = [];
+            processedDataByProject = {};
+            currentFileIndex = 0;
+
+            document.getElementById('fileQueue').style.display = 'none';
+            showLoading();
+
+            const fileProgress = document.getElementById('fileProgress');
+            const progressCounter = document.getElementById('progressCounter');
+            const progressBarFill = document.getElementById('progressBarFill');
+
+            if (fileQueue.length > 1) {
+                fileProgress.style.display = 'block';
+            }
+
+            for (let i = 0; i < fileQueue.length; i++) {
+                currentFileIndex = i + 1;
+
+                if (fileQueue.length > 1) {
+                    progressCounter.textContent = `File ${currentFileIndex} of ${fileQueue.length}`;
+                    progressBarFill.style.width = `${(currentFileIndex / fileQueue.length) * 100}%`;
+                }
+
+                document.getElementById('currentFileName').textContent = fileQueue[i].name;
+
+                try {
+                    await processFile(fileQueue[i]);
+                } catch (error) {
+                    console.error(`Error processing ${fileQueue[i].name}:`, error);
+                    showError(`Error processing ${fileQueue[i].name}: ${error.message}`);
+                }
+            }
+
+            hideLoading();
+            displayResults();
+            document.getElementById('saveBtn').style.display = 'block';
+            showSuccess(`Successfully processed ${fileQueue.length} file(s)`);
+        }
+
+        function processFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                const ext = file.name.split('.').pop().toLowerCase();
+
+                reader.onload = function(e) {
+                    try {
+                        let data;
+
+                        if (ext === 'json') {
+                            data = JSON.parse(e.target.result);
+                        } else if (ext === 'csv') {
+                            const parsed = Papa.parse(e.target.result, { header: true, skipEmptyLines: true });
+                            data = parsed.data;
+                        }
+
+                        if (!Array.isArray(data)) {
+                            reject(new Error('Invalid file format. Expected an array of objects.'));
+                            return;
+                        }
+
+                        // Process the data
+                        data.forEach(item => {
+                            if (!item.title || item.value === undefined) {
+                                return;
+                            }
+
+                            // Parse title to extract project and month
+                            const parsed = parseTitle(item.title);
+                            if (!parsed) return;
+
+                            const { project, month, year } = parsed;
+                            const quarter = getQuarter(month);
+                            const value = parseFloat(item.value);
+
+                            if (!processedDataByProject[project]) {
+                                processedDataByProject[project] = {
+                                    projectName: project,
+                                    months: [],
+                                    quarters: { 'Q1': [], 'Q2': [], 'Q3': [], 'Q4': [] },
+                                    years: {}
+                                };
+                            }
+
+                            processedDataByProject[project].months.push({
+                                month,
+                                quarter,
+                                year,
+                                value,
+                                filename: file.name
+                            });
+
+                            processedDataByProject[project].quarters[quarter].push(value);
+
+                            if (!processedDataByProject[project].years[year]) {
+                                processedDataByProject[project].years[year] = {
+                                    months: [],
+                                    quarters: { 'Q1': [], 'Q2': [], 'Q3': [], 'Q4': [] }
+                                };
+                            }
+
+                            processedDataByProject[project].years[year].months.push({
+                                month,
+                                quarter,
+                                value
+                            });
+
+                            processedDataByProject[project].years[year].quarters[quarter].push(value);
+                        });
+
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+
+                reader.onerror = function() {
+                    reject(new Error('Failed to read file'));
+                };
+
+                reader.readAsText(file);
+            });
+        }
+
+        function parseTitle(title) {
+            // Expected format: "ProjectName - Month:" or "ProjectName - Month Year:"
+            const parts = title.split('–').length > 1 ? title.split('–') : title.split('-');
+
+            if (parts.length < 2) return null;
+
+            const project = parts[0].trim();
+            const monthPart = parts[1].trim().replace(':', '').trim();
+
+            // Extract month and optional year
+            const monthWords = monthPart.split(/\s+/);
+            const month = monthWords[0].toLowerCase();
+            const year = monthWords[1] ? parseInt(monthWords[1]) : new Date().getFullYear();
+
+            if (!monthToQuarter[month]) return null;
+
+            return { project, month, year };
+        }
+
+        function getQuarter(month) {
+            return monthToQuarter[month.toLowerCase()] || null;
+        }
+
+        function calculateAverage(values) {
+            if (values.length === 0) return 0;
+            const sum = values.reduce((a, b) => a + b, 0);
+            return parseFloat((sum / values.length).toFixed(2));
+        }
+
+        function displayResults() {
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '';
+
+            Object.keys(processedDataByProject).sort().forEach(projectName => {
+                const projectData = processedDataByProject[projectName];
+                const projectCard = createProjectCard(projectName, projectData);
+                resultsContainer.appendChild(projectCard);
+            });
+        }
+
+        function createProjectCard(projectName, projectData) {
+            const card = document.createElement('div');
+            card.className = 'project-card';
+
+            // Sort months by month order
+            projectData.months.sort((a, b) => {
+                if (a.year !== b.year) return a.year - b.year;
+                return (monthToNumber[a.month.toLowerCase()] || 0) - (monthToNumber[b.month.toLowerCase()] || 0);
+            });
+
+            // Calculate quarterly averages
+            const quarterlyAverages = {};
+            Object.keys(projectData.quarters).forEach(quarter => {
+                quarterlyAverages[quarter] = calculateAverage(projectData.quarters[quarter]);
+            });
+
+            // Group by year
+            const yearGroups = {};
+            projectData.months.forEach(item => {
+                if (!yearGroups[item.year]) {
+                    yearGroups[item.year] = {
+                        months: [],
+                        quarters: { 'Q1': [], 'Q2': [], 'Q3': [], 'Q4': [] }
+                    };
+                }
+                yearGroups[item.year].months.push(item);
+                yearGroups[item.year].quarters[item.quarter].push(item.value);
+            });
+
+            let html = `
+                <div class="project-card-header">
+                    <h2><i class="fas fa-project-diagram"></i> ${projectName}</h2>
+                    <div class="project-stats">
+                        <span class="stat-badge"><i class="fas fa-calendar"></i> ${projectData.months.length} months</span>
+                    </div>
+                </div>
+            `;
+
+            // Display by year
+            Object.keys(yearGroups).sort((a, b) => b - a).forEach(year => {
+                const yearData = yearGroups[year];
+
+                html += `
+                    <div class="year-section">
+                        <h3 class="year-title"><i class="fas fa-calendar-alt"></i> ${year}</h3>
+                        <div class="months-grid">
+                `;
+
+                yearData.months.forEach(item => {
+                    html += `
+                        <div class="month-card">
+                            <div class="month-name">${capitalize(item.month)}</div>
+                            <div class="month-quarter">${item.quarter}</div>
+                            <div class="month-value">${item.value.toFixed(2)}</div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+
+                // Quarterly averages for this year
+                const yearQuarterAverages = {};
+                Object.keys(yearData.quarters).forEach(quarter => {
+                    yearQuarterAverages[quarter] = calculateAverage(yearData.quarters[quarter]);
+                });
+
+                html += `
+                    <div class="quarterly-summary">
+                        <h4><i class="fas fa-chart-bar"></i> Quarterly Averages</h4>
+                        <div class="quarters-grid">
+                `;
+
+                ['Q1', 'Q2', 'Q3', 'Q4'].forEach(quarter => {
+                    const avg = yearQuarterAverages[quarter];
+                    const hasData = yearData.quarters[quarter].length > 0;
+                    html += `
+                        <div class="quarter-card ${!hasData ? 'no-data' : ''}">
+                            <div class="quarter-name">${quarter}</div>
+                            <div class="quarter-value">${hasData ? avg.toFixed(2) : 'N/A'}</div>
+                            ${hasData ? `<div class="quarter-count">${yearData.quarters[quarter].length} months</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+
+            card.innerHTML = html;
+            return card;
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Save Modal Functions
+        function openSaveModal() {
+            const projectSelection = document.getElementById('projectSelection');
+            projectSelection.innerHTML = '';
+
+            Object.keys(processedDataByProject).sort().forEach(projectName => {
+                const projectData = processedDataByProject[projectName];
+                const div = document.createElement('div');
+                div.className = 'project-option';
+                div.innerHTML = `
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="project-checkbox" value="${projectName}" checked>
+                        <span><strong>${projectName}</strong> - ${projectData.months.length} months</span>
+                    </label>
+                `;
+                projectSelection.appendChild(div);
+            });
+
+            document.getElementById('saveModal').classList.add('show');
+        }
+
+        function closeSaveModal() {
+            document.getElementById('saveModal').classList.remove('show');
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAllProjects');
+            const checkboxes = document.querySelectorAll('.project-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        }
+
+        async function saveSelectedData() {
+            const selectedProjects = Array.from(document.querySelectorAll('.project-checkbox:checked'))
+                .map(cb => cb.value);
+
+            if (selectedProjects.length === 0) {
+                showError('Please select at least one project to save');
+                return;
+            }
+
+            // Fetch projects from API to get project IDs
+            try {
+                showLoading();
+                closeSaveModal();
+
+                const response = await fetch('/api/projects');
+                const { projects } = await response.json();
+
+                // Create a map of project names to IDs
+                const projectMap = {};
+                projects.forEach(p => {
+                    projectMap[p.name] = p.id;
+                });
+
+                // Prepare records to save
+                const records = [];
+
+                selectedProjects.forEach(projectName => {
+                    const projectData = processedDataByProject[projectName];
+                    const projectId = projectMap[projectName];
+
+                    projectData.months.forEach(item => {
+                        records.push({
+                            project_id: projectId || null,
+                            project_name: projectName,
+                            year: item.year,
+                            quarter: item.quarter,
+                            month: item.month,
+                            value: item.value,
+                            filename: item.filename
+                        });
+                    });
+                });
+
+                // Save to database
+                const saveResponse = await fetch('/api/performance-statistics', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ records })
+                });
+
+                const result = await saveResponse.json();
+
+                hideLoading();
+
+                if (saveResponse.ok) {
+                    showSuccess(result.message || 'Data saved successfully!');
+                } else {
+                    showError(result.error || 'Failed to save data');
+                }
+            } catch (error) {
+                hideLoading();
+                showError('Error saving data: ' + error.message);
+            }
+        }
+
+        // Utility Functions
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('fileProgress').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            successText.textContent = message;
+            successMessage.style.display = 'flex';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorMessage.style.display = 'flex';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
