@@ -44,18 +44,25 @@
             <p>Comprehensive ticket resolution insights and trends</p>
         </div>
 
+        <!-- Portfolio Tabs -->
+        <div class="tabs-container">
+            <div class="tabs-section-header">
+                <i class="fas fa-briefcase"></i>
+                <span>Portfolios</span>
+            </div>
+            <div class="tabs-header" id="portfolioTabs">
+                <!-- Portfolio tabs will be loaded here -->
+            </div>
+        </div>
+
         <!-- Project Tabs -->
         <div class="tabs-container">
+            <div class="tabs-section-header">
+                <i class="fas fa-folder-open"></i>
+                <span>Projects</span>
+            </div>
             <div class="tabs-header" id="projectTabs">
-                <button class="tab-btn active" onclick="switchProject('project1')">
-                    <i class="fas fa-folder"></i> Project Alpha
-                </button>
-                <button class="tab-btn" onclick="switchProject('project2')">
-                    <i class="fas fa-folder"></i> Project Beta
-                </button>
-                <button class="tab-btn" onclick="switchProject('project3')">
-                    <i class="fas fa-folder"></i> Project Gamma
-                </button>
+                <!-- Project tabs will be loaded here -->
             </div>
         </div>
 
@@ -68,6 +75,19 @@
                 </div>
                 <div class="stats-grid" id="statsGrid">
                     <!-- Statistics will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Statistics Summary -->
+        <div id="performanceStatisticsContainer" style="display: none;">
+            <div class="stats-summary-card">
+                <div class="stats-header">
+                    <h2><i class="fas fa-trophy"></i> Performance Statistics</h2>
+                    <p>Performance metrics and quarterly averages</p>
+                </div>
+                <div class="performance-stats-grid" id="performanceStatsGrid">
+                    <!-- Performance statistics will be loaded here -->
                 </div>
             </div>
         </div>
@@ -92,7 +112,9 @@
         let dashboardData = {};
         let currentYearByProject = {};
         let currentQuarterByProject = {};
+        let allPortfolios = [];
         let allProjects = [];
+        let activePortfolioId = null;
         let activeProjectId = null;
 
         // Show/hide loading overlay
@@ -156,7 +178,10 @@
         async function loadDashboard() {
             showLoading();
             try {
-                // Fetch all projects first
+                // Fetch portfolios first
+                const portfoliosData = await fetchJSON(`${API_URL}/portfolios`);
+
+                // Fetch all projects
                 const projectsData = await fetchJSON(`${API_URL}/projects`);
 
                 // Fetch aggregated records data
@@ -165,14 +190,27 @@
                 dashboardData = recordsData.aggregated;
 
                 // Clear existing data before repopulating
+                allPortfolios = [];
                 allProjects = [];
+
+                // Collect ALL portfolios
+                portfoliosData.portfolios.forEach(portfolio => {
+                    allPortfolios.push({
+                        id: String(portfolio.id),
+                        name: portfolio.name,
+                        description: portfolio.description,
+                        project_count: portfolio.project_count || 0
+                    });
+                });
 
                 // Collect ALL projects (including those without data)
                 projectsData.projects.forEach(project => {
                     allProjects.push({
                         id: String(project.id),
                         name: project.name,
-                        color: project.color
+                        color: project.color,
+                        portfolio_id: project.portfolio_id ? String(project.portfolio_id) : null,
+                        portfolio_name: project.portfolio_name
                     });
 
                     // Initialize year/quarter for projects with data
@@ -191,16 +229,24 @@
                     }
                 });
 
-                // Set active project to the first one if available
-                if (allProjects.length > 0 && !activeProjectId) {
-                    activeProjectId = allProjects[0].id;
+                // Set active portfolio to the first one if available
+                if (allPortfolios.length > 0 && !activePortfolioId) {
+                    activePortfolioId = allPortfolios[0].id;
                 }
 
-                populateTabs();
+                // Set active project to the first one in the active portfolio if available
+                const projectsInPortfolio = allProjects.filter(p => p.portfolio_id === activePortfolioId);
+                if (projectsInPortfolio.length > 0 && !activeProjectId) {
+                    activeProjectId = projectsInPortfolio[0].id;
+                }
+
+                populatePortfolioTabs();
+                populateProjectTabs();
 
                 // Load statistics for the active project
                 if (activeProjectId) {
                     await loadProjectStatistics(activeProjectId);
+                    await loadPerformanceStatistics(activeProjectId);
                 }
 
                 renderDashboard();
@@ -218,15 +264,35 @@
             }
         }
 
-        function populateTabs() {
-            const tabsContainer = document.getElementById('projectTabs');
+        function populatePortfolioTabs() {
+            const tabsContainer = document.getElementById('portfolioTabs');
 
-            if (allProjects.length === 0) {
-                tabsContainer.innerHTML = '<p style="padding: 1rem; color: var(--gray-600);">No projects available</p>';
+            if (allPortfolios.length === 0) {
+                tabsContainer.innerHTML = '<p style="padding: 1rem; color: var(--gray-600);">No portfolios available</p>';
                 return;
             }
 
-            tabsContainer.innerHTML = allProjects.map(project => `
+            tabsContainer.innerHTML = allPortfolios.map(portfolio => `
+                <button class="tab-btn ${portfolio.id === activePortfolioId ? 'active' : ''}"
+                        onclick="switchPortfolio('${portfolio.id}')">
+                    <i class="fas fa-briefcase"></i> ${portfolio.name}
+                    ${portfolio.project_count > 0 ? `<span class="portfolio-badge">${portfolio.project_count}</span>` : ''}
+                </button>
+            `).join('');
+        }
+
+        function populateProjectTabs() {
+            const tabsContainer = document.getElementById('projectTabs');
+
+            // Filter projects by active portfolio
+            const projectsInPortfolio = allProjects.filter(p => p.portfolio_id === activePortfolioId);
+
+            if (projectsInPortfolio.length === 0) {
+                tabsContainer.innerHTML = '<p style="padding: 1rem; color: var(--gray-600);">No projects in this portfolio</p>';
+                return;
+            }
+
+            tabsContainer.innerHTML = projectsInPortfolio.map(project => `
                 <button class="tab-btn ${project.id === activeProjectId ? 'active' : ''}"
                         onclick="switchProject('${project.id}')">
                     <i class="fas fa-folder"></i> ${project.name}
@@ -234,10 +300,38 @@
             `).join('');
         }
 
+        async function switchPortfolio(portfolioId) {
+            activePortfolioId = portfolioId;
+
+            // Get projects in this portfolio
+            const projectsInPortfolio = allProjects.filter(p => p.portfolio_id === activePortfolioId);
+
+            // Set active project to the first one in the portfolio
+            if (projectsInPortfolio.length > 0) {
+                activeProjectId = projectsInPortfolio[0].id;
+            } else {
+                activeProjectId = null;
+            }
+
+            populatePortfolioTabs();
+            populateProjectTabs();
+
+            if (activeProjectId) {
+                await loadProjectStatistics(activeProjectId);
+                await loadPerformanceStatistics(activeProjectId);
+            } else {
+                hideProjectStatistics();
+                hidePerformanceStatistics();
+            }
+
+            renderDashboard();
+        }
+
         async function switchProject(projectId) {
             activeProjectId = projectId;
-            populateTabs();
+            populateProjectTabs();
             await loadProjectStatistics(projectId);
+            await loadPerformanceStatistics(projectId);
             renderDashboard();
         }
 
@@ -304,6 +398,71 @@
 
         function hideProjectStatistics() {
             document.getElementById('projectStatisticsContainer').style.display = 'none';
+        }
+
+        async function loadPerformanceStatistics(projectId) {
+            try {
+                const response = await fetchJSON(`${API_URL}/projects/${projectId}/performance-statistics`);
+
+                if (response.success && response.hasData && response.statistics) {
+                    displayPerformanceStatistics(response.statistics);
+                } else {
+                    hidePerformanceStatistics();
+                }
+            } catch (error) {
+                console.error('Error loading performance statistics:', error);
+                hidePerformanceStatistics();
+            }
+        }
+
+        function displayPerformanceStatistics(stats) {
+            const container = document.getElementById('performanceStatisticsContainer');
+            const statsGrid = document.getElementById('performanceStatsGrid');
+
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.totalDataPoints.toLocaleString()}</h3>
+                        <p>Total Data Points</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.overallAverage.toLocaleString()}</h3>
+                        <p>Overall Average</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.latestQuarter} ${stats.latestYear}</h3>
+                        <p>Latest Period</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.latestQuarterAverage.toLocaleString()}</h3>
+                        <p>Latest Quarter Avg</p>
+                    </div>
+                </div>
+            `;
+
+            container.style.display = 'block';
+        }
+
+        function hidePerformanceStatistics() {
+            document.getElementById('performanceStatisticsContainer').style.display = 'none';
         }
 
         function renderYearQuarterNavigation() {
@@ -1121,6 +1280,59 @@
 
             .stat-content h3 {
                 font-size: 1.5rem;
+            }
+        }
+
+        /* Portfolio and Project Tabs Section Headers */
+        .tabs-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: var(--radius-lg);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs-section-header i {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        /* Portfolio Badge */
+        .portfolio-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            margin-left: 0.5rem;
+            min-width: 1.5rem;
+            text-align: center;
+        }
+
+        /* Performance Statistics Grid */
+        .performance-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        @media (max-width: 768px) {
+            .performance-stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs-section-header {
+                font-size: 0.85rem;
+                padding: 0.5rem 0.75rem;
             }
         }
     </style>
