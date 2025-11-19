@@ -58,37 +58,13 @@
 
         <!-- Tabs -->
         <div id="mainTabs" style="display: none;">
-            <div class="tabs-container">
-                <button class="tab-btn active" onclick="switchTab('all')">
-                    <i class="fas fa-th-large"></i> All Portfolios
-                </button>
-                <button class="tab-btn" onclick="switchTab('single')">
-                    <i class="fas fa-briefcase"></i> Select Portfolio
-                </button>
+            <div class="tabs-container" id="tabsContainer">
+                <!-- Portfolio tabs will be dynamically inserted here -->
             </div>
 
-            <!-- All Portfolios Tab -->
-            <div id="allPortfoliosTab" class="tab-content active">
-                <!-- Portfolios Container -->
-                <div id="portfoliosContainer">
-                    <!-- Portfolio cards will be inserted here -->
-                </div>
-            </div>
-
-            <!-- Single Portfolio Tab -->
-            <div id="singlePortfolioTab" class="tab-content" style="display: none;">
-                <div class="selector-card">
-                    <div class="selector-header">
-                        <h3><i class="fas fa-filter"></i> Select Portfolio</h3>
-                        <p>Choose a portfolio to view its detailed statistics</p>
-                    </div>
-                    <select id="portfolioSelector" class="form-select" onchange="loadSinglePortfolio()">
-                        <option value="">Select a portfolio...</option>
-                    </select>
-                </div>
-                <div id="singlePortfolioContainer">
-                    <!-- Single portfolio cards will be inserted here -->
-                </div>
+            <!-- Tab Content Container -->
+            <div id="tabContentContainer">
+                <!-- Portfolio content will be dynamically inserted here -->
             </div>
         </div>
 
@@ -181,11 +157,8 @@
                 document.getElementById('emptyState').style.display = 'none';
                 document.getElementById('mainTabs').style.display = 'block';
 
-                // Populate selector dropdown
-                populatePortfolioSelector(data.portfolios);
-
-                // Render all portfolios
-                renderPortfolios(data.portfolios);
+                // Create portfolio tabs
+                createPortfolioTabs(data.portfolios);
             } catch (error) {
                 hideLoading();
                 console.error('Error loading portfolio statistics:', error);
@@ -193,60 +166,54 @@
             }
         }
 
-        // Populate portfolio selector dropdown
-        function populatePortfolioSelector(portfolios) {
-            const selector = document.getElementById('portfolioSelector');
-            let options = '<option value="">Select a portfolio...</option>';
+        // Create tabs for each portfolio
+        function createPortfolioTabs(portfolios) {
+            const tabsContainer = document.getElementById('tabsContainer');
+            const contentContainer = document.getElementById('tabContentContainer');
 
-            portfolios.forEach(portfolio => {
-                options += `<option value="${portfolio.id}">${escapeHtml(portfolio.name)}</option>`;
+            let tabsHtml = '';
+            let contentHtml = '';
+
+            portfolios.forEach((portfolio, index) => {
+                const isActive = index === 0 ? 'active' : '';
+                const displayStyle = index === 0 ? 'block' : 'none';
+
+                // Create tab button
+                tabsHtml += `
+                    <button class="tab-btn ${isActive}" onclick="switchToPortfolio(${portfolio.id})">
+                        <i class="fas fa-briefcase"></i> ${escapeHtml(portfolio.name)}
+                    </button>
+                `;
+
+                // Create tab content
+                contentHtml += `
+                    <div id="portfolio-tab-${portfolio.id}" class="tab-content ${isActive}" style="display: ${displayStyle};">
+                        ${renderPortfolioCard(portfolio)}
+                    </div>
+                `;
             });
 
-            selector.innerHTML = options;
+            tabsContainer.innerHTML = tabsHtml;
+            contentContainer.innerHTML = contentHtml;
         }
 
-        // Switch between tabs
-        function switchTab(tab) {
+        // Switch to specific portfolio tab
+        function switchToPortfolio(portfolioId) {
             // Update tab buttons
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.closest('.tab-btn').classList.add('active');
 
             // Update tab content
-            if (tab === 'all') {
-                document.getElementById('allPortfoliosTab').style.display = 'block';
-                document.getElementById('singlePortfolioTab').style.display = 'none';
-            } else if (tab === 'single') {
-                document.getElementById('allPortfoliosTab').style.display = 'none';
-                document.getElementById('singlePortfolioTab').style.display = 'block';
-            }
-        }
-
-        // Load single portfolio
-        function loadSinglePortfolio() {
-            const portfolioId = document.getElementById('portfolioSelector').value;
-            const container = document.getElementById('singlePortfolioContainer');
-
-            if (!portfolioId) {
-                container.innerHTML = '';
-                return;
-            }
-
-            const portfolio = allPortfoliosData.find(p => p.id == portfolioId);
-            if (portfolio) {
-                container.innerHTML = renderPortfolioCard(portfolio);
-            }
-        }
-
-        // Render portfolios
-        function renderPortfolios(portfolios) {
-            const container = document.getElementById('portfoliosContainer');
-            let html = '';
-
-            portfolios.forEach(portfolio => {
-                html += renderPortfolioCard(portfolio);
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
             });
 
-            container.innerHTML = html;
+            const targetContent = document.getElementById(`portfolio-tab-${portfolioId}`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+                targetContent.style.display = 'block';
+            }
         }
 
         // Render single portfolio card
@@ -369,11 +336,33 @@
             display: flex;
             gap: var(--spacing-sm);
             margin-bottom: var(--spacing-2xl);
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-light) var(--gray-100);
+        }
+
+        .tabs-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .tabs-container::-webkit-scrollbar-track {
+            background: var(--gray-100);
+            border-radius: var(--radius-full);
+        }
+
+        .tabs-container::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: var(--radius-full);
+        }
+
+        .tabs-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
 
         .tab-btn {
-            flex: 1;
-            padding: var(--spacing-md) var(--spacing-lg);
+            flex-shrink: 0;
+            padding: var(--spacing-md) var(--spacing-xl);
             border: none;
             background: transparent;
             color: var(--gray-600);
@@ -386,6 +375,8 @@
             align-items: center;
             justify-content: center;
             gap: var(--spacing-sm);
+            white-space: nowrap;
+            min-width: fit-content;
         }
 
         .tab-btn:hover {
@@ -405,58 +396,6 @@
 
         .tab-content.active {
             display: block;
-        }
-
-        /* Selector Card */
-        .selector-card {
-            background: white;
-            border-radius: var(--radius-2xl);
-            box-shadow: var(--shadow-md);
-            padding: var(--spacing-2xl);
-            margin-bottom: var(--spacing-2xl);
-        }
-
-        .selector-header {
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .selector-header h3 {
-            margin: 0 0 var(--spacing-sm) 0;
-            color: var(--primary);
-            font-size: 1.25rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .selector-header p {
-            margin: 0;
-            color: var(--gray-600);
-            font-size: 0.9375rem;
-        }
-
-        .form-select {
-            width: 100%;
-            padding: var(--spacing-md) var(--spacing-lg);
-            border: 2px solid var(--gray-200);
-            border-radius: var(--radius-lg);
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--gray-700);
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .form-select:hover {
-            border-color: var(--primary-light);
-        }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
         /* Portfolio Section Styles */
