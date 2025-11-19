@@ -382,6 +382,44 @@
         </div>
     </footer>
 
+    <!-- Delete Data Confirmation Modal -->
+    <div class="confirm-modal" id="deleteDataModal">
+        <div class="confirm-content">
+            <div class="confirm-header">
+                <div class="confirm-icon" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="confirm-header-text">
+                    <h3>Delete Performance Data</h3>
+                    <p>This action cannot be undone</p>
+                </div>
+            </div>
+            <div class="confirm-body">
+                <p id="deleteDataDescription"></p>
+                <p style="margin-top: 0.75rem; color: var(--danger); font-size: 0.9rem; font-weight: 600;">
+                    <i class="fas fa-warning"></i> All selected data will be permanently removed.
+                </p>
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label" style="color: var(--gray-900); font-size: 0.875rem;">
+                        <i class="fas fa-keyboard"></i>
+                        Type <strong>delete</strong> to confirm
+                    </label>
+                    <input type="text" id="deleteDataConfirmInput" class="form-input" placeholder="Type 'delete' to confirm" autocomplete="off">
+                </div>
+            </div>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeDeleteDataModal()">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button class="btn-confirm-delete" id="confirmDeleteDataBtn" onclick="confirmDeleteData()" disabled>
+                    <i class="fas fa-trash-alt"></i>
+                    Delete Data
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_URL = `${window.location.protocol}//${window.location.host}/api`;
         let editingPortfolioId = null;
@@ -920,6 +958,9 @@
             }
         });
 
+        // Store deletion parameters for modal confirmation
+        let pendingDeletion = null;
+
         // Handle data management form submission
         document.getElementById('dataManagementForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -964,14 +1005,61 @@
                 description = `all data for ${monthName} ${year} (${quarter}) in project "${projectName}"`;
             }
 
-            // Confirm deletion
-            const confirmed = confirm(`Are you sure you want to delete ${description}?\n\nThis action cannot be undone.`);
+            // Store deletion parameters
+            pendingDeletion = {
+                projectId,
+                scope,
+                year,
+                quarter,
+                month,
+                description
+            };
 
-            if (!confirmed) {
-                return;
+            // Show confirmation modal
+            document.getElementById('deleteDataDescription').textContent = `Are you sure you want to delete ${description}?`;
+            document.getElementById('deleteDataConfirmInput').value = '';
+            document.getElementById('confirmDeleteDataBtn').disabled = true;
+            document.getElementById('deleteDataModal').classList.add('active');
+
+            // Focus on input after modal animation
+            setTimeout(() => {
+                document.getElementById('deleteDataConfirmInput').focus();
+            }, 100);
+        });
+
+        // Close delete data modal
+        function closeDeleteDataModal() {
+            document.getElementById('deleteDataModal').classList.remove('active');
+            document.getElementById('deleteDataConfirmInput').value = '';
+            document.getElementById('confirmDeleteDataBtn').disabled = true;
+            pendingDeletion = null;
+        }
+
+        // Enable/disable delete button based on input
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteDataConfirmInput = document.getElementById('deleteDataConfirmInput');
+            const confirmDeleteDataBtn = document.getElementById('confirmDeleteDataBtn');
+
+            if (deleteDataConfirmInput && confirmDeleteDataBtn) {
+                deleteDataConfirmInput.addEventListener('input', (e) => {
+                    const inputValue = e.target.value.trim();
+                    if (inputValue === 'delete') {
+                        confirmDeleteDataBtn.disabled = false;
+                    } else {
+                        confirmDeleteDataBtn.disabled = true;
+                    }
+                });
             }
+        });
 
-            // Perform deletion
+        // Confirm and execute deletion
+        async function confirmDeleteData() {
+            if (!pendingDeletion) return;
+
+            const { projectId, scope, year, quarter, month, description } = pendingDeletion;
+
+            closeDeleteDataModal();
+
             try {
                 showLoading();
 
@@ -1003,6 +1091,16 @@
                 hideLoading();
                 console.error('Error deleting data:', error);
                 showError(error.message || 'Failed to delete data');
+            }
+
+            pendingDeletion = null;
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const deleteModal = document.getElementById('deleteDataModal');
+            if (deleteModal && event.target === deleteModal) {
+                closeDeleteDataModal();
             }
         });
 
