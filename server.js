@@ -1475,6 +1475,106 @@ app.get('/api/performance-statistics/dashboard', async (req, res) => {
     }
 });
 
+// Get performance statistics summary for a specific project
+app.get('/api/projects/:id/performance-statistics', async (req, res) => {
+    try {
+        const projectId = req.params.id;
+
+        const records = await query(`
+            SELECT
+                ps.*,
+                p.name as project_name
+            FROM performance_statistics ps
+            LEFT JOIN projects p ON ps.project_id = p.id
+            WHERE ps.project_id = ?
+            ORDER BY ps.year DESC, ps.month
+        `, [projectId]);
+
+        if (records.length === 0) {
+            return res.json({
+                success: true,
+                hasData: false,
+                statistics: null
+            });
+        }
+
+        // Group by year and quarter
+        const years = {};
+        let totalDataPoints = 0;
+        let totalValue = 0;
+        const latestYear = Math.max(...records.map(r => r.year));
+        const latestQuarter = records.filter(r => r.year === latestYear)
+            .reduce((latest, r) => {
+                const qNum = parseInt(r.quarter.replace('Q', ''));
+                const latestQNum = latest ? parseInt(latest.replace('Q', '')) : 0;
+                return qNum > latestQNum ? r.quarter : latest;
+            }, null);
+
+        records.forEach(record => {
+            const year = record.year;
+            const quarter = record.quarter;
+
+            if (!years[year]) {
+                years[year] = {
+                    quarters: {}
+                };
+            }
+
+            if (!years[year].quarters[quarter]) {
+                years[year].quarters[quarter] = {
+                    months: [],
+                    values: [],
+                    average: 0,
+                    count: 0
+                };
+            }
+
+            years[year].quarters[quarter].months.push(record.month);
+            years[year].quarters[quarter].values.push(record.value);
+            years[year].quarters[quarter].count++;
+            totalDataPoints++;
+            totalValue += record.value;
+        });
+
+        // Calculate averages for each quarter
+        Object.keys(years).forEach(year => {
+            Object.keys(years[year].quarters).forEach(quarter => {
+                const quarterData = years[year].quarters[quarter];
+                if (quarterData.values.length > 0) {
+                    const sum = quarterData.values.reduce((a, b) => a + b, 0);
+                    quarterData.average = parseFloat((sum / quarterData.values.length).toFixed(2));
+                }
+            });
+        });
+
+        // Get latest quarter average
+        const latestQuarterAverage = years[latestYear] && years[latestYear].quarters[latestQuarter]
+            ? years[latestYear].quarters[latestQuarter].average
+            : 0;
+
+        const overallAverage = totalDataPoints > 0 ? parseFloat((totalValue / totalDataPoints).toFixed(2)) : 0;
+
+        res.json({
+            success: true,
+            hasData: true,
+            statistics: {
+                totalDataPoints,
+                overallAverage,
+                latestYear,
+                latestQuarter,
+                latestQuarterAverage,
+                years,
+                allRecords: records.length
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Save performance statistics (bulk insert)
 app.post('/api/performance-statistics', async (req, res) => {
     try {
