@@ -229,13 +229,42 @@
                     }
                 });
 
+                // Add "Unassigned" portfolio for projects without a portfolio
+                const unassignedProjects = allProjects.filter(p => !p.portfolio_id);
+                if (unassignedProjects.length > 0) {
+                    allPortfolios.unshift({
+                        id: 'unassigned',
+                        name: 'Unassigned',
+                        description: 'Projects not assigned to any portfolio',
+                        project_count: unassignedProjects.length
+                    });
+                }
+
+                // If no portfolios exist at all, show all projects as unassigned
+                if (allPortfolios.length === 0 && allProjects.length > 0) {
+                    allPortfolios.push({
+                        id: 'all',
+                        name: 'All Projects',
+                        description: 'All available projects',
+                        project_count: allProjects.length
+                    });
+                }
+
                 // Set active portfolio to the first one if available
                 if (allPortfolios.length > 0 && !activePortfolioId) {
                     activePortfolioId = allPortfolios[0].id;
                 }
 
                 // Set active project to the first one in the active portfolio if available
-                const projectsInPortfolio = allProjects.filter(p => p.portfolio_id === activePortfolioId);
+                let projectsInPortfolio;
+                if (activePortfolioId === 'unassigned') {
+                    projectsInPortfolio = allProjects.filter(p => !p.portfolio_id);
+                } else if (activePortfolioId === 'all') {
+                    projectsInPortfolio = allProjects;
+                } else {
+                    projectsInPortfolio = allProjects.filter(p => p.portfolio_id === activePortfolioId);
+                }
+
                 if (projectsInPortfolio.length > 0 && !activeProjectId) {
                     activeProjectId = projectsInPortfolio[0].id;
                 }
@@ -285,7 +314,14 @@
             const tabsContainer = document.getElementById('projectTabs');
 
             // Filter projects by active portfolio
-            const projectsInPortfolio = allProjects.filter(p => p.portfolio_id === activePortfolioId);
+            let projectsInPortfolio;
+            if (activePortfolioId === 'unassigned') {
+                projectsInPortfolio = allProjects.filter(p => !p.portfolio_id);
+            } else if (activePortfolioId === 'all') {
+                projectsInPortfolio = allProjects;
+            } else {
+                projectsInPortfolio = allProjects.filter(p => p.portfolio_id === activePortfolioId);
+            }
 
             if (projectsInPortfolio.length === 0) {
                 tabsContainer.innerHTML = '<p style="padding: 1rem; color: var(--gray-600);">No projects in this portfolio</p>';
@@ -304,7 +340,14 @@
             activePortfolioId = portfolioId;
 
             // Get projects in this portfolio
-            const projectsInPortfolio = allProjects.filter(p => p.portfolio_id === activePortfolioId);
+            let projectsInPortfolio;
+            if (activePortfolioId === 'unassigned') {
+                projectsInPortfolio = allProjects.filter(p => !p.portfolio_id);
+            } else if (activePortfolioId === 'all') {
+                projectsInPortfolio = allProjects;
+            } else {
+                projectsInPortfolio = allProjects.filter(p => p.portfolio_id === activePortfolioId);
+            }
 
             // Set active project to the first one in the portfolio
             if (projectsInPortfolio.length > 0) {
