@@ -448,17 +448,73 @@
             const resultsContainer = document.getElementById('resultsContainer');
             resultsContainer.innerHTML = '';
 
-            Object.keys(processedDataByProject).sort().forEach(projectName => {
+            const projectNames = Object.keys(processedDataByProject).sort();
+            
+            if (projectNames.length === 0) {
+                return;
+            }
+
+            // Create Tabs Container
+            const tabsContainer = document.createElement('div');
+            tabsContainer.className = 'tabs-container';
+
+            // Create Tabs Header
+            const tabsHeader = document.createElement('div');
+            tabsHeader.className = 'tabs-header';
+            
+            // Create Tabs Content Area
+            const tabsContent = document.createElement('div');
+            tabsContent.className = 'tab-content';
+
+            projectNames.forEach((projectName, index) => {
+                // Create Tab Button
+                const tabBtn = document.createElement('button');
+                tabBtn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+                tabBtn.innerHTML = `<i class="fas fa-project-diagram"></i> ${projectName}`;
+                tabBtn.onclick = () => switchTab(projectName);
+                tabBtn.dataset.tab = projectName;
+                tabsHeader.appendChild(tabBtn);
+
+                // Create Tab Pane
                 const projectData = processedDataByProject[projectName];
-                const projectCard = createProjectCard(projectName, projectData);
-                resultsContainer.appendChild(projectCard);
+                const tabPane = document.createElement('div');
+                tabPane.className = `tab-pane ${index === 0 ? 'active' : ''}`;
+                tabPane.id = `tab-${projectName.replace(/\s+/g, '-')}`;
+                
+                // Generate content for the project
+                tabPane.appendChild(createProjectContent(projectName, projectData));
+                tabsContent.appendChild(tabPane);
+            });
+
+            tabsContainer.appendChild(tabsHeader);
+            tabsContainer.appendChild(tabsContent);
+            resultsContainer.appendChild(tabsContainer);
+        }
+
+        function switchTab(projectName) {
+            // Update Tab Buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.dataset.tab === projectName) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update Tab Panes
+            const targetId = `tab-${projectName.replace(/\s+/g, '-')}`;
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                if (pane.id === targetId) {
+                    pane.classList.add('active');
+                } else {
+                    pane.classList.remove('active');
+                }
             });
         }
 
-        function createProjectCard(projectName, projectData) {
-            const card = document.createElement('div');
-            card.className = 'project-card';
-
+        function createProjectContent(projectName, projectData) {
+            const container = document.createElement('div');
+            
             // Sort months by month order
             projectData.months.sort((a, b) => {
                 if (a.year !== b.year) return a.year - b.year;
@@ -485,12 +541,13 @@
             });
 
             let html = `
-                <div class="project-card-header">
-                    <h2><i class="fas fa-project-diagram"></i> ${projectName}</h2>
-                    <div class="project-stats">
-                        <span class="stat-badge"><i class="fas fa-calendar"></i> ${projectData.months.length} months</span>
+                <div class="project-card">
+                    <div class="project-card-header">
+                        <h2><i class="fas fa-chart-line"></i> ${projectName} Statistics</h2>
+                        <div class="project-stats">
+                            <span class="stat-badge"><i class="fas fa-calendar"></i> ${projectData.months.length} months</span>
+                        </div>
                     </div>
-                </div>
             `;
 
             // Display by year
@@ -546,8 +603,9 @@
                 `;
             });
 
-            card.innerHTML = html;
-            return card;
+            html += `</div>`; // Close project-card
+            container.innerHTML = html;
+            return container;
         }
 
         function capitalize(str) {
