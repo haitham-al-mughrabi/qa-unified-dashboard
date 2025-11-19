@@ -59,6 +59,19 @@
             </div>
         </div>
 
+        <!-- Project Statistics Summary -->
+        <div id="projectStatisticsContainer" style="display: none;">
+            <div class="stats-summary-card">
+                <div class="stats-header">
+                    <h2><i class="fas fa-chart-pie"></i> Project Statistics</h2>
+                    <p>Overall performance metrics for this project</p>
+                </div>
+                <div class="stats-grid" id="statsGrid">
+                    <!-- Statistics will be loaded here -->
+                </div>
+            </div>
+        </div>
+
         <!-- Dashboard Container -->
         <div id="dashboardContainer">
         </div>
@@ -215,10 +228,76 @@
             `).join('');
         }
 
-        function switchProject(projectId) {
+        async function switchProject(projectId) {
             activeProjectId = projectId;
             populateTabs();
+            await loadProjectStatistics(projectId);
             renderDashboard();
+        }
+
+        async function loadProjectStatistics(projectId) {
+            try {
+                const stats = await fetchJSON(`${API_URL}/projects/${projectId}/statistics`);
+
+                if (stats.success && stats.statistics) {
+                    displayProjectStatistics(stats.statistics);
+                } else {
+                    hideProjectStatistics();
+                }
+            } catch (error) {
+                console.error('Error loading project statistics:', error);
+                hideProjectStatistics();
+            }
+        }
+
+        function displayProjectStatistics(stats) {
+            const container = document.getElementById('projectStatisticsContainer');
+            const statsGrid = document.getElementById('statsGrid');
+
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.totalTickets.toLocaleString()}</h3>
+                        <p>Total Tickets</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.within2Days.toLocaleString()}</h3>
+                        <p>Resolved ≤ 2 Days</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.resolutionRate.toFixed(1)}%</h3>
+                        <p>Resolution Rate</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.resolvedTickets.toLocaleString()}</h3>
+                        <p>Analysis Records</p>
+                    </div>
+                </div>
+            `;
+
+            container.style.display = 'block';
+        }
+
+        function hideProjectStatistics() {
+            document.getElementById('projectStatisticsContainer').style.display = 'none';
         }
 
         function renderYearQuarterNavigation() {
@@ -932,6 +1011,113 @@
             </div>
         </div>
     </footer>
+
+    <style>
+        .stats-summary-card {
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 1px solid var(--gray-200);
+        }
+
+        .stats-header {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stats-header h2 {
+            font-size: 1.75rem;
+            color: var(--gray-800);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .stats-header h2 i {
+            color: var(--primary);
+        }
+
+        .stats-header p {
+            color: var(--gray-600);
+            font-size: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .stat-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-icon i {
+            font-size: 1.75rem;
+            color: white;
+        }
+
+        .stat-content h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gray-800);
+            margin-bottom: var(--spacing-xs);
+            line-height: 1;
+        }
+
+        .stat-content p {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: var(--spacing-lg);
+            }
+
+            .stat-icon {
+                width: 56px;
+                height: 56px;
+            }
+
+            .stat-content h3 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 
     <script>
         // Set current year in footer

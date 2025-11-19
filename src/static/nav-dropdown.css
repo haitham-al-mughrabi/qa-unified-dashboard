@@ -3,6 +3,21 @@
     display: inline-block;
 }
 
+/* Create an invisible bridge to prevent dropdown from disappearing */
+.nav-dropdown::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 0.5rem;
+    display: none;
+}
+
+.nav-dropdown:hover::after {
+    display: block;
+}
+
 .nav-dropdown-content {
     display: none;
     position: absolute;
