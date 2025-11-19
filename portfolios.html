@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolios - QA Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/src/static/projects.css">
+    <link rel="stylesheet" href="/src/static/footer.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/dashboard.html" class="navbar-brand">
+                <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+                <span>QA Analytics</span>
+            </a>
+            <div class="navbar-links">
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                <a href="/portfolios" class="nav-btn active"><i class="fas fa-briefcase"></i> Portfolios</a>
+                <a href="/projects.html" class="nav-btn"><i class="fas fa-sitemap"></i> Projects</a>
+                <a href="/project-statistics.html" class="nav-btn"><i class="fas fa-chart-line"></i> Project Statistics</a>
+                <a href="/performance-statistics" class="nav-btn"><i class="fas fa-trophy"></i> Performance Statistics</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-briefcase"></i> Portfolio Management</h1>
+            <p>Create and organize portfolios to group your QA projects</p>
+        </div>
+
+        <!-- Messages -->
+        <div class="message message-success" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <span id="successText"></span>
+        </div>
+        <div class="message message-error" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="header-actions">
+            <div class="section-header">
+                <h2><i class="fas fa-layer-group"></i> Your Portfolios</h2>
+                <p>Manage and organize all your project portfolios</p>
+            </div>
+            <button class="btn-create-project" onclick="openModal()">
+                <i class="fas fa-plus"></i>
+                New Portfolio
+            </button>
+        </div>
+
+        <!-- Portfolios List -->
+        <div class="projects-section">
+            <div class="projects-table-wrapper">
+                <table class="projects-table" id="portfoliosTable">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-briefcase"></i> Portfolio Name</th>
+                            <th><i class="fas fa-align-left"></i> Description</th>
+                            <th><i class="fas fa-folder"></i> Projects</th>
+                            <th><i class="fas fa-calendar"></i> Created Date</th>
+                            <th><i class="fas fa-cog"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="portfoliosTableBody">
+                        <!-- Portfolios will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay active" id="loadingOverlay">
+        <div class="loading">
+            <div class="spinner"></div>
+            <h3>Loading portfolios...</h3>
+            <p>Please wait</p>
+        </div>
+    </div>
+
+    <!-- Create/Edit Portfolio Modal -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"><i class="fas fa-plus-circle"></i> Create New Portfolio</h2>
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="portfolioForm">
+                <input type="hidden" id="portfolioId">
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tag"></i>
+                        Portfolio Name *
+                    </label>
+                    <input type="text" id="portfolioName" class="form-input" required placeholder="e.g., Enterprise Applications">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <textarea id="portfolioDescription" class="form-textarea" placeholder="Brief description of the portfolio (optional)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-palette"></i>
+                        Color (optional)
+                    </label>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <input type="color" id="portfolioColor" class="form-input" value="#4f46e5" style="width: 80px; height: 40px; padding: 2px;">
+                        <span id="colorPreview" style="padding: 0.5rem 1rem; background: #4f46e5; color: white; border-radius: 0.5rem; font-size: 0.875rem; display: flex; align-items: center;">#4f46e5</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <i class="fas fa-plus"></i>
+                    <span id="submitBtnText">Create Portfolio</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-content">
+            <div class="confirm-header">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="confirm-header-text">
+                    <h3>Delete Portfolio</h3>
+                    <p>This action cannot be undone</p>
+                </div>
+            </div>
+            <div class="confirm-body">
+                <p>Are you sure you want to delete <span class="confirm-project-name" id="confirmPortfolioName"></span>?</p>
+                <p style="margin-top: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">Note: Portfolios with projects cannot be deleted. Please remove or reassign projects first.</p>
+                <div class="form-group" style="margin-top: 1.25rem;">
+                    <label class="form-label" style="color: var(--gray-900); font-size: 0.875rem;">
+                        <i class="fas fa-keyboard"></i>
+                        Type <strong id="confirmPortfolioNameInput"></strong> to confirm
+                    </label>
+                    <input type="text" id="deleteConfirmInput" class="form-input" placeholder="Enter portfolio name" autocomplete="off">
+                </div>
+            </div>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button class="btn-confirm-delete" id="confirmDeleteBtn" onclick="confirmDelete()" disabled>
+                    <i class="fas fa-trash-alt"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 QA Analytics Dashboard. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = `${window.location.protocol}//${window.location.host}/api`;
+        let editingPortfolioId = null;
+        let portfolioToDelete = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPortfolios();
+
+            // Color picker change handler
+            document.getElementById('portfolioColor').addEventListener('input', function(e) {
+                const color = e.target.value;
+                document.getElementById('colorPreview').style.background = color;
+                document.getElementById('colorPreview').textContent = color;
+            });
+        });
+
+        // Form submission
+        document.getElementById('portfolioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('portfolioName').value.trim();
+            const description = document.getElementById('portfolioDescription').value.trim();
+            const color = document.getElementById('portfolioColor').value;
+
+            if (!name) {
+                showError('Portfolio name is required');
+                return;
+            }
+
+            try {
+                const url = editingPortfolioId
+                    ? `${API_URL}/portfolios/${editingPortfolioId}`
+                    : `${API_URL}/portfolios`;
+
+                const method = editingPortfolioId ? 'PUT' : 'POST';
+
+                const data = await fetchJSON(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, description, color })
+                });
+
+                showSuccess(editingPortfolioId ? 'Portfolio updated successfully!' : 'Portfolio created successfully!');
+                document.getElementById('portfolioForm').reset();
+                closeModal();
+                loadPortfolios();
+            } catch (error) {
+                showError(error.message);
+            }
+        });
+
+        // Load portfolios
+        async function loadPortfolios() {
+            try {
+                showLoading();
+                const data = await fetchJSON(`${API_URL}/portfolios`);
+                displayPortfolios(data.portfolios || []);
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError('Error loading portfolios: ' + error.message);
+            }
+        }
+
+        // Display portfolios
+        function displayPortfolios(portfolios) {
+            const tbody = document.getElementById('portfoliosTableBody');
+
+            if (portfolios.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fas fa-briefcase"></i>
+                            <p>No portfolios yet. Create your first portfolio!</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = portfolios.map(portfolio => {
+                const createdDate = new Date(portfolio.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                const colorBadge = portfolio.color
+                    ? `<span class="color-badge" style="background: ${portfolio.color}"></span>`
+                    : '';
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="project-name-cell">
+                                ${colorBadge}
+                                <span>${escapeHtml(portfolio.name)}</span>
+                            </div>
+                        </td>
+                        <td>${portfolio.description ? escapeHtml(portfolio.description) : '<span class="text-muted">No description</span>'}</td>
+                        <td>
+                            <span class="project-count-badge">${portfolio.project_count || 0}</span>
+                        </td>
+                        <td>${createdDate}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-edit" onclick="editPortfolio(${portfolio.id})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete" onclick="deletePortfolio(${portfolio.id}, '${escapeHtml(portfolio.name).replace(/'/g, "\\'")}', ${portfolio.project_count || 0})" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Edit portfolio
+        async function editPortfolio(id) {
+            try {
+                const data = await fetchJSON(`${API_URL}/portfolios/${id}`);
+                const portfolio = data.portfolio;
+
+                editingPortfolioId = id;
+                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Portfolio';
+                document.getElementById('submitBtnText').textContent = 'Update Portfolio';
+                document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> <span id="submitBtnText">Update Portfolio</span>';
+
+                document.getElementById('portfolioId').value = portfolio.id;
+                document.getElementById('portfolioName').value = portfolio.name;
+                document.getElementById('portfolioDescription').value = portfolio.description || '';
+                document.getElementById('portfolioColor').value = portfolio.color || '#4f46e5';
+                document.getElementById('colorPreview').style.background = portfolio.color || '#4f46e5';
+                document.getElementById('colorPreview').textContent = portfolio.color || '#4f46e5';
+
+                openModal();
+            } catch (error) {
+                showError('Error loading portfolio: ' + error.message);
+            }
+        }
+
+        // Delete portfolio
+        function deletePortfolio(id, name, projectCount) {
+            if (projectCount > 0) {
+                showError(`Cannot delete "${name}". This portfolio has ${projectCount} project(s). Please remove or reassign them first.`);
+                return;
+            }
+
+            portfolioToDelete = { id, name };
+            document.getElementById('confirmPortfolioName').textContent = name;
+            document.getElementById('confirmPortfolioNameInput').textContent = name;
+            document.getElementById('deleteConfirmInput').value = '';
+            document.getElementById('confirmDeleteBtn').disabled = true;
+
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            if (!portfolioToDelete) return;
+
+            try {
+                await fetchJSON(`${API_URL}/portfolios/${portfolioToDelete.id}`, {
+                    method: 'DELETE'
+                });
+
+                showSuccess('Portfolio deleted successfully!');
+                closeConfirmModal();
+                loadPortfolios();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Delete confirmation input handler
+        document.getElementById('deleteConfirmInput').addEventListener('input', function(e) {
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const inputValue = e.target.value.trim();
+            const portfolioName = portfolioToDelete ? portfolioToDelete.name : '';
+
+            confirmBtn.disabled = inputValue !== portfolioName;
+        });
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('createModal').classList.remove('active');
+            document.getElementById('portfolioForm').reset();
+            editingPortfolioId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Create New Portfolio';
+            document.getElementById('submitBtnText').textContent = 'Create Portfolio';
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus"></i> <span id="submitBtnText">Create Portfolio</span>';
+            document.getElementById('portfolioColor').value = '#4f46e5';
+            document.getElementById('colorPreview').style.background = '#4f46e5';
+            document.getElementById('colorPreview').textContent = '#4f46e5';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            portfolioToDelete = null;
+        }
+
+        // Loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Messages
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            successText.textContent = message;
+            successMessage.style.display = 'flex';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorMessage.style.display = 'flex';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Helper functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function fetchJSON(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+
+                if (!response.ok) {
+                    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    try {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorData.message || errorMessage;
+                        } else {
+                            const text = await response.text();
+                            if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
+                                errorMessage = `Server returned HTML error page (${response.status}). The API endpoint may not exist or the server encountered an error.`;
+                            } else {
+                                errorMessage = text || errorMessage;
+                            }
+                        }
+                    } catch (e) {
+                        // Use default message
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
+                        throw new Error('Server returned HTML instead of JSON. The API endpoint may not exist or the server is not running.');
+                    }
+                    throw new Error('Server did not return JSON. Received content-type: ' + (contentType || 'unknown'));
+                }
+
+                return await response.json();
+            } catch (error) {
+                if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+                    throw new Error('Cannot connect to API server. Please ensure the server is running at ' + API_URL);
+                }
+                throw error;
+            }
+        }
+    </script>
+
+    <style>
+        .color-badge {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .project-name-cell {
+            display: flex;
+            align-items: center;
+        }
+
+        .project-count-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .text-muted {
+            color: var(--gray-400);
+            font-style: italic;
+        }
+    </style>
+</body>
+</html>
