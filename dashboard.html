@@ -197,6 +197,12 @@
                 }
 
                 populateTabs();
+
+                // Load statistics for the active project
+                if (activeProjectId) {
+                    await loadProjectStatistics(activeProjectId);
+                }
+
                 renderDashboard();
                 hideLoading();
             } catch (error) {

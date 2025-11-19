@@ -3,21 +3,6 @@
     display: inline-block;
 }
 
-/* Create an invisible bridge to prevent dropdown from disappearing */
-.nav-dropdown::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    height: 0.5rem;
-    display: none;
-}
-
-.nav-dropdown:hover::after {
-    display: block;
-}
-
 .nav-dropdown-content {
     display: none;
     position: absolute;
@@ -27,8 +12,11 @@
     border-radius: var(--radius-lg);
     z-index: 1000;
     top: 100%;
-    margin-top: 0.5rem;
+    left: 0;
+    margin-top: 0;
     border: 1px solid var(--gray-200);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 
 .nav-dropdown-content a {
