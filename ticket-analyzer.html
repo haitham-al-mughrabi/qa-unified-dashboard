@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/src/static/ticket-analyzer.css">
     <link rel="stylesheet" href="/src/static/nav-dropdown.css">
     <link rel="stylesheet" href="/src/static/footer.css">
+    <link rel="stylesheet" href="/src/static/toast.css">
 </head>
 <body>
     <!-- Navigation -->
@@ -100,18 +101,6 @@
         </div>
 
         <!-- Messages -->
-        <div class="message message-success" id="successMessage">
-            <i class="fas fa-check-circle"></i>
-            <span id="successText"></span>
-        </div>
-        <div class="message message-error" id="errorMessage">
-            <i class="fas fa-exclamation-circle"></i>
-            <span id="errorText"></span>
-        </div>
-
-        <!-- Toast Container -->
-        <div class="toast-container" id="toastContainer"></div>
-
         <!-- Summary Section -->
         <div id="summaryContainer"></div>
 
@@ -660,57 +649,7 @@
             });
         }
 
-        function showError(message) {
-            const errorElement = document.getElementById('errorMessage');
-            const errorText = document.getElementById('errorText');
-            errorText.textContent = message;
-            errorElement.classList.add('active');
-
-            setTimeout(() => {
-                errorElement.classList.remove('active');
-            }, 5000);
-        }
-
-        function showSuccess(message) {
-            const successElement = document.getElementById('successMessage');
-            const successText = document.getElementById('successText');
-            successText.textContent = message;
-            successElement.classList.add('active');
-
-            setTimeout(() => {
-                successElement.classList.remove('active');
-            }, 3000);
-        }
-
-        function showToast(title, message, type = 'success', duration = 4000) {
-            const container = document.getElementById('toastContainer');
-            const toastId = 'toast-' + Date.now();
-
-            const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-
-            const toastHTML = `
-                <div class="toast ${type}" id="${toastId}">
-                    <i class="fas ${iconClass} toast-icon"></i>
-                    <div class="toast-content">
-                        <div class="toast-title">${title}</div>
-                        <p class="toast-message">${message}</p>
-                    </div>
-                    <button class="toast-close" onclick="document.getElementById('${toastId}').classList.add('toast-out'); setTimeout(() => document.getElementById('${toastId}').remove(), 300)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-
-            container.insertAdjacentHTML('beforeend', toastHTML);
-
-            setTimeout(() => {
-                const toast = document.getElementById(toastId);
-                if (toast) {
-                    toast.classList.add('toast-out');
-                    setTimeout(() => toast.remove(), 300);
-                }
-            }, duration);
-        }
+        // showError, showSuccess, and showToast are now provided by toast.js
 
         // Save Modal Functions
         async function openSaveModal() {
@@ -927,6 +866,7 @@
         </div>
     </footer>
 
+    <script src="/src/static/toast.js"></script>
     <script>
         // Set current year in footer
         document.getElementById('year').textContent = new Date().getFullYear();
