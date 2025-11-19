@@ -1615,36 +1615,8 @@ app.post('/api/performance-statistics', async (req, res) => {
     }
 });
 
-// Delete performance statistic
-app.delete('/api/performance-statistics/:id', async (req, res) => {
-    try {
-        const result = await query('DELETE FROM performance_statistics WHERE id = ?', [req.params.id]);
-
-        if (result.affectedRows === 0) {
-            res.status(404).json({ error: 'Record not found' });
-            return;
-        }
-
-        res.json({ message: 'Performance statistic deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Delete all performance statistics
-app.delete('/api/performance-statistics', async (req, res) => {
-    try {
-        const result = await query('DELETE FROM performance_statistics');
-        res.json({
-            message: 'All performance statistics deleted successfully',
-            deletedCount: result.affectedRows
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // Delete performance statistics by scope (project, year, quarter, month)
+// NOTE: This route must come BEFORE the /:id route to avoid "delete" being interpreted as an id
 app.delete('/api/performance-statistics/delete', async (req, res) => {
     try {
         const { scope, projectId, year, quarter, month } = req.query;
@@ -1698,6 +1670,35 @@ app.delete('/api/performance-statistics/delete', async (req, res) => {
             success: false,
             error: error.message
         });
+    }
+});
+
+// Delete performance statistic by ID
+app.delete('/api/performance-statistics/:id', async (req, res) => {
+    try {
+        const result = await query('DELETE FROM performance_statistics WHERE id = ?', [req.params.id]);
+
+        if (result.affectedRows === 0) {
+            res.status(404).json({ error: 'Record not found' });
+            return;
+        }
+
+        res.json({ message: 'Performance statistic deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete all performance statistics
+app.delete('/api/performance-statistics', async (req, res) => {
+    try {
+        const result = await query('DELETE FROM performance_statistics');
+        res.json({
+            message: 'All performance statistics deleted successfully',
+            deletedCount: result.affectedRows
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
