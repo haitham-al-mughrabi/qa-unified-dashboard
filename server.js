@@ -53,15 +53,66 @@ async function createTables() {
     try {
         const connection = await pool.getConnection();
 
+        // Portfolios table (must be created first for foreign key)
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS portfolios (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                name VARCHAR(255) NOT NULL UNIQUE,
+                description TEXT,
+                color VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         // Projects table
         await connection.execute(`
             CREATE TABLE IF NOT EXISTS projects (
                 id INT PRIMARY KEY AUTO_INCREMENT,
+                portfolio_id INT,
                 name VARCHAR(255) NOT NULL UNIQUE,
                 description TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                color VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE SET NULL,
+                INDEX idx_portfolio_id (portfolio_id)
             )
         `);
+
+        // Check if portfolio_id column exists, if not add it (for existing databases)
+        const [columns] = await connection.execute(`
+            SELECT COLUMN_NAME
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'projects'
+            AND COLUMN_NAME = 'portfolio_id'
+        `);
+
+        if (columns.length === 0) {
+            // Add portfolio_id column to existing projects table
+            await connection.execute(`
+                ALTER TABLE projects
+                ADD COLUMN portfolio_id INT,
+                ADD FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE SET NULL,
+                ADD INDEX idx_portfolio_id (portfolio_id)
+            `);
+            console.log('Added portfolio_id column to projects table');
+        }
+
+        // Check if color column exists in projects, if not add it
+        const [colorColumns] = await connection.execute(`
+            SELECT COLUMN_NAME
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'projects'
+            AND COLUMN_NAME = 'color'
+        `);
+
+        if (colorColumns.length === 0) {
+            await connection.execute(`
+                ALTER TABLE projects ADD COLUMN color VARCHAR(50)
+            `);
+            console.log('Added color column to projects table');
+        }
 
         // Analysis records table
         await connection.execute(`
@@ -159,12 +210,145 @@ function getMonthQuarter(monthString) {
     return monthToQuarter[monthName] || null;
 }
 
+// ==================== PORTFOLIOS API ====================
+
+// Get all portfolios
+app.get('/api/portfolios', async (req, res) => {
+    try {
+        const portfolios = await query(`
+            SELECT
+                p.*,
+                COUNT(DISTINCT pr.id) as project_count
+            FROM portfolios p
+            LEFT JOIN projects pr ON p.id = pr.portfolio_id
+            GROUP BY p.id
+            ORDER BY p.created_at DESC
+        `);
+        res.json({ portfolios });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get single portfolio
+app.get('/api/portfolios/:id', async (req, res) => {
+    try {
+        const portfolios = await query('SELECT * FROM portfolios WHERE id = ?', [req.params.id]);
+        if (portfolios.length === 0) {
+            res.status(404).json({ error: 'Portfolio not found' });
+            return;
+        }
+
+        // Get associated projects
+        const projects = await query('SELECT * FROM projects WHERE portfolio_id = ?', [req.params.id]);
+
+        res.json({
+            portfolio: portfolios[0],
+            projects
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Create portfolio
+app.post('/api/portfolios', async (req, res) => {
+    try {
+        const { name, description, color } = req.body;
+
+        if (!name) {
+            res.status(400).json({ error: 'Portfolio name is required' });
+            return;
+        }
+
+        const result = await query(
+            'INSERT INTO portfolios (name, description, color) VALUES (?, ?, ?)',
+            [name, description, color]
+        );
+
+        res.json({
+            message: 'Portfolio created successfully',
+            portfolio: {
+                id: result.insertId,
+                name,
+                description,
+                color
+            }
+        });
+    } catch (error) {
+        if (error.message.includes('Duplicate entry')) {
+            res.status(400).json({ error: 'Portfolio name already exists' });
+        } else {
+            res.status(500).json({ error: error.message });
+        }
+    }
+});
+
+// Update portfolio
+app.put('/api/portfolios/:id', async (req, res) => {
+    try {
+        const { name, description, color } = req.body;
+
+        const result = await query(
+            'UPDATE portfolios SET name = ?, description = ?, color = ? WHERE id = ?',
+            [name, description, color, req.params.id]
+        );
+
+        if (result.affectedRows === 0) {
+            res.status(404).json({ error: 'Portfolio not found' });
+            return;
+        }
+
+        res.json({ message: 'Portfolio updated successfully' });
+    } catch (error) {
+        if (error.message.includes('Duplicate entry')) {
+            res.status(400).json({ error: 'Portfolio name already exists' });
+        } else {
+            res.status(500).json({ error: error.message });
+        }
+    }
+});
+
+// Delete portfolio
+app.delete('/api/portfolios/:id', async (req, res) => {
+    try {
+        // Check if portfolio has projects
+        const projects = await query('SELECT COUNT(*) as count FROM projects WHERE portfolio_id = ?', [req.params.id]);
+
+        if (projects[0].count > 0) {
+            res.status(400).json({
+                error: 'Cannot delete portfolio with associated projects. Please reassign or delete the projects first.'
+            });
+            return;
+        }
+
+        const result = await query('DELETE FROM portfolios WHERE id = ?', [req.params.id]);
+
+        if (result.affectedRows === 0) {
+            res.status(404).json({ error: 'Portfolio not found' });
+            return;
+        }
+
+        res.json({ message: 'Portfolio deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ==================== PROJECTS API ====================
 
 // Get all projects
 app.get('/api/projects', async (req, res) => {
     try {
-        const projects = await query('SELECT * FROM projects ORDER BY created_at DESC');
+        const projects = await query(`
+            SELECT
+                p.*,
+                po.name as portfolio_name,
+                po.color as portfolio_color
+            FROM projects p
+            LEFT JOIN portfolios po ON p.portfolio_id = po.id
+            ORDER BY p.created_at DESC
+        `);
         res.json({ projects });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -225,16 +409,25 @@ app.get('/api/projects/:id', async (req, res) => {
 // Create project
 app.post('/api/projects', async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description, portfolio_id, color } = req.body;
 
         if (!name) {
             res.status(400).json({ error: 'Project name is required' });
             return;
         }
 
+        // Verify portfolio exists if portfolio_id is provided
+        if (portfolio_id) {
+            const portfolios = await query('SELECT id FROM portfolios WHERE id = ?', [portfolio_id]);
+            if (portfolios.length === 0) {
+                res.status(400).json({ error: 'Portfolio not found' });
+                return;
+            }
+        }
+
         const result = await query(
-            'INSERT INTO projects (name, description) VALUES (?, ?)',
-            [name, description]
+            'INSERT INTO projects (name, description, portfolio_id, color) VALUES (?, ?, ?, ?)',
+            [name, description, portfolio_id || null, color]
         );
 
         res.json({
@@ -242,7 +435,9 @@ app.post('/api/projects', async (req, res) => {
             project: {
                 id: result.insertId,
                 name,
-                description
+                description,
+                portfolio_id: portfolio_id || null,
+                color
             }
         });
     } catch (error) {
@@ -257,11 +452,20 @@ app.post('/api/projects', async (req, res) => {
 // Update project
 app.put('/api/projects/:id', async (req, res) => {
     try {
-        const { name, description, color } = req.body;
+        const { name, description, portfolio_id, color } = req.body;
+
+        // Verify portfolio exists if portfolio_id is provided
+        if (portfolio_id) {
+            const portfolios = await query('SELECT id FROM portfolios WHERE id = ?', [portfolio_id]);
+            if (portfolios.length === 0) {
+                res.status(400).json({ error: 'Portfolio not found' });
+                return;
+            }
+        }
 
         const result = await query(
-            'UPDATE projects SET name = ?, description = ?, color = ? WHERE id = ?',
-            [name, description, color, req.params.id]
+            'UPDATE projects SET name = ?, description = ?, portfolio_id = ?, color = ? WHERE id = ?',
+            [name, description, portfolio_id || null, color, req.params.id]
         );
 
         if (result.affectedRows === 0) {
@@ -271,7 +475,11 @@ app.put('/api/projects/:id', async (req, res) => {
 
         res.json({ message: 'Project updated successfully' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (error.message.includes('Duplicate entry')) {
+            res.status(400).json({ error: 'Project name already exists' });
+        } else {
+            res.status(500).json({ error: error.message });
+        }
     }
 });
 
@@ -1346,6 +1554,10 @@ app.get('/', (req, res) => {
 
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+app.get('/portfolios', (req, res) => {
+    res.sendFile(path.join(__dirname, 'portfolios.html'));
 });
 
 app.get('/projects', (req, res) => {
