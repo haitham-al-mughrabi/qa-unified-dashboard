@@ -1644,6 +1644,63 @@ app.delete('/api/performance-statistics', async (req, res) => {
     }
 });
 
+// Delete performance statistics by scope (project, year, quarter, month)
+app.delete('/api/performance-statistics/delete', async (req, res) => {
+    try {
+        const { scope, projectId, year, quarter, month } = req.query;
+
+        if (!scope || !projectId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Scope and projectId are required'
+            });
+        }
+
+        let sql = 'DELETE FROM performance_statistics WHERE project_id = ?';
+        const params = [projectId];
+
+        // Build WHERE clause based on scope
+        if (scope === 'year' && year) {
+            sql += ' AND year = ?';
+            params.push(year);
+        } else if (scope === 'quarter' && year && quarter) {
+            sql += ' AND year = ? AND quarter = ?';
+            params.push(year, quarter);
+        } else if (scope === 'month' && year && quarter && month) {
+            // Convert month name to lowercase for comparison
+            sql += ' AND year = ? AND quarter = ? AND LOWER(month) = LOWER(?)';
+            params.push(year, quarter, month);
+        } else if (scope !== 'all') {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid scope or missing required parameters'
+            });
+        }
+
+        const result = await query(sql, params);
+
+        if (result.affectedRows === 0) {
+            return res.json({
+                success: true,
+                message: 'No records found to delete',
+                deletedCount: 0
+            });
+        }
+
+        res.json({
+            success: true,
+            message: `Successfully deleted ${result.affectedRows} record(s)`,
+            deletedCount: result.affectedRows
+        });
+    } catch (error) {
+        console.error('Error deleting performance statistics:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // ==================== SERVE HTML PAGES ====================
 
 app.get('/', (req, res) => {

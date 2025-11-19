@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/src/static/projects.css">
+    <link rel="stylesheet" href="/src/static/nav-dropdown.css">
     <link rel="stylesheet" href="/src/static/footer.css">
 </head>
 <body>
@@ -60,6 +61,9 @@
                 </button>
                 <button class="tab-btn" onclick="switchTab('projects')">
                     <i class="fas fa-sitemap"></i> Projects
+                </button>
+                <button class="tab-btn" onclick="switchTab('data-management')">
+                    <i class="fas fa-trash-alt"></i> Data Management
                 </button>
             </div>
 
@@ -125,6 +129,114 @@
                                 <!-- Projects will be loaded here -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Management Tab -->
+            <div id="data-management-tab" class="tab-content">
+                <div class="header-actions">
+                    <div class="section-header">
+                        <h2><i class="fas fa-trash-restore"></i> Performance Data Management</h2>
+                        <p>Delete performance statistics data by project and time period</p>
+                    </div>
+                </div>
+
+                <div class="data-management-section">
+                    <div class="data-management-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-filter"></i> Select Data to Delete</h3>
+                            <p>Choose a project and specify the time period for data deletion</p>
+                        </div>
+
+                        <form id="dataManagementForm" class="data-management-form">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-folder"></i>
+                                    Select Project *
+                                </label>
+                                <select id="deleteDataProject" class="form-input" required>
+                                    <option value="">-- Select Project --</option>
+                                </select>
+                                <small class="form-help">Choose the project whose data you want to delete</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Delete Scope *
+                                </label>
+                                <select id="deleteScope" class="form-input" onchange="handleScopeChange()" required>
+                                    <option value="">-- Select Scope --</option>
+                                    <option value="all">All Data (Complete Project)</option>
+                                    <option value="year">Specific Year</option>
+                                    <option value="quarter">Specific Quarter</option>
+                                    <option value="month">Specific Month</option>
+                                </select>
+                                <small class="form-help">Choose what range of data to delete</small>
+                            </div>
+
+                            <!-- Year Selection -->
+                            <div id="yearSelection" class="form-group" style="display: none;">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar"></i>
+                                    Select Year *
+                                </label>
+                                <select id="deleteYear" class="form-input">
+                                    <option value="">-- Select Year --</option>
+                                </select>
+                            </div>
+
+                            <!-- Quarter Selection -->
+                            <div id="quarterSelection" class="form-group" style="display: none;">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-check"></i>
+                                    Select Quarter *
+                                </label>
+                                <select id="deleteQuarter" class="form-input">
+                                    <option value="">-- Select Quarter --</option>
+                                    <option value="Q1">Q1 (Jan - Mar)</option>
+                                    <option value="Q2">Q2 (Apr - Jun)</option>
+                                    <option value="Q3">Q3 (Jul - Sep)</option>
+                                    <option value="Q4">Q4 (Oct - Dec)</option>
+                                </select>
+                            </div>
+
+                            <!-- Month Selection -->
+                            <div id="monthSelection" class="form-group" style="display: none;">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-day"></i>
+                                    Select Month *
+                                </label>
+                                <select id="deleteMonth" class="form-input">
+                                    <option value="">-- Select Month --</option>
+                                    <option value="january">January</option>
+                                    <option value="february">February</option>
+                                    <option value="march">March</option>
+                                    <option value="april">April</option>
+                                    <option value="may">May</option>
+                                    <option value="june">June</option>
+                                    <option value="july">July</option>
+                                    <option value="august">August</option>
+                                    <option value="september">September</option>
+                                    <option value="october">October</option>
+                                    <option value="november">November</option>
+                                    <option value="december">December</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                    Delete Data
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="data-preview-section" id="dataPreview" style="display: none;">
+                            <h4><i class="fas fa-info-circle"></i> Data to be Deleted</h4>
+                            <div id="dataPreviewContent"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -725,6 +837,179 @@
                 throw error;
             }
         }
+
+        // ==================== DATA MANAGEMENT ====================
+
+        // Load projects for data management
+        async function loadDataManagementProjects() {
+            try {
+                const response = await fetchJSON(`${API_URL}/projects`);
+                const select = document.getElementById('deleteDataProject');
+
+                select.innerHTML = '<option value="">-- Select Project --</option>';
+
+                if (response.projects && response.projects.length > 0) {
+                    response.projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        // Load available years for selected project
+        async function loadAvailableYears(projectId) {
+            try {
+                const response = await fetchJSON(`${API_URL}/projects/${projectId}/performance-statistics`);
+                const yearSelect = document.getElementById('deleteYear');
+
+                yearSelect.innerHTML = '<option value="">-- Select Year --</option>';
+
+                if (response.success && response.hasData && response.statistics && response.statistics.years) {
+                    const years = Object.keys(response.statistics.years).sort((a, b) => b - a);
+                    years.forEach(year => {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        yearSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading years:', error);
+            }
+        }
+
+        // Handle scope change
+        function handleScopeChange() {
+            const scope = document.getElementById('deleteScope').value;
+            const projectId = document.getElementById('deleteDataProject').value;
+
+            // Hide all conditional fields
+            document.getElementById('yearSelection').style.display = 'none';
+            document.getElementById('quarterSelection').style.display = 'none';
+            document.getElementById('monthSelection').style.display = 'none';
+
+            // Show fields based on scope
+            if (scope === 'year' || scope === 'quarter' || scope === 'month') {
+                document.getElementById('yearSelection').style.display = 'block';
+                if (projectId) {
+                    loadAvailableYears(projectId);
+                }
+            }
+
+            if (scope === 'quarter' || scope === 'month') {
+                document.getElementById('quarterSelection').style.display = 'block';
+            }
+
+            if (scope === 'month') {
+                document.getElementById('monthSelection').style.display = 'block';
+            }
+        }
+
+        // Handle project selection change
+        document.getElementById('deleteDataProject')?.addEventListener('change', function() {
+            const projectId = this.value;
+            const scope = document.getElementById('deleteScope').value;
+
+            if (projectId && (scope === 'year' || scope === 'quarter' || scope === 'month')) {
+                loadAvailableYears(projectId);
+            }
+        });
+
+        // Handle data management form submission
+        document.getElementById('dataManagementForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const projectId = document.getElementById('deleteDataProject').value;
+            const scope = document.getElementById('deleteScope').value;
+            const year = document.getElementById('deleteYear').value;
+            const quarter = document.getElementById('deleteQuarter').value;
+            const month = document.getElementById('deleteMonth').value;
+
+            if (!projectId || !scope) {
+                showError('Please select a project and scope');
+                return;
+            }
+
+            // Validate required fields based on scope
+            if ((scope === 'year' || scope === 'quarter' || scope === 'month') && !year) {
+                showError('Please select a year');
+                return;
+            }
+
+            if ((scope === 'quarter' || scope === 'month') && !quarter) {
+                showError('Please select a quarter');
+                return;
+            }
+
+            if (scope === 'month' && !month) {
+                showError('Please select a month');
+                return;
+            }
+
+            // Build description for confirmation
+            const projectName = document.getElementById('deleteDataProject').selectedOptions[0].text;
+            let description = `all data for project "${projectName}"`;
+
+            if (scope === 'year') {
+                description = `all data for year ${year} in project "${projectName}"`;
+            } else if (scope === 'quarter') {
+                description = `all data for ${quarter} ${year} in project "${projectName}"`;
+            } else if (scope === 'month') {
+                const monthName = document.getElementById('deleteMonth').selectedOptions[0].text;
+                description = `all data for ${monthName} ${year} (${quarter}) in project "${projectName}"`;
+            }
+
+            // Confirm deletion
+            const confirmed = confirm(`Are you sure you want to delete ${description}?\n\nThis action cannot be undone.`);
+
+            if (!confirmed) {
+                return;
+            }
+
+            // Perform deletion
+            try {
+                showLoading();
+
+                const params = new URLSearchParams({
+                    scope: scope,
+                    projectId: projectId
+                });
+
+                if (year) params.append('year', year);
+                if (quarter) params.append('quarter', quarter);
+                if (month) params.append('month', month);
+
+                const response = await fetchJSON(`${API_URL}/performance-statistics/delete?${params}`, {
+                    method: 'DELETE'
+                });
+
+                hideLoading();
+
+                if (response.success) {
+                    showSuccess(`Successfully deleted ${description}`);
+
+                    // Reset form
+                    document.getElementById('dataManagementForm').reset();
+                    handleScopeChange();
+                } else {
+                    showError(response.error || 'Failed to delete data');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error deleting data:', error);
+                showError(error.message || 'Failed to delete data');
+            }
+        });
+
+        // Initialize data management when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDataManagementProjects();
+        });
     </script>
 
     <style>
@@ -880,6 +1165,115 @@
         .empty-state p {
             color: var(--gray-500);
             font-size: 1.125rem;
+        }
+
+        /* Data Management */
+        .data-management-section {
+            padding: 2rem;
+        }
+
+        .data-management-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .card-header h3 {
+            font-size: 1.5rem;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header h3 i {
+            color: var(--primary);
+        }
+
+        .card-header p {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        .data-management-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            font-style: italic;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        .btn-danger:active {
+            transform: translateY(0);
+        }
+
+        .data-preview-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #fbbf24;
+            border-radius: 8px;
+        }
+
+        .data-preview-section h4 {
+            font-size: 1.125rem;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .data-preview-section h4 i {
+            color: #f59e0b;
+        }
+
+        @media (max-width: 768px) {
+            .data-management-card {
+                padding: 1.5rem;
+            }
+
+            .card-header h3 {
+                font-size: 1.25rem;
+            }
         }
     </style>
 </body>
