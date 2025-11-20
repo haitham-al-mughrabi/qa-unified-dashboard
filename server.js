@@ -2177,6 +2177,14 @@ app.get('/project-availability-dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'project-availability-dashboard.html'));
 });
 
+app.get('/analyzers', (req, res) => {
+    res.sendFile(path.join(__dirname, 'analyzers.html'));
+});
+
+app.get('/statistics', (req, res) => {
+    res.sendFile(path.join(__dirname, 'statistics-hub.html'));
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

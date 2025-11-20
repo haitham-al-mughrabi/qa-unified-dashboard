@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyzers - QA Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="src/static/dashboard.css">
+    <link rel="stylesheet" href="/src/static/nav-dropdown.css">
+    <link rel="stylesheet" href="src/static/footer.css">
+    <link rel="stylesheet" href="/src/static/toast.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container-new">
+            <div class="navbar-links-left">
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Analyzers</a>
+                <a href="/statistics" class="nav-btn"><i class="fas fa-chart-pie"></i> Statistics</a>
+            </div>
+
+            <a href="/dashboard.html" class="navbar-brand-center">
+                <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+            </a>
+
+            <div class="navbar-links-right">
+                <a href="/projects" class="nav-btn"><i class="fas fa-folder-open"></i> Projects</a>
+                <a href="/portfolios" class="nav-btn"><i class="fas fa-briefcase"></i> Portfolios</a>
+                <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero -->
+        <div class="hero">
+            <h1><i class="fas fa-microscope"></i> Analyzers</h1>
+            <p>Choose an analyzer to process and analyze your QA data</p>
+        </div>
+
+        <!-- Analyzers Grid -->
+        <div class="analyzers-grid">
+            <!-- Ticket Resolution Analyzer Card -->
+            <a href="/" class="analyzer-card analyzer-card-1">
+                <div class="analyzer-card-header">
+                    <div class="analyzer-icon">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                </div>
+                <div class="analyzer-card-body">
+                    <h2>Ticket Resolution Analyzer</h2>
+                    <p>Upload Excel files to analyze ticket resolution performance and track success rates</p>
+                    <div class="analyzer-features">
+                        <span class="feature-tag"><i class="fas fa-check-circle"></i> Excel Files</span>
+                        <span class="feature-tag"><i class="fas fa-chart-bar"></i> Performance</span>
+                        <span class="feature-tag"><i class="fas fa-calendar"></i> Monthly/Quarterly</span>
+                    </div>
+                </div>
+                <div class="analyzer-card-footer">
+                    <span class="cta-text">Open Analyzer <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Performance Statistics Card -->
+            <a href="/performance-statistics" class="analyzer-card analyzer-card-2">
+                <div class="analyzer-card-header">
+                    <div class="analyzer-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                </div>
+                <div class="analyzer-card-body">
+                    <h2>Performance Statistics</h2>
+                    <p>Upload performance metrics and analyze project performance across quarters and years</p>
+                    <div class="analyzer-features">
+                        <span class="feature-tag"><i class="fas fa-upload"></i> JSON/CSV</span>
+                        <span class="feature-tag"><i class="fas fa-percentage"></i> Metrics</span>
+                        <span class="feature-tag"><i class="fas fa-tachometer-alt"></i> KPIs</span>
+                    </div>
+                </div>
+                <div class="analyzer-card-footer">
+                    <span class="cta-text">Open Analyzer <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Project Availability Card -->
+            <a href="/project-availability" class="analyzer-card analyzer-card-3">
+                <div class="analyzer-card-header">
+                    <div class="analyzer-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="analyzer-card-body">
+                    <h2>Project Availability</h2>
+                    <p>Track and analyze project availability percentages across different time periods</p>
+                    <div class="analyzer-features">
+                        <span class="feature-tag"><i class="fas fa-upload"></i> JSON/CSV</span>
+                        <span class="feature-tag"><i class="fas fa-percent"></i> Percentages</span>
+                        <span class="feature-tag"><i class="fas fa-chart-line"></i> Trends</span>
+                    </div>
+                </div>
+                <div class="analyzer-card-footer">
+                    <span class="cta-text">Open Analyzer <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-developer">
+                    <i class="fas fa-user-tie"></i> Developed by: <strong>Haitham Al Mughrabi</strong>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-company">
+                    <div class="footer-company-header">
+                        <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
+                    </div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Set current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+
+    <style>
+        /* Analyzers Grid */
+        .analyzers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: var(--spacing-2xl);
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        /* Analyzer Card */
+        .analyzer-card {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border: 2px solid var(--gray-200);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            height: 100%;
+        }
+
+        .analyzer-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary);
+        }
+
+        .analyzer-card-header {
+            padding: var(--spacing-2xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Gradient backgrounds for each card */
+        .analyzer-card-1 .analyzer-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .analyzer-card-2 .analyzer-card-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .analyzer-card-3 .analyzer-card-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        /* Animated background elements */
+        .analyzer-card-header::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -50px;
+            right: -50px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .analyzer-card-header::after {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            bottom: -40px;
+            left: -40px;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .analyzer-icon {
+            position: relative;
+            z-index: 1;
+            font-size: 3.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+        }
+
+        .analyzer-card-body {
+            padding: var(--spacing-2xl);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+
+        .analyzer-card-body h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1.3;
+        }
+
+        .analyzer-card-body p {
+            margin: 0;
+            font-size: 0.9375rem;
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        .analyzer-features {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .feature-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: var(--radius-full);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            width: fit-content;
+        }
+
+        .feature-tag i {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .analyzer-card-footer {
+            padding: var(--spacing-lg) var(--spacing-2xl);
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cta-text {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            transition: all 0.3s ease;
+        }
+
+        .analyzer-card:hover .cta-text {
+            gap: var(--spacing-md);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .analyzers-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-xl);
+            }
+
+            .analyzer-card-header {
+                min-height: 120px;
+            }
+
+            .analyzer-icon {
+                font-size: 2.5rem;
+            }
+
+            .analyzer-card-body h2 {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* New Centered Navigation Styles */
+        .navbar-container-new {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-lg) var(--spacing-xl);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: var(--spacing-xl);
+        }
+
+        .navbar-links-left {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .navbar-links-right {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .navbar-brand-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            padding: var(--spacing-sm);
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: var(--radius-2xl);
+            border: 2px solid rgba(79, 70, 229, 0.2);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+        }
+
+        .navbar-brand-center:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+        }
+
+        .navbar-brand-center .navbar-brand-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.75rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand-center:hover .navbar-brand-icon {
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
+        }
+
+        .navbar-links-left .nav-btn,
+        .navbar-links-right .nav-btn {
+            padding: 0.875rem 1.5rem;
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--gray-700);
+            border: 2px solid transparent;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            white-space: nowrap;
+        }
+
+        .navbar-links-left .nav-btn:hover,
+        .navbar-links-right .nav-btn:hover {
+            background: white;
+            color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .navbar-links-left .nav-btn.active,
+        .navbar-links-right .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .navbar-links-left .nav-btn i,
+        .navbar-links-right .nav-btn i {
+            font-size: 1rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .navbar-container-new {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+
+            .navbar-brand-center {
+                order: -1;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .navbar-links-left,
+            .navbar-links-right {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-links-left .nav-btn span:not(.fas),
+            .navbar-links-right .nav-btn span:not(.fas) {
+                display: none;
+            }
+
+            .navbar-links-left .nav-btn,
+            .navbar-links-right .nav-btn {
+                padding: 0.75rem;
+                min-width: 44px;
+                justify-content: center;
+            }
+
+            .navbar-brand-center .navbar-brand-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</body>
+</html>
