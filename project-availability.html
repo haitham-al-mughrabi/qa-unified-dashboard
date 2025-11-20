@@ -31,6 +31,8 @@
             <div class="navbar-links-right">
                 <a href="/project-availability" class="nav-btn active"><i class="fas fa-check-circle"></i> Availability</a>
                 <a href="/project-availability-dashboard" class="nav-btn"><i class="fas fa-th-large"></i> Availability Dashboard</a>
+                <a href="/project-statistics.html" class="nav-btn"><i class="fas fa-project-diagram"></i> Projects</a>
+                <a href="/portfolio-statistics.html" class="nav-btn"><i class="fas fa-briefcase"></i> Portfolios</a>
                 <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
             </div>
         </div>
@@ -102,6 +104,13 @@
         <!-- Messages -->
         <!-- Results Container -->
         <div class="results-container" id="resultsContainer"></div>
+
+        <!-- Save Button -->
+        <div id="saveButtonContainer" style="display: none; text-align: center; margin-top: 2rem;">
+            <button id="saveBtn" class="btn-save" onclick="openSaveModal()" style="padding: 12px 32px; font-size: 1rem;">
+                <i class="fas fa-save"></i> Save to Database
+            </button>
+        </div>
     </div>
 
     <!-- Save Modal -->
@@ -302,7 +311,7 @@
             allParsedData = [];
             processedDataByProject = {};
             document.getElementById('resultsContainer').innerHTML = '';
-            document.getElementById('saveBtn').style.display = 'none';
+            document.getElementById('saveButtonContainer').style.display = 'none';
         }
 
         async function processFileQueue() {
@@ -343,7 +352,7 @@
 
             hideLoading();
             displayResults();
-            document.getElementById('saveBtn').style.display = 'block';
+            document.getElementById('saveButtonContainer').style.display = 'block';
             showSuccess(`Successfully processed ${fileQueue.length} file(s)`);
         }
 
