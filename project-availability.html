@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Statistics - QA Dashboard</title>
+    <title>Project Availability - QA Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@
             <div class="navbar-links-left">
                 <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
                 <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
-                <a href="/performance-statistics" class="nav-btn active"><i class="fas fa-trophy"></i> Performance</a>
+                <a href="/performance-statistics" class="nav-btn"><i class="fas fa-trophy"></i> Performance</a>
             </div>
 
             <a href="/dashboard.html" class="navbar-brand-center">
@@ -29,7 +29,7 @@
             </a>
 
             <div class="navbar-links-right">
-                <a href="/project-availability" class="nav-btn"><i class="fas fa-server"></i> Availability</a>
+                <a href="/availability-dashboard" class="nav-btn"><i class="fas fa-chart-pie"></i> Availability Dashboard</a>
                 <a href="/project-statistics.html" class="nav-btn"><i class="fas fa-project-diagram"></i> Projects</a>
                 <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
             </div>
@@ -40,8 +40,8 @@
     <div class="main-container">
         <!-- Hero Section -->
         <div class="hero">
-            <h1><i class="fas fa-trophy"></i> Performance Statistics</h1>
-            <p>Upload JSON or CSV files to analyze performance metrics by project and quarter</p>
+            <h1><i class="fas fa-server"></i> Project Availability</h1>
+            <p>Upload JSON or CSV files to analyze availability percentages by project and quarter</p>
         </div>
 
         <!-- Upload Card -->
@@ -51,7 +51,7 @@
                 <div class="upload-text">
                     <h3>Upload JSON or CSV Files</h3>
                     <p>Drag and drop one or more files here or click to browse</p>
-                    <small>Expected format: [{"title": "ProjectName - Month:", "value": 124.0}]</small>
+                    <small>Expected format: [{"title": "ProjectName - Month:", "value": 99.5}] (value as percentage)</small>
                 </div>
                 <input type="file" id="fileInput" class="file-input" accept=".json, .csv" multiple>
                 <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
@@ -108,7 +108,7 @@
     <div class="modal" id="saveModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-save"></i> Save Performance Statistics</h2>
+                <h2><i class="fas fa-save"></i> Save Availability Statistics</h2>
                 <button class="modal-close" onclick="closeSaveModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -581,7 +581,7 @@
                         <div class="month-card">
                             <div class="month-name">${capitalize(item.month)}</div>
                             <div class="month-quarter">${item.quarter}</div>
-                            <div class="month-value">${item.value.toFixed(2)}</div>
+                            <div class="month-value">${item.value.toFixed(2)}%</div>
                         </div>
                     `;
                 });
@@ -606,7 +606,7 @@
                     html += `
                         <div class="quarter-card ${!hasData ? 'no-data' : ''}">
                             <div class="quarter-name">${quarter}</div>
-                            <div class="quarter-value">${hasData ? avg.toFixed(2) : 'N/A'}</div>
+                            <div class="quarter-value">${hasData ? avg.toFixed(2) + '%' : 'N/A'}</div>
                             ${hasData ? `<div class="quarter-count">${yearData.quarters[quarter].length} months</div>` : ''}
                         </div>
                     `;
@@ -703,7 +703,7 @@
                 });
 
                 // Save to database
-                const saveResponse = await fetch('/api/performance-statistics', {
+                const saveResponse = await fetch('/api/availability-statistics', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
