@@ -199,22 +199,41 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar">
+        <nav class="navbar">
         <div class="navbar-container-new">
             <div class="navbar-links-left">
-                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="/dashboard" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
                 <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
-                <a href="/performance-statistics" class="nav-btn"><i class="fas fa-trophy"></i> Performance</a>
             </div>
 
-            <a href="/dashboard.html" class="navbar-brand-center">
+            <a href="/dashboard" class="navbar-brand-center">
                 <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
             </a>
 
             <div class="navbar-links-right">
-                <a href="/project-availability" class="nav-btn"><i class="fas fa-server"></i> Availability</a>
-                <a href="/project-statistics.html" class="nav-btn"><i class="fas fa-project-diagram"></i> Projects</a>
-                <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
+                <div class="nav-dropdown">
+                    <a href="#" class="nav-btn"><i class="fas fa-trophy"></i> Performance <i class="fas fa-chevron-down"></i></a>
+                    <div class="nav-dropdown-content">
+                        <a href="/performance-statistics"><i class="fas fa-upload"></i> Upload Stats</a>
+                        <a href="/project-statistics"><i class="fas fa-project-diagram"></i> Project Stats</a>
+                        <a href="/portfolio-statistics"><i class="fas fa-briefcase"></i> Portfolio Stats</a>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
+                    <a href="#" class="nav-btn"><i class="fas fa-server"></i> Availability <i class="fas fa-chevron-down"></i></a>
+                    <div class="nav-dropdown-content">
+                        <a href="/project-availability"><i class="fas fa-upload"></i> Upload Stats</a>
+                        <a href="/availability-dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
+                    <a href="#" class="nav-btn"><i class="fas fa-cog"></i> Manage <i class="fas fa-chevron-down"></i></a>
+                    <div class="nav-dropdown-content">
+                        <a href="/projects"><i class="fas fa-folder"></i> Projects</a>
+                        <a href="/portfolios"><i class="fas fa-briefcase"></i> Portfolios</a>
+                        <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
