@@ -32,25 +32,37 @@
             <a href="/" class="nav-icon active" data-tooltip="Ticket Analyzer">
                 <i class="fas fa-file-alt"></i>
             </a>
+            <a href="/statistics" class="nav-icon" data-tooltip="Statistics">
+                <i class="fas fa-chart-pie"></i>
+            </a>
 
             <!-- Metrics Section -->
             <div class="nav-section-divider"></div>
             <div class="nav-section-label">Metrics</div>
-            <a href="/performance-statistics" class="nav-icon" data-tooltip="Performance">
+            <a href="/performance-statistics" class="nav-icon" data-tooltip="Performance Stats">
                 <i class="fas fa-trophy"></i>
             </a>
-            <a href="/project-availability" class="nav-icon" data-tooltip="Availability">
+            <a href="/project-availability" class="nav-icon" data-tooltip="Upload Availability">
+                <i class="fas fa-upload"></i>
+            </a>
+            <a href="/project-availability-results" class="nav-icon" data-tooltip="View Availability">
                 <i class="fas fa-server"></i>
             </a>
 
             <!-- Management Section -->
             <div class="nav-section-divider"></div>
             <div class="nav-section-label">Manage</div>
-            <a href="/project-statistics.html" class="nav-icon" data-tooltip="Projects">
+            <a href="/projects" class="nav-icon" data-tooltip="Projects">
+                <i class="fas fa-folder"></i>
+            </a>
+            <a href="/project-statistics" class="nav-icon" data-tooltip="Project Stats">
                 <i class="fas fa-project-diagram"></i>
             </a>
-            <a href="/portfolio-statistics.html" class="nav-icon" data-tooltip="Portfolios">
+            <a href="/portfolios" class="nav-icon" data-tooltip="Portfolios">
                 <i class="fas fa-briefcase"></i>
+            </a>
+            <a href="/portfolio-statistics" class="nav-icon" data-tooltip="Portfolio Stats">
+                <i class="fas fa-chart-line"></i>
             </a>
 
             <!-- Settings Section -->
@@ -60,6 +72,12 @@
             </a>
         </div>
     </nav>
+
+    <!-- Save Button (Fixed Position) -->
+    <button class="save-btn-fixed" id="saveBtn" onclick="openSaveModal()" style="display: none;">
+        <i class="fas fa-save"></i>
+        <span>Save Data</span>
+    </button>
 
     <!-- Main Container -->
     <div class="main-container">
@@ -903,7 +921,7 @@
             position: fixed;
             left: 0;
             top: 0;
-            width: 90px;
+            width: 85px;
             height: 100vh;
             background: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
             display: flex;
@@ -913,12 +931,12 @@
             z-index: 1000;
             box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
             overflow-y: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
         .left-navbar::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
+            display: none;
         }
 
         .nav-brand {
@@ -1034,7 +1052,7 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(139, 92, 246, 0.3);
-            z-index: 10000;
+            z-index: 10001;
         }
 
         [data-tooltip]::before {
@@ -1049,7 +1067,7 @@
             opacity: 0;
             pointer-events: none;
             transition: all 0.3s ease;
-            z-index: 10000;
+            z-index: 10001;
         }
 
         [data-tooltip]:hover::after,
@@ -1057,13 +1075,55 @@
             opacity: 1;
         }
 
+        /* Save Button Fixed Position */
+        .save-btn-fixed {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            transition: all 0.3s ease;
+            z-index: 999;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .save-btn-fixed.active {
+            display: flex;
+        }
+
+        .save-btn-fixed:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+        }
+
+        .save-btn-fixed i {
+            font-size: 1.1rem;
+        }
+
         /* Adjust main container for sidebar and center content */
         .main-container {
-            margin-left: 90px;
+            margin-left: 85px;
             max-width: 1400px;
             margin-right: auto;
-            padding-left: 2rem;
-            padding-right: 2rem;
+            padding-left: max(2rem, calc((100vw - 85px - 1400px) / 2));
+            padding-right: max(2rem, calc((100vw - 85px - 1400px) / 2));
+        }
+
+        /* Mid-range screens: keep good spacing */
+        @media (min-width: 769px) and (max-width: 1600px) {
+            .main-container {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
         }
 
         /* Mobile Responsive */
@@ -1126,7 +1186,7 @@
                 border-radius: 0 0 4px 4px;
             }
 
-            /* Mobile tooltips - show below */
+            /* Mobile tooltips - show above */
             [data-tooltip]::after {
                 left: 50%;
                 top: auto;
@@ -1151,6 +1211,13 @@
                 margin-left: 0;
                 padding-left: 1rem;
                 padding-right: 1rem;
+            }
+
+            .save-btn-fixed {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9rem;
             }
         }
     </style>
