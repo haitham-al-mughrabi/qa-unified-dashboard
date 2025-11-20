@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Availability Results - QA Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="src/static/dashboard.css">
+    <link rel="stylesheet" href="/src/static/nav-dropdown.css">
+    <link rel="stylesheet" href="src/static/footer.css">
+    <link rel="stylesheet" href="src/static/toast.css">
+</head>
+<body>
+    <!-- Left Navigation Sidebar -->
+    <nav class="left-navbar">
+        <div class="nav-brand">
+            <a href="/dashboard.html" class="brand-icon" data-tooltip="QA Dashboard">
+                <i class="fas fa-line-chart"></i>
+            </a>
+        </div>
+
+        <div class="nav-links">
+            <!-- Analytics Section -->
+            <div class="nav-section-label">Analytics</div>
+            <a href="/dashboard.html" class="nav-icon" data-tooltip="Dashboard">
+                <i class="fas fa-chart-bar"></i>
+            </a>
+            <a href="/" class="nav-icon" data-tooltip="Ticket Analyzer">
+                <i class="fas fa-file-alt"></i>
+            </a>
+
+            <!-- Metrics Section -->
+            <div class="nav-section-divider"></div>
+            <div class="nav-section-label">Metrics</div>
+            <a href="/performance-statistics" class="nav-icon" data-tooltip="Performance">
+                <i class="fas fa-trophy"></i>
+            </a>
+            <a href="/project-availability" class="nav-icon" data-tooltip="Availability">
+                <i class="fas fa-server"></i>
+            </a>
+
+            <!-- Management Section -->
+            <div class="nav-section-divider"></div>
+            <div class="nav-section-label">Manage</div>
+            <a href="/project-statistics.html" class="nav-icon" data-tooltip="Projects">
+                <i class="fas fa-project-diagram"></i>
+            </a>
+            <a href="/portfolio-statistics.html" class="nav-icon" data-tooltip="Portfolios">
+                <i class="fas fa-briefcase"></i>
+            </a>
+
+            <!-- Settings Section -->
+            <div class="nav-section-divider"></div>
+            <a href="/settings" class="nav-icon" data-tooltip="Settings">
+                <i class="fas fa-cog"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero -->
+        <div class="hero">
+            <h1><i class="fas fa-server"></i> Project Availability</h1>
+            <p>View and analyze project availability metrics across all projects</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="/project-availability" class="action-btn upload-btn">
+                <i class="fas fa-upload"></i> Upload New Data
+            </a>
+        </div>
+
+        <!-- Project Tabs -->
+        <div class="tabs-container">
+            <div class="tabs-section-header">
+                <i class="fas fa-project-diagram"></i>
+                <span>Projects</span>
+            </div>
+            <div class="tabs-header" id="projectTabs">
+                <!-- Project tabs will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Project Availability Summary -->
+        <div id="availabilityStatisticsContainer" style="display: none;">
+            <div class="stats-summary-card">
+                <div class="stats-header">
+                    <h2><i class="fas fa-server"></i> Availability Statistics</h2>
+                    <p>Availability metrics and quarterly averages</p>
+                </div>
+                <div class="performance-stats-grid" id="availabilityStatsGrid">
+                    <!-- Availability statistics will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Availability Dashboard Container -->
+        <div id="dashboardContainer"></div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading">
+            <div class="spinner"></div>
+            <h3>Loading availability data...</h3>
+            <p>Please wait</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-developer">
+                    <i class="fas fa-user-tie"></i> Developed by: <strong>Haitham Al Mughrabi</strong>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-company">
+                    <div class="footer-company-header">
+                        <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
+                    </div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Set current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Dynamically construct API URL based on current domain
+        const API_URL = `${window.location.protocol}//${window.location.host}/api`;
+        let availabilityData = {};
+        let currentYearByProject = {};
+        let currentQuarterByProject = {};
+        let allProjects = [];
+        let activeProjectId = null;
+
+        // Show/hide loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Helper function to safely parse JSON responses
+        async function fetchJSON(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+
+                if (!response.ok) {
+                    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    try {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorData.message || errorMessage;
+                        }
+                    } catch (e) {
+                        // If we can't parse the error, use the default message
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server did not return JSON');
+                }
+
+                return await response.json();
+            } catch (error) {
+                if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+                    throw new Error('Cannot connect to API server at ' + API_URL);
+                }
+                throw error;
+            }
+        }
+
+        async function loadAvailability() {
+            showLoading();
+            try {
+                // Fetch all projects
+                const projectsData = await fetchJSON(`${API_URL}/projects`);
+
+                // Fetch all availability data
+                const availabilityResponse = await fetchJSON(`${API_URL}/project-availability`);
+                const availabilityRecords = availabilityResponse.data || [];
+
+                // Clear existing data
+                allProjects = [];
+                availabilityData = {};
+
+                // Collect all projects
+                projectsData.projects.forEach(project => {
+                    allProjects.push({
+                        id: String(project.id),
+                        name: project.name,
+                        color: project.color,
+                        portfolio_id: project.portfolio_id ? String(project.portfolio_id) : null,
+                        portfolio_name: project.portfolio_name
+                    });
+                });
+
+                // Process availability data
+                availabilityRecords.forEach(record => {
+                    const projectId = String(record.project_id);
+                    const year = record.year;
+                    const quarter = record.quarter;
+                    const month = record.month;
+                    const value = parseFloat(record.value);
+
+                    if (!availabilityData[projectId]) {
+                        availabilityData[projectId] = {
+                            project_name: record.project_name,
+                            years: {}
+                        };
+                    }
+
+                    if (!availabilityData[projectId].years[year]) {
+                        availabilityData[projectId].years[year] = {
+                            quarters: {}
+                        };
+                    }
+
+                    if (!availabilityData[projectId].years[year].quarters[quarter]) {
+                        availabilityData[projectId].years[year].quarters[quarter] = {
+                            months: {},
+                            values: [],
+                            records: []
+                        };
+                    }
+
+                    if (!availabilityData[projectId].years[year].quarters[quarter].months[month]) {
+                        availabilityData[projectId].years[year].quarters[quarter].months[month] = {
+                            value: value,
+                            filename: record.filename
+                        };
+                        availabilityData[projectId].years[year].quarters[quarter].values.push(value);
+                    }
+
+                    availabilityData[projectId].years[year].quarters[quarter].records.push({
+                        id: record.id,
+                        month: month,
+                        value: value,
+                        filename: record.filename
+                    });
+                });
+
+                // Calculate quarterly averages
+                Object.keys(availabilityData).forEach(projectId => {
+                    Object.keys(availabilityData[projectId].years).forEach(year => {
+                        Object.keys(availabilityData[projectId].years[year].quarters).forEach(quarter => {
+                            const quarterData = availabilityData[projectId].years[year].quarters[quarter];
+                            const values = quarterData.values;
+                            const avgValue = values.length > 0 ?
+                                values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+                            quarterData.average_value = parseFloat(avgValue.toFixed(2));
+                        });
+                    });
+                });
+
+                // Initialize year/quarter for projects with data
+                Object.keys(availabilityData).forEach(projectId => {
+                    const years = Object.keys(availabilityData[projectId].years).map(Number);
+                    const sortedYears = years.sort((a, b) => b - a);
+
+                    if (sortedYears.length > 0) {
+                        currentYearByProject[projectId] = sortedYears[0];
+
+                        const quarters = Object.keys(availabilityData[projectId].years[sortedYears[0]].quarters).sort();
+                        currentQuarterByProject[projectId] = quarters.length > 0 ? quarters[quarters.length - 1] : 'Q4';
+                    }
+                });
+
+                // Set active project to the first one with data
+                const projectsWithData = Object.keys(availabilityData);
+                if (projectsWithData.length > 0 && !activeProjectId) {
+                    activeProjectId = projectsWithData[0];
+                }
+
+                populateProjectTabs();
+
+                // Load statistics for the active project
+                if (activeProjectId) {
+                    await loadProjectAvailabilityStatistics(activeProjectId);
+                }
+
+                renderDashboard();
+                hideLoading();
+            } catch (error) {
+                console.error('Error loading availability:', error);
+                document.getElementById('dashboardContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle empty-state-icon" style="color: #ef4444;"></i>
+                        <h3>Error loading availability data</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                hideLoading();
+            }
+        }
+
+        function populateProjectTabs() {
+            const tabsContainer = document.getElementById('projectTabs');
+
+            const projectsWithData = allProjects.filter(p => availabilityData[p.id]);
+
+            if (projectsWithData.length === 0) {
+                tabsContainer.innerHTML = `
+                    <p style="padding: 1rem; color: var(--gray-600);">
+                        No availability data available.
+                        <a href="/project-availability" style="color: var(--primary); text-decoration: none; font-weight: 600;">Upload data</a> to get started.
+                    </p>
+                `;
+                return;
+            }
+
+            tabsContainer.innerHTML = projectsWithData.map(project => `
+                <button class="tab-btn ${project.id === activeProjectId ? 'active' : ''}"
+                        onclick="switchProject('${project.id}')">
+                    <i class="fas fa-project-diagram"></i> ${project.name}
+                </button>
+            `).join('');
+        }
+
+        async function switchProject(projectId) {
+            activeProjectId = projectId;
+            populateProjectTabs();
+            await loadProjectAvailabilityStatistics(projectId);
+            renderDashboard();
+        }
+
+        async function loadProjectAvailabilityStatistics(projectId) {
+            try {
+                const stats = await fetchJSON(`${API_URL}/projects/${projectId}/project-availability`);
+
+                if (stats.success && stats.hasData && stats.statistics) {
+                    displayAvailabilityStatistics(stats.statistics);
+                } else {
+                    hideAvailabilityStatistics();
+                }
+            } catch (error) {
+                console.error('Error loading availability statistics:', error);
+                hideAvailabilityStatistics();
+            }
+        }
+
+        function displayAvailabilityStatistics(stats) {
+            const container = document.getElementById('availabilityStatisticsContainer');
+            const statsGrid = document.getElementById('availabilityStatsGrid');
+
+            let html = `
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.totalDataPoints.toLocaleString()}</h3>
+                        <p>Total Data Points</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.overallAverage.toFixed(2)}%</h3>
+                        <p>Overall Average</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.latestQuarter} ${stats.latestYear}</h3>
+                        <p>Latest Period</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.latestQuarterAverage.toFixed(2)}%</h3>
+                        <p>Latest Quarter Avg</p>
+                    </div>
+                </div>
+            `;
+
+            statsGrid.innerHTML = html;
+            container.style.display = 'block';
+        }
+
+        function hideAvailabilityStatistics() {
+            document.getElementById('availabilityStatisticsContainer').style.display = 'none';
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('dashboardContainer');
+
+            if (!activeProjectId) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-server empty-state-icon"></i>
+                        <h3>No Projects</h3>
+                        <p>Create a project to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const activeProject = allProjects.find(p => p.id === activeProjectId);
+            const project = availabilityData[activeProjectId];
+
+            if (!project) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-server empty-state-icon"></i>
+                        <h3>No Availability Data for ${activeProject.name}</h3>
+                        <p>Upload availability data for this project to see analytics</p>
+                        <p style="margin-top: 1rem;">
+                            <a href="/project-availability" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+                                <i class="fas fa-upload"></i> Upload Availability Data
+                            </a>
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            const years = Object.keys(project.years).map(Number).sort((a, b) => b - a);
+            const currentYear = currentYearByProject[activeProjectId];
+            const yearData = project.years[currentYear];
+
+            if (!yearData) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-times empty-state-icon"></i>
+                        <h3>No data for ${currentYear}</h3>
+                        <p>No availability records found for this year</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const currentQuarter = currentQuarterByProject[activeProjectId];
+            const quarterData = yearData.quarters[currentQuarter];
+
+            const defaultColor = '#10b981';
+
+            let html = `
+                <div class="project-section">
+                    <div class="project-header" style="border-bottom-color: ${defaultColor}">
+                        <div class="project-name" style="color: ${defaultColor}">
+                            <i class="fas fa-server"></i>
+                            ${project.project_name}
+                        </div>
+                    </div>
+
+                    ${renderYearQuarterNavigation()}
+            `;
+
+            if (!quarterData) {
+                html += `
+                    <div class="quarter-empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <h3>No Data for ${currentQuarter} ${currentYear}</h3>
+                        <p>There are no availability records for this quarter yet.</p>
+                    </div>
+                </div>
+                `;
+                container.innerHTML = html;
+                return;
+            }
+
+            const avgValue = quarterData.average_value;
+
+            html += `
+                    <div class="quarter-card" style="border-left-color: ${defaultColor}">
+                        <div class="quarter-title" style="color: ${defaultColor}">
+                            <i class="fas fa-calendar-alt"></i>
+                            ${currentQuarter}
+                        </div>
+
+                        <div class="metrics-grid">
+                            <div class="metric-card" style="--metric-color: #10b981; --metric-color-dark: #059669;">
+                                <div class="metric-icon"><i class="fas fa-server"></i></div>
+                                <div class="metric-value">
+                                    ${avgValue.toFixed(2)}%
+                                </div>
+                                <div class="metric-label">Average Availability</div>
+                            </div>
+
+                            <div class="metric-card" style="--metric-color: #06b6d4; --metric-color-dark: #0891b2;">
+                                <div class="metric-icon"><i class="fas fa-calendar-check"></i></div>
+                                <div class="metric-value">
+                                    ${Object.keys(quarterData.months).length}
+                                </div>
+                                <div class="metric-label">Months Tracked</div>
+                            </div>
+
+                            <div class="metric-card" style="--metric-color: #8b5cf6; --metric-color-dark: #7c3aed;">
+                                <div class="metric-icon"><i class="fas fa-database"></i></div>
+                                <div class="metric-value">
+                                    ${quarterData.records.length}
+                                </div>
+                                <div class="metric-label">Data Points</div>
+                            </div>
+
+                            <div class="metric-card" style="--metric-color: ${avgValue >= 99 ? '#10b981' : avgValue >= 95 ? '#f59e0b' : '#ef4444'}; --metric-color-dark: ${avgValue >= 99 ? '#059669' : avgValue >= 95 ? '#d97706' : '#dc2626'};">
+                                <div class="metric-icon"><i class="fas ${avgValue >= 99 ? 'fa-check-circle' : avgValue >= 95 ? 'fa-exclamation-triangle' : 'fa-times-circle'}"></i></div>
+                                <div class="metric-value">
+                                    ${avgValue >= 99 ? 'Excellent' : avgValue >= 95 ? 'Good' : 'Needs Attention'}
+                                </div>
+                                <div class="metric-label">Status</div>
+                            </div>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <div class="progress-label">Availability Performance</div>
+                                <div class="progress-value">${avgValue.toFixed(2)}%</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${avgValue}%; background: ${defaultColor}"></div>
+                            </div>
+                        </div>
+
+                        <div class="details-section">
+                            ${Object.keys(quarterData.months).length > 0 ? `
+                                <div class="monthly-breakdown">
+                                    <h4 style="color: ${defaultColor}"><i class="fas fa-calendar-week"></i> Monthly Breakdown</h4>
+                                    <div class="months-grid">
+                                        ${Object.keys(quarterData.months)
+                                            .map(monthKey => {
+                                                const monthData = quarterData.months[monthKey];
+                                                const monthValue = monthData.value;
+                                                const monthColor = monthValue >= 99 ? '#10b981' : monthValue >= 95 ? '#f59e0b' : '#ef4444';
+                                                return `
+                                                    <div class="month-card" style="--month-color: ${monthColor};">
+                                                        <div class="month-header">
+                                                            <div class="month-title">
+                                                                <i class="fas fa-calendar-day"></i>
+                                                                ${monthKey}
+                                                            </div>
+                                                            <div class="month-success-badge">
+                                                                ${monthValue.toFixed(2)}%
+                                                            </div>
+                                                        </div>
+                                                        <div class="month-metrics">
+                                                            <div class="month-metric-item">
+                                                                <div class="month-metric-label">
+                                                                    <i class="fas fa-file-alt"></i>
+                                                                    Source File
+                                                                </div>
+                                                                <div class="month-metric-value" style="font-size: 0.75rem; word-break: break-all;">${monthData.filename}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderYearQuarterNavigation() {
+            if (!activeProjectId) return '';
+
+            const project = availabilityData[activeProjectId];
+            if (!project) return '';
+
+            const years = Object.keys(project.years).map(Number).sort((a, b) => a - b);
+            const currentYear = currentYearByProject[activeProjectId];
+
+            const yearsHTML = years.map(year => {
+                const hasData = project.years[year] && Object.keys(project.years[year].quarters).length > 0;
+                const isActive = year === currentYear;
+                const classes = `year-btn ${isActive ? 'active' : ''} ${!hasData ? 'no-data' : ''}`;
+
+                return `
+                    <button class="${classes}"
+                            onclick="selectYear(${year})"
+                            ${!hasData ? 'disabled' : ''}>
+                        ${year}
+                        ${hasData ? '<span class="period-badge"></span>' : ''}
+                    </button>
+                `;
+            }).join('');
+
+            const allQuarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+            const currentQuarter = currentQuarterByProject[activeProjectId];
+            const yearData = project.years[currentYear];
+
+            const quartersHTML = allQuarters.map(quarter => {
+                const hasData = yearData && yearData.quarters && yearData.quarters[quarter];
+                const isActive = quarter === currentQuarter;
+                const classes = `quarter-btn ${isActive ? 'active' : ''} ${!hasData ? 'no-data' : ''}`;
+
+                return `
+                    <button class="${classes}"
+                            onclick="selectQuarter('${quarter}')"
+                            ${!hasData ? 'disabled' : ''}>
+                        ${quarter}
+                        ${hasData ? '<span class="period-badge"></span>' : ''}
+                    </button>
+                `;
+            }).join('');
+
+            return `
+                <div class="period-navigation">
+                    <div class="period-section">
+                        <div class="period-label">
+                            <i class="fas fa-calendar"></i>
+                            Select Year
+                        </div>
+                        <div class="years-container">
+                            ${yearsHTML}
+                        </div>
+                    </div>
+
+                    <div class="period-section">
+                        <div class="period-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            Select Quarter
+                        </div>
+                        <div class="quarters-container">
+                            ${quartersHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectYear(year) {
+            if (!activeProjectId) return;
+
+            const project = availabilityData[activeProjectId];
+            if (!project || !project.years[year]) return;
+
+            currentYearByProject[activeProjectId] = year;
+
+            const yearData = project.years[year];
+            const availableQuarters = Object.keys(yearData.quarters).sort();
+
+            if (availableQuarters.length > 0) {
+                const currentQuarter = currentQuarterByProject[activeProjectId];
+                if (yearData.quarters[currentQuarter]) {
+                    currentQuarterByProject[activeProjectId] = currentQuarter;
+                } else {
+                    currentQuarterByProject[activeProjectId] = availableQuarters[availableQuarters.length - 1];
+                }
+            } else {
+                currentQuarterByProject[activeProjectId] = 'Q4';
+            }
+
+            renderDashboard();
+        }
+
+        function selectQuarter(quarter) {
+            if (!activeProjectId) return;
+
+            const project = availabilityData[activeProjectId];
+            const currentYear = currentYearByProject[activeProjectId];
+
+            if (!project || !project.years[currentYear]) return;
+
+            currentQuarterByProject[activeProjectId] = quarter;
+            renderDashboard();
+        }
+
+        // Load availability on page load
+        loadAvailability();
+    </script>
+    <script src="src/static/toast.js"></script>
+
+    <style>
+        /* Left Sidebar Navigation Styles */
+        body {
+            margin: 0;
+        }
+
+        .left-navbar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 90px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 0;
+            z-index: 1000;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .left-navbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-brand {
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.75rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            position: relative;
+        }
+
+        .brand-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0 0.75rem;
+        }
+
+        .nav-section-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            margin-top: 0.75rem;
+            margin-bottom: 0.25rem;
+            padding: 0 0.25rem;
+        }
+
+        .nav-section-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0.75rem 0.5rem;
+        }
+
+        .nav-icon {
+            width: 100%;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.4rem;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-icon.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .nav-icon.active::before {
+            content: '';
+            position: absolute;
+            left: -0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 32px;
+            background: white;
+            border-radius: 0 4px 4px 0;
+        }
+
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 1rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(30, 27, 75, 0.95);
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-radius: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            z-index: 10000;
+        }
+
+        [data-tooltip]::before {
+            content: '';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 0.5rem;
+            border: 6px solid transparent;
+            border-right-color: rgba(30, 27, 75, 0.95);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 10000;
+        }
+
+        [data-tooltip]:hover::after,
+        [data-tooltip]:hover::before {
+            opacity: 1;
+        }
+
+        .main-container {
+            margin-left: 90px;
+            max-width: 1400px;
+            margin-right: auto;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 70px;
+            }
+
+            .left-navbar {
+                width: 100%;
+                height: 70px;
+                top: auto;
+                bottom: 0;
+                flex-direction: row;
+                padding: 0 1rem;
+                background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            .nav-brand {
+                margin-bottom: 0;
+                margin-right: auto;
+            }
+
+            .brand-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.5rem;
+            }
+
+            .nav-links {
+                flex-direction: row;
+                gap: 0.5rem;
+                padding: 0;
+                width: auto;
+            }
+
+            .nav-section-label,
+            .nav-section-divider {
+                display: none;
+            }
+
+            .nav-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.25rem;
+            }
+
+            .nav-icon:hover {
+                transform: translateY(-4px);
+            }
+
+            .nav-icon.active::before {
+                left: 50%;
+                top: -0.5rem;
+                transform: translateX(-50%);
+                width: 32px;
+                height: 4px;
+                border-radius: 0 0 4px 4px;
+            }
+
+            [data-tooltip]::after {
+                left: 50%;
+                top: auto;
+                bottom: 100%;
+                transform: translateX(-50%);
+                margin-left: 0;
+                margin-bottom: 0.5rem;
+            }
+
+            [data-tooltip]::before {
+                left: 50%;
+                top: auto;
+                bottom: 100%;
+                transform: translateX(-50%);
+                margin-left: 0;
+                margin-bottom: -0.25rem;
+                border-right-color: transparent;
+                border-top-color: rgba(30, 27, 75, 0.95);
+            }
+
+            .main-container {
+                margin-left: 0;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+    </style>
+</body>
+</html>
