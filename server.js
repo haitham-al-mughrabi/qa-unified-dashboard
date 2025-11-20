@@ -152,6 +152,25 @@ async function createTables() {
             )
         `);
 
+        // Project availability table
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS project_availability (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                project_id INT,
+                project_name VARCHAR(255),
+                year INT,
+                quarter VARCHAR(10),
+                month VARCHAR(50),
+                value FLOAT,
+                filename VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                INDEX idx_project_id (project_id),
+                INDEX idx_year (year),
+                INDEX idx_quarter (quarter)
+            )
+        `);
+
         connection.release();
         console.log('Database tables initialized');
     } catch (error) {
@@ -1854,6 +1873,227 @@ app.delete('/api/performance-statistics', async (req, res) => {
     }
 });
 
+// ==================== PROJECT AVAILABILITY ENDPOINTS ====================
+
+// Get all project availability data
+app.get('/api/project-availability', async (req, res) => {
+    try {
+        const data = await query(`
+            SELECT pa.*, p.name as project_name
+            FROM project_availability pa
+            LEFT JOIN projects p ON pa.project_id = p.id
+            ORDER BY pa.year DESC, pa.quarter, pa.month
+        `);
+        res.json({ data });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get project availability by project
+app.get('/api/project-availability/project/:id', async (req, res) => {
+    try {
+        const data = await query(
+            `SELECT * FROM project_availability
+            WHERE project_id = ?
+            ORDER BY year DESC, quarter, month`,
+            [req.params.id]
+        );
+        res.json({ data });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get project availability summary for a specific project
+app.get('/api/projects/:id/project-availability', async (req, res) => {
+    try {
+        const projectId = req.params.id;
+
+        const data = await query(`
+            SELECT *
+            FROM project_availability pa
+            WHERE pa.project_id = ?
+            ORDER BY pa.year DESC, pa.quarter, pa.month
+        `, [projectId]);
+
+        if (data.length === 0) {
+            return res.json({ success: true, hasData: false, statistics: null });
+        }
+
+        // Process data to calculate statistics
+        const totalDataPoints = data.length;
+        const overallAverage = data.reduce((sum, item) => sum + parseFloat(item.value), 0) / totalDataPoints;
+
+        // Get latest data point
+        const latestData = data[0];
+        const latestYear = latestData.year;
+        const latestQuarter = latestData.quarter;
+        const latestQuarterData = data.filter(d => d.year === latestYear && d.quarter === latestQuarter);
+        const latestQuarterAverage = latestQuarterData.reduce((sum, item) => sum + parseFloat(item.value), 0) / latestQuarterData.length;
+
+        // Group by year and quarter
+        const years = {};
+        data.forEach(item => {
+            const year = item.year;
+            const quarter = item.quarter;
+            const month = item.month;
+
+            if (!years[year]) {
+                years[year] = { quarters: {} };
+            }
+
+            if (!years[year].quarters[quarter]) {
+                years[year].quarters[quarter] = {
+                    values: [],
+                    months: [],
+                    count: 0,
+                    average: 0
+                };
+            }
+
+            years[year].quarters[quarter].values.push(parseFloat(item.value));
+            years[year].quarters[quarter].months.push(month);
+            years[year].quarters[quarter].count++;
+        });
+
+        // Calculate quarterly averages
+        Object.keys(years).forEach(year => {
+            Object.keys(years[year].quarters).forEach(quarter => {
+                const quarterData = years[year].quarters[quarter];
+                quarterData.average = quarterData.values.reduce((sum, val) => sum + val, 0) / quarterData.count;
+            });
+        });
+
+        res.json({
+            success: true,
+            hasData: true,
+            statistics: {
+                totalDataPoints,
+                overallAverage: parseFloat(overallAverage.toFixed(2)),
+                latestYear,
+                latestQuarter,
+                latestQuarterAverage: parseFloat(latestQuarterAverage.toFixed(2)),
+                years
+            }
+        });
+    } catch (error) {
+        console.error('Error getting project availability:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Save project availability (bulk insert)
+app.post('/api/project-availability', async (req, res) => {
+    try {
+        const { records } = req.body;
+
+        if (!records || !Array.isArray(records) || records.length === 0) {
+            return res.status(400).json({ error: 'Records array is required' });
+        }
+
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            for (const record of records) {
+                const { project_id, project_name, year, quarter, month, value, filename } = record;
+
+                await connection.execute(
+                    `INSERT INTO project_availability
+                    (project_id, project_name, year, quarter, month, value, filename)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [project_id, project_name, year, quarter, month, value, filename]
+                );
+            }
+
+            await connection.commit();
+            res.json({
+                success: true,
+                message: `${records.length} project availability records saved successfully`
+            });
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete project availability by scope (project, year, quarter, month)
+app.delete('/api/project-availability/delete', async (req, res) => {
+    try {
+        const { scope, projectId, year, quarter, month } = req.query;
+
+        if (!scope || !projectId) {
+            return res.status(400).json({ error: 'Scope and project ID are required' });
+        }
+
+        let sql = 'DELETE FROM project_availability WHERE project_id = ?';
+        let params = [projectId];
+
+        if (scope === 'year' && year) {
+            sql += ' AND year = ?';
+            params.push(year);
+        } else if (scope === 'quarter' && year && quarter) {
+            sql += ' AND year = ? AND quarter = ?';
+            params.push(year, quarter);
+        } else if (scope === 'month' && year && quarter && month) {
+            sql += ' AND year = ? AND quarter = ? AND month = ?';
+            params.push(year, quarter, month);
+        }
+
+        const result = await query(sql, params);
+
+        res.json({
+            success: true,
+            message: `Deleted ${result.affectedRows} record(s)`,
+            deletedCount: result.affectedRows
+        });
+    } catch (error) {
+        console.error('Error deleting project availability:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Delete project availability by ID
+app.delete('/api/project-availability/:id', async (req, res) => {
+    try {
+        const result = await query('DELETE FROM project_availability WHERE id = ?', [req.params.id]);
+
+        if (result.affectedRows === 0) {
+            res.status(404).json({ error: 'Record not found' });
+            return;
+        }
+
+        res.json({ message: 'Project availability record deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete all project availability records
+app.delete('/api/project-availability', async (req, res) => {
+    try {
+        const result = await query('DELETE FROM project_availability');
+        res.json({
+            message: 'All project availability records deleted successfully',
+            deletedCount: result.affectedRows
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ==================== SERVE HTML PAGES ====================
 
 app.get('/', (req, res) => {
@@ -1886,6 +2126,10 @@ app.get('/project-statistics', (req, res) => {
 
 app.get('/performance-statistics', (req, res) => {
     res.sendFile(path.join(__dirname, 'performance-statistics.html'));
+});
+
+app.get('/project-availability', (req, res) => {
+    res.sendFile(path.join(__dirname, 'project-availability.html'));
 });
 
 // Start server

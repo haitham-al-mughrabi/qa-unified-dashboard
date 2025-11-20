@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Statistics - QA Dashboard</title>
+    <title>Project Availability - QA Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,10 +29,10 @@
             <a href="/" class="nav-icon" title="Ticket Analyzer">
                 <i class="fas fa-file-alt"></i>
             </a>
-            <a href="/performance-statistics" class="nav-icon active" title="Performance">
+            <a href="/performance-statistics" class="nav-icon" title="Performance">
                 <i class="fas fa-trophy"></i>
             </a>
-            <a href="/project-availability" class="nav-icon" title="Project Availability">
+            <a href="/project-availability" class="nav-icon active" title="Project Availability">
                 <i class="fas fa-server"></i>
             </a>
             <a href="/project-statistics.html" class="nav-icon" title="Projects">
@@ -51,8 +51,8 @@
     <div class="main-container">
         <!-- Hero Section -->
         <div class="hero">
-            <h1><i class="fas fa-trophy"></i> Performance Statistics</h1>
-            <p>Upload JSON or CSV files to analyze performance metrics by project and quarter</p>
+            <h1><i class="fas fa-server"></i> Project Availability</h1>
+            <p>Upload JSON or CSV files to track project availability metrics by quarter</p>
         </div>
 
         <!-- Upload Card -->
@@ -62,7 +62,7 @@
                 <div class="upload-text">
                     <h3>Upload JSON or CSV Files</h3>
                     <p>Drag and drop one or more files here or click to browse</p>
-                    <small>Expected format: [{"title": "ProjectName - Month:", "value": 124.0}]</small>
+                    <small>Expected format: [{"title": "ProjectName - Month:", "value": 98.5}] (values as percentages)</small>
                 </div>
                 <input type="file" id="fileInput" class="file-input" accept=".json, .csv" multiple>
                 <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
@@ -119,7 +119,7 @@
     <div class="modal" id="saveModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-save"></i> Save Performance Statistics</h2>
+                <h2><i class="fas fa-save"></i> Save Project Availability Data</h2>
                 <button class="modal-close" onclick="closeSaveModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -476,7 +476,7 @@
             resultsContainer.innerHTML = '';
 
             const projectNames = Object.keys(processedDataByProject).sort();
-            
+
             if (projectNames.length === 0) {
                 return;
             }
@@ -488,7 +488,7 @@
             // Create Tabs Header
             const tabsHeader = document.createElement('div');
             tabsHeader.className = 'tabs-header';
-            
+
             // Create Tabs Content Area
             const tabsContent = document.createElement('div');
             tabsContent.className = 'tab-content';
@@ -507,7 +507,7 @@
                 const tabPane = document.createElement('div');
                 tabPane.className = `tab-pane ${index === 0 ? 'active' : ''}`;
                 tabPane.id = `tab-${projectName.replace(/\s+/g, '-')}`;
-                
+
                 // Generate content for the project
                 tabPane.appendChild(createProjectContent(projectName, projectData));
                 tabsContent.appendChild(tabPane);
@@ -541,7 +541,7 @@
 
         function createProjectContent(projectName, projectData) {
             const container = document.createElement('div');
-            
+
             // Sort months by month order
             projectData.months.sort((a, b) => {
                 if (a.year !== b.year) return a.year - b.year;
@@ -570,7 +570,7 @@
             let html = `
                 <div class="project-card">
                     <div class="project-card-header">
-                        <h2><i class="fas fa-chart-line"></i> ${projectName} Statistics</h2>
+                        <h2><i class="fas fa-server"></i> ${projectName} Availability</h2>
                         <div class="project-stats">
                             <span class="stat-badge"><i class="fas fa-calendar"></i> ${projectData.months.length} months</span>
                         </div>
@@ -592,7 +592,7 @@
                         <div class="month-card">
                             <div class="month-name">${capitalize(item.month)}</div>
                             <div class="month-quarter">${item.quarter}</div>
-                            <div class="month-value">${item.value.toFixed(2)}</div>
+                            <div class="month-value">${item.value.toFixed(2)}%</div>
                         </div>
                     `;
                 });
@@ -617,7 +617,7 @@
                     html += `
                         <div class="quarter-card ${!hasData ? 'no-data' : ''}">
                             <div class="quarter-name">${quarter}</div>
-                            <div class="quarter-value">${hasData ? avg.toFixed(2) : 'N/A'}</div>
+                            <div class="quarter-value">${hasData ? avg.toFixed(2) + '%' : 'N/A'}</div>
                             ${hasData ? `<div class="quarter-count">${yearData.quarters[quarter].length} months</div>` : ''}
                         </div>
                     `;
@@ -714,7 +714,7 @@
                 });
 
                 // Save to database
-                const saveResponse = await fetch('/api/performance-statistics', {
+                const saveResponse = await fetch('/api/project-availability', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
