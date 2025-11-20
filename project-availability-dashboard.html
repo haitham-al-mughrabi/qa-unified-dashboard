@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Statistics - QA Analytics</title>
+    <title>Project Availability Dashboard - QA Analytics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
 
             <div class="navbar-links-right">
                 <a href="/project-availability" class="nav-btn"><i class="fas fa-check-circle"></i> Availability</a>
-                <a href="/project-availability-dashboard" class="nav-btn"><i class="fas fa-th-large"></i> Availability Dashboard</a>
+                <a href="/project-availability-dashboard" class="nav-btn active"><i class="fas fa-th-large"></i> Availability Dashboard</a>
                 <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
             </div>
         </div>
@@ -39,35 +39,35 @@
     <div class="main-container">
         <!-- Hero -->
         <div class="hero">
-            <h1><i class="fas fa-briefcase"></i> Portfolio Statistics</h1>
-            <p>Aggregated performance metrics across all projects in each portfolio</p>
+            <h1><i class="fas fa-th-large"></i> Project Availability Dashboard</h1>
+            <p>Aggregated availability metrics across all projects and portfolios</p>
         </div>
 
         <!-- Loading Overlay -->
         <div class="loading-overlay" id="loadingOverlay">
             <div class="spinner"></div>
-            <p>Loading portfolio statistics...</p>
+            <p>Loading project availability data...</p>
         </div>
 
         <!-- Tabs -->
         <div id="mainTabs" style="display: none;">
             <div class="tabs-container" id="tabsContainer">
-                <!-- Portfolio tabs will be dynamically inserted here -->
+                <!-- Project tabs will be dynamically inserted here -->
             </div>
 
             <!-- Tab Content Container -->
             <div id="tabContentContainer">
-                <!-- Portfolio content will be dynamically inserted here -->
+                <!-- Project content will be dynamically inserted here -->
             </div>
         </div>
 
         <!-- Empty State -->
         <div class="empty-state" id="emptyState" style="display: none;">
-            <i class="fas fa-briefcase"></i>
-            <h3>No Portfolio Data Available</h3>
-            <p>There are no portfolios with performance statistics yet.</p>
-            <a href="/performance-statistics" class="btn-primary">
-                <i class="fas fa-upload"></i> Upload Performance Data
+            <i class="fas fa-database"></i>
+            <h3>No Availability Data Available</h3>
+            <p>There are no projects with availability data yet.</p>
+            <a href="/project-availability" class="btn-primary">
+                <i class="fas fa-upload"></i> Upload Availability Data
             </a>
         </div>
     </div>
@@ -128,61 +128,66 @@
             return response.json();
         }
 
-        // Store all portfolios data globally
-        let allPortfoliosData = [];
+        // Store all projects data globally
+        let allProjectsData = [];
 
-        // Load portfolio statistics
-        async function loadPortfolioStatistics() {
+        // Load project availability statistics
+        async function loadProjectAvailability() {
             try {
                 showLoading();
-                const data = await fetchJSON(`${API_URL}/portfolio-statistics`);
+                const data = await fetchJSON(`${API_URL}/project-availability/dashboard`);
 
                 hideLoading();
 
-                if (!data.portfolios || data.portfolios.length === 0) {
+                if (!data.data || Object.keys(data.data).length === 0) {
                     document.getElementById('emptyState').style.display = 'flex';
                     document.getElementById('mainTabs').style.display = 'none';
                     return;
                 }
 
-                // Store data globally
-                allPortfoliosData = data.portfolios;
+                // Convert object to array
+                const projects = Object.values(data.data);
+                allProjectsData = projects;
 
                 document.getElementById('emptyState').style.display = 'none';
                 document.getElementById('mainTabs').style.display = 'block';
 
-                // Create portfolio tabs
-                createPortfolioTabs(data.portfolios);
+                // Create project tabs
+                createProjectTabs(projects);
             } catch (error) {
                 hideLoading();
-                console.error('Error loading portfolio statistics:', error);
-                showError(error.message || 'Failed to load portfolio statistics');
+                console.error('Error loading project availability:', error);
+                showError(error.message || 'Failed to load project availability data');
             }
         }
 
-        // Create tabs for each portfolio
-        function createPortfolioTabs(portfolios) {
+        // Create tabs for each project
+        function createProjectTabs(projects) {
             const tabsContainer = document.getElementById('tabsContainer');
             const contentContainer = document.getElementById('tabContentContainer');
 
             let tabsHtml = '';
             let contentHtml = '';
 
-            portfolios.forEach((portfolio, index) => {
+            // Sort projects by name
+            projects.sort((a, b) => (a.project_name || '').localeCompare(b.project_name || ''));
+
+            projects.forEach((project, index) => {
+                const projectId = project.project_id || index;
                 const isActive = index === 0 ? 'active' : '';
                 const displayStyle = index === 0 ? 'block' : 'none';
 
                 // Create tab button
                 tabsHtml += `
-                    <button class="tab-btn ${isActive}" onclick="switchToPortfolio(${portfolio.id})">
-                        <i class="fas fa-briefcase"></i> ${escapeHtml(portfolio.name)}
+                    <button class="tab-btn ${isActive}" onclick="switchToProject(${projectId})">
+                        <i class="fas fa-project-diagram"></i> ${escapeHtml(project.project_name || 'Unassigned')}
                     </button>
                 `;
 
                 // Create tab content
                 contentHtml += `
-                    <div id="portfolio-tab-${portfolio.id}" class="tab-content ${isActive}" style="display: ${displayStyle};">
-                        ${renderPortfolioCard(portfolio)}
+                    <div id="project-tab-${projectId}" class="tab-content ${isActive}" style="display: ${displayStyle};">
+                        ${renderProjectCard(project)}
                     </div>
                 `;
             });
@@ -191,8 +196,8 @@
             contentContainer.innerHTML = contentHtml;
         }
 
-        // Switch to specific portfolio tab
-        function switchToPortfolio(portfolioId) {
+        // Switch to specific project tab
+        function switchToProject(projectId) {
             // Update tab buttons
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.closest('.tab-btn').classList.add('active');
@@ -203,32 +208,27 @@
                 content.style.display = 'none';
             });
 
-            const targetContent = document.getElementById(`portfolio-tab-${portfolioId}`);
+            const targetContent = document.getElementById(`project-tab-${projectId}`);
             if (targetContent) {
                 targetContent.classList.add('active');
                 targetContent.style.display = 'block';
             }
         }
 
-        // Render single portfolio card
-        function renderPortfolioCard(portfolio) {
+        // Render single project card
+        function renderProjectCard(project) {
             let html = `
                 <div class="portfolio-section">
                     <div class="portfolio-header">
                         <div class="portfolio-header-content">
                             <h2>
-                                <i class="fas fa-briefcase"></i>
-                                ${escapeHtml(portfolio.name)}
+                                <i class="fas fa-project-diagram"></i>
+                                ${escapeHtml(project.project_name || 'Unassigned')}
                             </h2>
-                            ${portfolio.description ? `<p class="portfolio-description">${escapeHtml(portfolio.description)}</p>` : ''}
                             <div class="portfolio-meta">
                                 <span class="meta-badge">
-                                    <i class="fas fa-project-diagram"></i>
-                                    ${portfolio.project_count} Project${portfolio.project_count !== 1 ? 's' : ''}
-                                </span>
-                                <span class="meta-badge">
-                                    <i class="fas fa-chart-line"></i>
-                                    ${portfolio.total_data_points} Data Point${portfolio.total_data_points !== 1 ? 's' : ''}
+                                    <i class="fas fa-calendar"></i>
+                                    ${Object.keys(project.years).length} Year${Object.keys(project.years).length !== 1 ? 's' : ''}
                                 </span>
                             </div>
                         </div>
@@ -237,10 +237,10 @@
             `;
 
             // Render year cards
-            const years = Object.keys(portfolio.years).sort((a, b) => b - a);
+            const years = Object.keys(project.years).sort((a, b) => b - a);
 
             years.forEach(year => {
-                const yearData = portfolio.years[year];
+                const yearData = project.years[year];
                 const quarters = Object.keys(yearData.quarters).sort();
 
                 quarters.forEach(quarter => {
@@ -256,7 +256,7 @@
                                 </div>
                                 <div class="breakdown-card-average">
                                     <div class="average-display">
-                                        <span class="average-number">${quarterData.average.toLocaleString()}</span>
+                                        <span class="average-number">${quarterData.average.toFixed(2)}%</span>
                                         <span class="average-label">Average</span>
                                     </div>
                                 </div>
@@ -267,15 +267,16 @@
 
                     // Render months
                     if (quarterData.months && quarterData.months.length > 0) {
-                        quarterData.months.forEach(monthData => {
-                            const capitalizedMonth = monthData.month.charAt(0).toUpperCase() + monthData.month.slice(1);
+                        quarterData.months.forEach((monthName, idx) => {
+                            const monthPercentage = quarterData.percentages[idx];
+                            const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                             html += `
                                 <div class="breakdown-month-item">
                                     <div class="month-info">
                                         <i class="fas fa-calendar-day"></i>
                                         <span class="month-label">${capitalizedMonth}</span>
                                     </div>
-                                    <span class="month-value-display">${monthData.average.toLocaleString()}</span>
+                                    <span class="month-value-display">${monthPercentage.toFixed(2)}%</span>
                                 </div>
                             `;
                         });
@@ -316,7 +317,7 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
-            loadPortfolioStatistics();
+            loadProjectAvailability();
         });
     </script>
 
@@ -398,7 +399,7 @@
         }
 
         .portfolio-header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             padding: var(--spacing-2xl);
             border-radius: var(--radius-2xl);
             box-shadow: var(--shadow-xl);
@@ -490,11 +491,11 @@
         .breakdown-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-            border-color: var(--primary);
+            border-color: #10b981;
         }
 
         .breakdown-card-header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             padding: var(--spacing-lg);
             color: white;
         }
@@ -571,7 +572,7 @@
         }
 
         .breakdown-month-item:hover {
-            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            background: linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%);
             transform: translateX(4px);
         }
 
@@ -582,7 +583,7 @@
         }
 
         .month-info i {
-            color: var(--primary);
+            color: #10b981;
             font-size: 0.875rem;
         }
 
@@ -594,7 +595,7 @@
 
         .month-value-display {
             font-weight: 800;
-            color: var(--primary);
+            color: #10b981;
             font-size: 1.25rem;
         }
 
@@ -617,7 +618,7 @@
         }
 
         .footer-stat i {
-            color: var(--primary);
+            color: #10b981;
         }
 
         /* Responsive Design */
