@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Statistics - QA Analytics</title>
+    <title>Project Availability Dashboard - QA Analytics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -21,7 +21,6 @@
                 <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
                 <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
                 <a href="/performance-statistics" class="nav-btn"><i class="fas fa-trophy"></i> Performance</a>
-                <a href="/availability-dashboard" class="nav-btn"><i class="fas fa-server"></i> Availability</a>
             </div>
 
             <a href="/dashboard.html" class="navbar-brand-center">
@@ -29,8 +28,8 @@
             </a>
 
             <div class="navbar-links-right">
-                <a href="/project-statistics.html" class="nav-btn"><i class="fas fa-project-diagram"></i> Projects</a>
-                <a href="/portfolio-statistics.html" class="nav-btn active"><i class="fas fa-briefcase"></i> Portfolios</a>
+                <a href="/project-availability" class="nav-btn"><i class="fas fa-project-diagram"></i> Projects</a>
+                <a href="/availability-dashboard" class="nav-btn active"><i class="fas fa-server"></i> Availability</a>
                 <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
             </div>
         </div>
@@ -40,14 +39,14 @@
     <div class="main-container">
         <!-- Hero -->
         <div class="hero">
-            <h1><i class="fas fa-briefcase"></i> Portfolio Statistics</h1>
-            <p>Aggregated performance metrics across all projects in each portfolio</p>
+            <h1><i class="fas fa-server"></i> Project Availability Dashboard</h1>
+            <p>View portfolios and projects availability analytics with percentage metrics</p>
         </div>
 
         <!-- Loading Overlay -->
         <div class="loading-overlay" id="loadingOverlay">
             <div class="spinner"></div>
-            <p>Loading portfolio statistics...</p>
+            <p>Loading availability statistics...</p>
         </div>
 
         <!-- Tabs -->
@@ -64,11 +63,11 @@
 
         <!-- Empty State -->
         <div class="empty-state" id="emptyState" style="display: none;">
-            <i class="fas fa-briefcase"></i>
-            <h3>No Portfolio Data Available</h3>
-            <p>There are no portfolios with performance statistics yet.</p>
-            <a href="/performance-statistics" class="btn-primary">
-                <i class="fas fa-upload"></i> Upload Performance Data
+            <i class="fas fa-server"></i>
+            <h3>No Availability Data Available</h3>
+            <p>There are no portfolios with availability statistics yet.</p>
+            <a href="/availability-dashboard" class="btn-primary">
+                <i class="fas fa-upload"></i> Upload Availability Data
             </a>
         </div>
     </div>
@@ -132,11 +131,11 @@
         // Store all portfolios data globally
         let allPortfoliosData = [];
 
-        // Load portfolio statistics
+        // Load portfolio availability statistics
         async function loadPortfolioStatistics() {
             try {
                 showLoading();
-                const data = await fetchJSON(`${API_URL}/portfolio-statistics`);
+                const data = await fetchJSON(`${API_URL}/portfolio-availability-statistics`);
 
                 hideLoading();
 
@@ -156,8 +155,8 @@
                 createPortfolioTabs(data.portfolios);
             } catch (error) {
                 hideLoading();
-                console.error('Error loading portfolio statistics:', error);
-                showError(error.message || 'Failed to load portfolio statistics');
+                console.error('Error loading portfolio availability statistics:', error);
+                showError(error.message || 'Failed to load portfolio availability statistics');
             }
         }
 
@@ -257,7 +256,7 @@
                                 </div>
                                 <div class="breakdown-card-average">
                                     <div class="average-display">
-                                        <span class="average-number">${quarterData.average.toLocaleString()}</span>
+                                        <span class="average-number">${quarterData.average.toLocaleString()}%</span>
                                         <span class="average-label">Average</span>
                                     </div>
                                 </div>
@@ -276,7 +275,7 @@
                                         <i class="fas fa-calendar-day"></i>
                                         <span class="month-label">${capitalizedMonth}</span>
                                     </div>
-                                    <span class="month-value-display">${monthData.average.toLocaleString()}</span>
+                                    <span class="month-value-display">${monthData.average.toLocaleString()}%</span>
                                 </div>
                             `;
                         });
@@ -399,7 +398,7 @@
         }
 
         .portfolio-header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             padding: var(--spacing-2xl);
             border-radius: var(--radius-2xl);
             box-shadow: var(--shadow-xl);
@@ -491,11 +490,11 @@
         .breakdown-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-            border-color: var(--primary);
+            border-color: #10b981;
         }
 
         .breakdown-card-header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             padding: var(--spacing-lg);
             color: white;
         }
@@ -572,7 +571,7 @@
         }
 
         .breakdown-month-item:hover {
-            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
             transform: translateX(4px);
         }
 
@@ -583,7 +582,7 @@
         }
 
         .month-info i {
-            color: var(--primary);
+            color: #10b981;
             font-size: 0.875rem;
         }
 
@@ -595,7 +594,7 @@
 
         .month-value-display {
             font-weight: 800;
-            color: var(--primary);
+            color: #10b981;
             font-size: 1.25rem;
         }
 
@@ -618,7 +617,7 @@
         }
 
         .footer-stat i {
-            color: var(--primary);
+            color: #10b981;
         }
 
         /* Responsive Design */

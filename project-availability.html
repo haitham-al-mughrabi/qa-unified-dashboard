@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Availability - QA Analytics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="src/static/dashboard.css">
+    <link rel="stylesheet" href="src/static/project-statistics.css">
+    <link rel="stylesheet" href="/src/static/nav-dropdown.css">
+    <link rel="stylesheet" href="src/static/footer.css">
+    <link rel="stylesheet" href="/src/static/toast.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container-new">
+            <div class="navbar-links-left">
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                <a href="/performance-statistics" class="nav-btn"><i class="fas fa-trophy"></i> Performance</a>
+            </div>
+
+            <a href="/dashboard.html" class="navbar-brand-center">
+                <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+            </a>
+
+            <div class="navbar-links-right">
+                <a href="/project-availability" class="nav-btn active"><i class="fas fa-project-diagram"></i> Projects</a>
+                <a href="/availability-dashboard" class="nav-btn"><i class="fas fa-server"></i> Availability</a>
+                <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero -->
+        <div class="hero">
+            <h1><i class="fas fa-server"></i> <span id="heroTitle">Project Availability</span></h1>
+            <p id="heroSubtitle">View project availability metrics as percentages</p>
+        </div>
+
+        <!-- Project Selector -->
+        <div class="year-selector-card" id="projectSelector">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md);">
+                <h3 style="margin: 0; color: #10b981;">
+                    <i class="fas fa-folder-open"></i> Select Project
+                </h3>
+                <select id="projectSelect" class="filter-select" onchange="loadProjectData()" style="min-width: 250px;">
+                    <option value="">Select a project...</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <p>Loading availability data...</p>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" style="display: none;">
+            <!-- Year Selector -->
+            <div class="year-selector-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <h3 style="margin: 0; color: #10b981;">
+                        <i class="fas fa-calendar"></i> Filter by Year
+                    </h3>
+                    <select id="yearSelect" class="filter-select" onchange="filterByYear()" style="min-width: 150px;">
+                        <option value="all">All Years</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Overall Stats -->
+            <div class="section-header">
+                <h2><i class="fas fa-chart-line"></i> Overall Availability</h2>
+                <p>Average availability across all recorded periods</p>
+            </div>
+
+            <div class="stats-cards-grid">
+                <div class="stat-card availability-stat">
+                    <div class="stat-icon"><i class="fas fa-database"></i></div>
+                    <div class="stat-content">
+                        <h3>Overall Average</h3>
+                        <p class="stat-value" id="overallAverage">0%</p>
+                    </div>
+                </div>
+                <div class="stat-card availability-stat">
+                    <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="stat-content">
+                        <h3>Total Data Points</h3>
+                        <p class="stat-value" id="totalDataPoints">0</p>
+                    </div>
+                </div>
+                <div class="stat-card availability-stat">
+                    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-content">
+                        <h3>Latest Quarter</h3>
+                        <p class="stat-value" id="latestQuarterAvg">0%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Availability Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2><i class="fas fa-chart-area"></i> Availability Trend</h2>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="availabilityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Quarterly Breakdown -->
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-week"></i> Quarterly Breakdown</h2>
+                <p>Availability metrics by quarter</p>
+            </div>
+
+            <div id="quarterlyBreakdown" class="breakdown-cards-container">
+                <!-- Quarterly cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-server"></i>
+            <h3>No Availability Data</h3>
+            <p>Select a project or upload availability data to get started.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-developer">
+                    <i class="fas fa-user-tie"></i> Developed by: <strong>Haitham Al Mughrabi</strong>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-company">
+                    <div class="footer-company-header">
+                        <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
+                    </div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/src/static/toast.js"></script>
+    <script>
+        // Set current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api';
+
+        let currentProjectId = null;
+        let allData = null;
+        let availabilityChart = null;
+
+        // Loading functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Fetch with error handling
+        async function fetchJSON(url, options = {}) {
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ error: 'Request failed' }));
+                throw new Error(error.error || `HTTP ${response.status}`);
+            }
+
+            return response.json();
+        }
+
+        // Load projects for selector
+        async function loadProjects() {
+            try {
+                const data = await fetchJSON(`${API_URL}/projects`);
+                const select = document.getElementById('projectSelect');
+
+                select.innerHTML = '<option value="">Select a project...</option>';
+
+                data.projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.name;
+                    select.appendChild(option);
+                });
+
+                // Check for project ID in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('projectId');
+                if (projectId) {
+                    select.value = projectId;
+                    loadProjectData();
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                showError('Failed to load projects');
+            }
+        }
+
+        // Load project availability data
+        async function loadProjectData() {
+            const projectId = document.getElementById('projectSelect').value;
+
+            if (!projectId) {
+                document.getElementById('mainContent').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'none';
+                return;
+            }
+
+            try {
+                showLoading();
+                currentProjectId = projectId;
+
+                const data = await fetchJSON(`${API_URL}/projects/${projectId}/availability-statistics`);
+
+                hideLoading();
+
+                if (!data.success || !data.hasData) {
+                    document.getElementById('mainContent').style.display = 'none';
+                    document.getElementById('emptyState').style.display = 'flex';
+                    return;
+                }
+
+                allData = data.statistics;
+
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+                // Update overall stats
+                document.getElementById('overallAverage').textContent = `${allData.overallAverage}%`;
+                document.getElementById('totalDataPoints').textContent = allData.totalDataPoints;
+                document.getElementById('latestQuarterAvg').textContent = `${allData.latestQuarterAverage}%`;
+
+                // Populate year filter
+                populateYearFilter();
+
+                // Render data
+                renderData();
+            } catch (error) {
+                hideLoading();
+                console.error('Error loading project availability data:', error);
+                showError('Failed to load availability data');
+            }
+        }
+
+        // Populate year filter
+        function populateYearFilter() {
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.innerHTML = '<option value="all">All Years</option>';
+
+            const years = Object.keys(allData.years).sort((a, b) => b - a);
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            });
+        }
+
+        // Filter by year
+        function filterByYear() {
+            renderData();
+        }
+
+        // Render all data
+        function renderData() {
+            const selectedYear = document.getElementById('yearSelect').value;
+
+            let yearsToDisplay = {};
+            if (selectedYear === 'all') {
+                yearsToDisplay = allData.years;
+            } else {
+                yearsToDisplay = { [selectedYear]: allData.years[selectedYear] };
+            }
+
+            renderChart(yearsToDisplay);
+            renderQuarterlyBreakdown(yearsToDisplay);
+        }
+
+        // Render availability chart
+        function renderChart(yearsData) {
+            const ctx = document.getElementById('availabilityChart');
+
+            if (availabilityChart) {
+                availabilityChart.destroy();
+            }
+
+            const labels = [];
+            const values = [];
+            const years = Object.keys(yearsData).sort();
+
+            years.forEach(year => {
+                const yearData = yearsData[year];
+                const quarters = Object.keys(yearData.quarters).sort();
+
+                quarters.forEach(quarter => {
+                    const quarterData = yearData.quarters[quarter];
+                    if (quarterData.average > 0) {
+                        labels.push(`${year} ${quarter}`);
+                        values.push(quarterData.average);
+                    }
+                });
+            });
+
+            availabilityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Availability %',
+                        data: values,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Availability: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render quarterly breakdown
+        function renderQuarterlyBreakdown(yearsData) {
+            const container = document.getElementById('quarterlyBreakdown');
+            container.innerHTML = '';
+
+            const years = Object.keys(yearsData).sort((a, b) => b - a);
+
+            years.forEach(year => {
+                const yearData = yearsData[year];
+                const quarters = Object.keys(yearData.quarters).sort();
+
+                quarters.forEach(quarter => {
+                    const quarterData = yearData.quarters[quarter];
+                    if (!quarterData || quarterData.count === 0) return;
+
+                    const card = document.createElement('div');
+                    card.className = 'breakdown-card';
+
+                    let monthsHtml = '';
+                    if (quarterData.months && quarterData.months.length > 0) {
+                        quarterData.months.forEach((month, index) => {
+                            const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+                            const value = quarterData.values[index];
+                            monthsHtml += `
+                                <div class="breakdown-month-item">
+                                    <div class="month-info">
+                                        <i class="fas fa-calendar-day"></i>
+                                        <span class="month-label">${capitalizedMonth}</span>
+                                    </div>
+                                    <span class="month-value-display">${value.toLocaleString()}%</span>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    card.innerHTML = `
+                        <div class="breakdown-card-header">
+                            <div class="breakdown-card-title">
+                                <span class="breakdown-year-badge">${year}</span>
+                                <span class="breakdown-quarter-badge">${quarter}</span>
+                            </div>
+                            <div class="breakdown-card-average">
+                                <div class="average-display">
+                                    <span class="average-number">${quarterData.average.toLocaleString()}%</span>
+                                    <span class="average-label">Average</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="breakdown-card-body">
+                            <div class="breakdown-months">
+                                ${monthsHtml}
+                            </div>
+                        </div>
+                        <div class="breakdown-card-footer">
+                            <span class="footer-stat">
+                                <i class="fas fa-hashtag"></i>
+                                ${quarterData.count} data point${quarterData.count > 1 ? 's' : ''}
+                            </span>
+                            <span class="footer-stat">
+                                <i class="fas fa-chart-bar"></i>
+                                ${quarterData.months ? quarterData.months.length : 0} month${quarterData.months && quarterData.months.length > 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    `;
+
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProjects();
+        });
+    </script>
+
+    <style>
+        .availability-stat .stat-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .breakdown-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .breakdown-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .breakdown-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+            border-color: #10b981;
+        }
+
+        .breakdown-card-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: var(--spacing-lg);
+            color: white;
+        }
+
+        .breakdown-card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .breakdown-year-badge,
+        .breakdown-quarter-badge {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+        }
+
+        .breakdown-card-average {
+            display: flex;
+            justify-content: center;
+        }
+
+        .average-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .average-number {
+            font-size: 2.25rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .average-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .breakdown-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .breakdown-months {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .breakdown-month-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+
+        .breakdown-month-item:hover {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            transform: translateX(4px);
+        }
+
+        .month-info {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .month-info i {
+            color: #10b981;
+            font-size: 0.875rem;
+        }
+
+        .month-label {
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.9375rem;
+        }
+
+        .month-value-display {
+            font-weight: 800;
+            color: #10b981;
+            font-size: 1.25rem;
+        }
+
+        .breakdown-card-footer {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-around;
+            gap: var(--spacing-md);
+        }
+
+        .footer-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-600);
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+
+        .footer-stat i {
+            color: #10b981;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-3xl);
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            min-height: 400px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-300);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .empty-state h3 {
+            margin: 0 0 var(--spacing-md) 0;
+            color: var(--gray-700);
+            font-size: 1.5rem;
+        }
+
+        .empty-state p {
+            margin: 0 0 var(--spacing-xl) 0;
+            color: var(--gray-500);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .breakdown-cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .average-number {
+                font-size: 1.875rem;
+            }
+
+            .breakdown-card-footer {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+        }
+
+        /* New Centered Navigation Styles */
+        .navbar-container-new {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-lg) var(--spacing-xl);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: var(--spacing-xl);
+        }
+
+        .navbar-links-left {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .navbar-links-right {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .navbar-brand-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            padding: var(--spacing-sm);
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: var(--radius-2xl);
+            border: 2px solid rgba(79, 70, 229, 0.2);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+        }
+
+        .navbar-brand-center:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+        }
+
+        .navbar-brand-center .navbar-brand-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.75rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand-center:hover .navbar-brand-icon {
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
+        }
+
+        .navbar-links-left .nav-btn,
+        .navbar-links-right .nav-btn {
+            padding: 0.875rem 1.5rem;
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--gray-700);
+            border: 2px solid transparent;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            white-space: nowrap;
+        }
+
+        .navbar-links-left .nav-btn:hover,
+        .navbar-links-right .nav-btn:hover {
+            background: white;
+            color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .navbar-links-left .nav-btn.active,
+        .navbar-links-right .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .navbar-links-left .nav-btn i,
+        .navbar-links-right .nav-btn i {
+            font-size: 1rem;
+        }
+
+        /* Mobile Responsive for Navigation */
+        @media (max-width: 1024px) {
+            .navbar-container-new {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+
+            .navbar-brand-center {
+                order: -1;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .navbar-links-left,
+            .navbar-links-right {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-links-left .nav-btn span:not(.fas),
+            .navbar-links-right .nav-btn span:not(.fas) {
+                display: none;
+            }
+
+            .navbar-links-left .nav-btn,
+            .navbar-links-right .nav-btn {
+                padding: 0.75rem;
+                min-width: 44px;
+                justify-content: center;
+            }
+
+            .navbar-brand-center .navbar-brand-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</body>
+</html>
