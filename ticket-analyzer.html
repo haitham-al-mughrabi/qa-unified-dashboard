@@ -16,22 +16,50 @@
 </head>
 <body>
     <!-- Navigation -->
+        <!-- Navigation -->
     <nav class="navbar">
-        <div class="navbar-container-new">
-            <div class="navbar-links-left">
-                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
-                <a href="/" class="nav-btn active"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
-                <a href="/performance-statistics" class="nav-btn"><i class="fas fa-trophy"></i> Performance</a>
-                <a href="/availability-statistics" class="nav-btn"><i class="fas fa-server"></i> Availability</a>
-            </div>
-
-            <a href="/dashboard.html" class="navbar-brand-center">
+        <div class="navbar-container-redesigned">
+            <!-- Logo/Icon on the left -->
+            <a href="/dashboard.html" class="navbar-brand-left">
                 <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+                <span class="navbar-brand-text">QA Analytics</span>
             </a>
 
-            <div class="navbar-links-right">
-                <a href="/project-statistics.html" class="nav-btn"><i class="fas fa-project-diagram"></i> Projects</a>
-                <a href="/portfolio-statistics.html" class="nav-btn"><i class="fas fa-briefcase"></i> Portfolios</a>
+            <!-- Main Navigation Links -->
+            <div class="navbar-links-main">
+                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+
+                <!-- Statistics Dropdown -->
+                <div class="nav-dropdown">
+                    <button class="nav-btn dropdown-toggle">
+                        <i class="fas fa-chart-line"></i> Statistics <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/performance-statistics" class="dropdown-item">
+                            <i class="fas fa-trophy"></i> Performance Statistics
+                        </a>
+                        <a href="/availability-statistics" class="dropdown-item">
+                            <i class="fas fa-server"></i> Availability Statistics
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/project-statistics.html" class="dropdown-item">
+                            <i class="fas fa-project-diagram"></i> Project Details
+                        </a>
+                        <a href="/portfolio-statistics.html" class="dropdown-item">
+                            <i class="fas fa-briefcase"></i> Portfolio Details
+                        </a>
+                        <a href="/project-availability" class="dropdown-item">
+                            <i class="fas fa-server"></i> Availability Projects
+                        </a>
+                        <a href="/availability-dashboard" class="dropdown-item">
+                            <i class="fas fa-briefcase"></i> Availability Portfolios
+                        </a>
+                    </div>
+                </div>
+
+                <a href="/projects" class="nav-btn"><i class="fas fa-folder-open"></i> Projects</a>
+                <a href="/portfolios" class="nav-btn"><i class="fas fa-briefcase"></i> Portfolios</a>
                 <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
             </div>
         </div>
@@ -1013,5 +1041,45 @@
             }
         }
     </style>
+
+    <script>
+        // Dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = document.querySelectorAll('.nav-dropdown');
+
+            dropdowns.forEach(dropdown => {
+                const toggle = dropdown.querySelector('.dropdown-toggle');
+
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Close other dropdowns
+                    dropdowns.forEach(d => {
+                        if (d !== dropdown) {
+                            d.classList.remove('active');
+                        }
+                    });
+
+                    // Toggle current dropdown
+                    dropdown.classList.toggle('active');
+                });
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            });
+
+            // Prevent dropdown from closing when clicking inside it
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+        });
+    </script>
 </body>
 </html>
