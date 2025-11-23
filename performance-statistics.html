@@ -506,6 +506,36 @@
             tabsContainer.appendChild(tabsHeader);
             tabsContainer.appendChild(tabsContent);
             resultsContainer.appendChild(tabsContainer);
+
+            // Add Save Button
+            const saveButtonContainer = document.createElement('div');
+            saveButtonContainer.className = 'save-button-container';
+            saveButtonContainer.style.cssText = 'text-align: center; margin-top: 2rem; padding: 1.5rem;';
+            saveButtonContainer.innerHTML = `
+                <button onclick="openSaveModal()" class="btn-save-main" style="
+                    padding: 1rem 2.5rem;
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 1.125rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                    transition: all 0.3s ease;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.4)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'">
+                    <i class="fas fa-save" style="font-size: 1.25rem;"></i>
+                    <span>Save to Database</span>
+                </button>
+                <p style="margin-top: 1rem; color: var(--gray-600); font-size: 0.875rem;">
+                    Click to select which projects to save
+                </p>
+            `;
+            resultsContainer.appendChild(saveButtonContainer);
         }
 
         function switchTab(projectName) {
