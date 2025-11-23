@@ -152,6 +152,25 @@ async function createTables() {
             )
         `);
 
+        // Availability statistics table
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS availability_statistics (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                project_id INT,
+                project_name VARCHAR(255),
+                year INT,
+                quarter VARCHAR(10),
+                month VARCHAR(50),
+                value FLOAT,
+                filename VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                INDEX idx_project_id (project_id),
+                INDEX idx_year (year),
+                INDEX idx_quarter (quarter)
+            )
+        `);
+
         connection.release();
         console.log('Database tables initialized');
     } catch (error) {
@@ -1854,6 +1873,503 @@ app.delete('/api/performance-statistics', async (req, res) => {
     }
 });
 
+// ==================== AVAILABILITY STATISTICS API ====================
+
+// Get all availability statistics
+app.get('/api/availability-statistics', async (req, res) => {
+    try {
+        const records = await query(`
+            SELECT
+                as_table.*,
+                p.name as project_name
+            FROM availability_statistics as_table
+            LEFT JOIN projects p ON as_table.project_id = p.id
+            ORDER BY as_table.year DESC, as_table.month, as_table.created_at DESC
+        `);
+        res.json({ records });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get availability statistics by project
+app.get('/api/availability-statistics/project/:id', async (req, res) => {
+    try {
+        const records = await query(`
+            SELECT * FROM availability_statistics
+            WHERE project_id = ?
+            ORDER BY year DESC, month
+        `, [req.params.id]);
+        res.json({ records });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get aggregated availability statistics for dashboard
+app.get('/api/availability-statistics/dashboard', async (req, res) => {
+    try {
+        const { projectId, year } = req.query;
+
+        let sql = `
+            SELECT
+                as_table.*,
+                p.name as project_name
+            FROM availability_statistics as_table
+            LEFT JOIN projects p ON as_table.project_id = p.id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        if (projectId) {
+            sql += ' AND as_table.project_id = ?';
+            params.push(projectId);
+        }
+
+        if (year) {
+            sql += ' AND as_table.year = ?';
+            params.push(year);
+        }
+
+        sql += ' ORDER BY as_table.project_name, as_table.year DESC, as_table.month';
+
+        const records = await query(sql, params);
+
+        // Group by project and calculate quarterly averages
+        const grouped = {};
+
+        records.forEach(record => {
+            const projectKey = record.project_id || 'unassigned';
+
+            if (!grouped[projectKey]) {
+                grouped[projectKey] = {
+                    project_id: record.project_id,
+                    project_name: record.project_name || 'Unassigned',
+                    years: {}
+                };
+            }
+
+            const recordYear = record.year;
+            if (!grouped[projectKey].years[recordYear]) {
+                grouped[projectKey].years[recordYear] = {
+                    quarters: {
+                        'Q1': { months: [], values: [], average: 0 },
+                        'Q2': { months: [], values: [], average: 0 },
+                        'Q3': { months: [], values: [], average: 0 },
+                        'Q4': { months: [], values: [], average: 0 }
+                    },
+                    allMonths: []
+                };
+            }
+
+            const quarter = record.quarter;
+            grouped[projectKey].years[recordYear].quarters[quarter].months.push(record.month);
+            grouped[projectKey].years[recordYear].quarters[quarter].values.push(record.value);
+            grouped[projectKey].years[recordYear].allMonths.push({
+                month: record.month,
+                quarter: record.quarter,
+                value: record.value
+            });
+        });
+
+        // Calculate averages and sort months
+        Object.keys(grouped).forEach(projectKey => {
+            Object.keys(grouped[projectKey].years).forEach(year => {
+                Object.keys(grouped[projectKey].years[year].quarters).forEach(quarter => {
+                    const quarterData = grouped[projectKey].years[year].quarters[quarter];
+                    if (quarterData.values.length > 0) {
+                        // Create array of month-value pairs
+                        const monthValuePairs = quarterData.months.map((month, index) => ({
+                            month: month,
+                            value: quarterData.values[index]
+                        }));
+
+                        // Sort by month order
+                        const monthOrder = ['january', 'february', 'march', 'april', 'may', 'june',
+                                          'july', 'august', 'september', 'october', 'november', 'december'];
+                        monthValuePairs.sort((a, b) => {
+                            return monthOrder.indexOf(a.month.toLowerCase()) - monthOrder.indexOf(b.month.toLowerCase());
+                        });
+
+                        // Separate back into months and values arrays
+                        quarterData.months = monthValuePairs.map(pair => pair.month);
+                        quarterData.values = monthValuePairs.map(pair => pair.value);
+
+                        // Calculate average
+                        const sum = quarterData.values.reduce((a, b) => a + b, 0);
+                        quarterData.average = parseFloat((sum / quarterData.values.length).toFixed(2));
+                        quarterData.count = quarterData.values.length;
+                    }
+                });
+            });
+        });
+
+        res.json({ data: grouped });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get portfolio availability statistics - aggregated availability data by portfolio
+app.get('/api/portfolio-availability-statistics', async (req, res) => {
+    try {
+        // Get all portfolios
+        const portfolios = await query(`
+            SELECT
+                p.*,
+                COUNT(DISTINCT proj.id) as project_count
+            FROM portfolios p
+            LEFT JOIN projects proj ON p.id = proj.portfolio_id
+            GROUP BY p.id
+            ORDER BY p.name
+        `);
+
+        // Get all availability statistics with project and portfolio info
+        const allStats = await query(`
+            SELECT
+                as_table.*,
+                proj.name as project_name,
+                proj.portfolio_id
+            FROM availability_statistics as_table
+            INNER JOIN projects proj ON as_table.project_id = proj.id
+            WHERE proj.portfolio_id IS NOT NULL
+            ORDER BY proj.portfolio_id, as_table.year DESC, as_table.quarter, as_table.month
+        `);
+
+        // Group statistics by portfolio
+        const portfolioStats = {};
+
+        portfolios.forEach(portfolio => {
+            portfolioStats[portfolio.id] = {
+                id: portfolio.id,
+                name: portfolio.name,
+                description: portfolio.description,
+                project_count: portfolio.project_count,
+                total_data_points: 0,
+                years: {}
+            };
+        });
+
+        // Aggregate statistics by portfolio
+        allStats.forEach(record => {
+            const portfolioId = record.portfolio_id;
+
+            if (!portfolioStats[portfolioId]) return;
+
+            portfolioStats[portfolioId].total_data_points++;
+
+            const year = record.year;
+            const quarter = record.quarter;
+            const month = record.month.toLowerCase();
+
+            // Initialize year if not exists
+            if (!portfolioStats[portfolioId].years[year]) {
+                portfolioStats[portfolioId].years[year] = {
+                    quarters: {
+                        'Q1': { months: {}, count: 0, sum: 0, average: 0 },
+                        'Q2': { months: {}, count: 0, sum: 0, average: 0 },
+                        'Q3': { months: {}, count: 0, sum: 0, average: 0 },
+                        'Q4': { months: {}, count: 0, sum: 0, average: 0 }
+                    }
+                };
+            }
+
+            const quarterData = portfolioStats[portfolioId].years[year].quarters[quarter];
+
+            // Initialize month if not exists
+            if (!quarterData.months[month]) {
+                quarterData.months[month] = {
+                    sum: 0,
+                    count: 0,
+                    average: 0
+                };
+            }
+
+            // Add value to month
+            quarterData.months[month].sum += record.value;
+            quarterData.months[month].count++;
+
+            // Add to quarter totals
+            quarterData.sum += record.value;
+            quarterData.count++;
+        });
+
+        // Calculate averages
+        Object.keys(portfolioStats).forEach(portfolioId => {
+            const portfolio = portfolioStats[portfolioId];
+
+            Object.keys(portfolio.years).forEach(year => {
+                const yearData = portfolio.years[year];
+
+                Object.keys(yearData.quarters).forEach(quarterKey => {
+                    const quarter = yearData.quarters[quarterKey];
+
+                    // Calculate month averages
+                    Object.keys(quarter.months).forEach(month => {
+                        const monthData = quarter.months[month];
+                        if (monthData.count > 0) {
+                            monthData.average = parseFloat((monthData.sum / monthData.count).toFixed(2));
+                        }
+                    });
+
+                    // Calculate quarter average
+                    if (quarter.count > 0) {
+                        quarter.average = parseFloat((quarter.sum / quarter.count).toFixed(2));
+
+                        // Convert months object to array for easier frontend rendering
+                        quarter.months = Object.keys(quarter.months).map(month => ({
+                            month: month,
+                            average: quarter.months[month].average,
+                            count: quarter.months[month].count
+                        })).sort((a, b) => {
+                            const monthOrder = ['january', 'february', 'march', 'april', 'may', 'june',
+                                              'july', 'august', 'september', 'october', 'november', 'december'];
+                            return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
+                        });
+                    } else {
+                        quarter.months = [];
+                    }
+                });
+            });
+        });
+
+        // Convert to array and filter out portfolios with no data
+        const result = Object.values(portfolioStats).filter(p => p.total_data_points > 0);
+
+        res.json({ portfolios: result });
+    } catch (error) {
+        console.error('Error fetching portfolio availability statistics:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get availability statistics summary for a specific project
+app.get('/api/projects/:id/availability-statistics', async (req, res) => {
+    try {
+        const projectId = req.params.id;
+
+        const records = await query(`
+            SELECT
+                as_table.*,
+                p.name as project_name
+            FROM availability_statistics as_table
+            LEFT JOIN projects p ON as_table.project_id = p.id
+            WHERE as_table.project_id = ?
+            ORDER BY as_table.year DESC, as_table.month
+        `, [projectId]);
+
+        if (records.length === 0) {
+            return res.json({
+                success: true,
+                hasData: false,
+                statistics: null
+            });
+        }
+
+        // Group by year and quarter
+        const years = {};
+        let totalDataPoints = 0;
+        let totalValue = 0;
+        const latestYear = Math.max(...records.map(r => r.year));
+        const latestQuarter = records.filter(r => r.year === latestYear)
+            .reduce((latest, r) => {
+                const qNum = parseInt(r.quarter.replace('Q', ''));
+                const latestQNum = latest ? parseInt(latest.replace('Q', '')) : 0;
+                return qNum > latestQNum ? r.quarter : latest;
+            }, null);
+
+        records.forEach(record => {
+            const year = record.year;
+            const quarter = record.quarter;
+
+            if (!years[year]) {
+                years[year] = {
+                    quarters: {}
+                };
+            }
+
+            if (!years[year].quarters[quarter]) {
+                years[year].quarters[quarter] = {
+                    months: [],
+                    values: [],
+                    average: 0,
+                    count: 0
+                };
+            }
+
+            years[year].quarters[quarter].months.push(record.month);
+            years[year].quarters[quarter].values.push(record.value);
+            years[year].quarters[quarter].count++;
+            totalDataPoints++;
+            totalValue += record.value;
+        });
+
+        // Calculate averages for each quarter
+        Object.keys(years).forEach(year => {
+            Object.keys(years[year].quarters).forEach(quarter => {
+                const quarterData = years[year].quarters[quarter];
+                if (quarterData.values.length > 0) {
+                    const sum = quarterData.values.reduce((a, b) => a + b, 0);
+                    quarterData.average = parseFloat((sum / quarterData.values.length).toFixed(2));
+                }
+            });
+        });
+
+        // Get latest quarter average
+        const latestQuarterAverage = years[latestYear] && years[latestYear].quarters[latestQuarter]
+            ? years[latestYear].quarters[latestQuarter].average
+            : 0;
+
+        const overallAverage = totalDataPoints > 0 ? parseFloat((totalValue / totalDataPoints).toFixed(2)) : 0;
+
+        res.json({
+            success: true,
+            hasData: true,
+            statistics: {
+                totalDataPoints,
+                overallAverage,
+                latestYear,
+                latestQuarter,
+                latestQuarterAverage,
+                years,
+                allRecords: records.length
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Save availability statistics (bulk insert)
+app.post('/api/availability-statistics', async (req, res) => {
+    try {
+        const { records } = req.body;
+
+        if (!records || !Array.isArray(records) || records.length === 0) {
+            return res.status(400).json({ error: 'Records array is required' });
+        }
+
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            for (const record of records) {
+                const { project_id, project_name, year, quarter, month, value, filename } = record;
+
+                await connection.execute(
+                    `INSERT INTO availability_statistics
+                    (project_id, project_name, year, quarter, month, value, filename)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [project_id, project_name, year, quarter, month, value, filename]
+                );
+            }
+
+            await connection.commit();
+            res.json({
+                success: true,
+                message: `${records.length} availability statistics saved successfully`
+            });
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete availability statistics by scope (project, year, quarter, month)
+// NOTE: This route must come BEFORE the /:id route to avoid "delete" being interpreted as an id
+app.delete('/api/availability-statistics/delete', async (req, res) => {
+    try {
+        const { scope, projectId, year, quarter, month } = req.query;
+
+        if (!scope || !projectId) {
+            return res.status(400).json({
+                success: false,
+                error: 'Scope and projectId are required'
+            });
+        }
+
+        let sql = 'DELETE FROM availability_statistics WHERE project_id = ?';
+        const params = [projectId];
+
+        // Build WHERE clause based on scope
+        if (scope === 'year' && year) {
+            sql += ' AND year = ?';
+            params.push(year);
+        } else if (scope === 'quarter' && year && quarter) {
+            sql += ' AND year = ? AND quarter = ?';
+            params.push(year, quarter);
+        } else if (scope === 'month' && year && quarter && month) {
+            // Convert month name to lowercase for comparison
+            sql += ' AND year = ? AND quarter = ? AND LOWER(month) = LOWER(?)';
+            params.push(year, quarter, month);
+        } else if (scope !== 'all') {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid scope or missing required parameters'
+            });
+        }
+
+        const result = await query(sql, params);
+
+        if (result.affectedRows === 0) {
+            return res.json({
+                success: true,
+                message: 'No records found to delete',
+                deletedCount: 0
+            });
+        }
+
+        res.json({
+            success: true,
+            message: `Successfully deleted ${result.affectedRows} record(s)`,
+            deletedCount: result.affectedRows
+        });
+    } catch (error) {
+        console.error('Error deleting availability statistics:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Delete availability statistic by ID
+app.delete('/api/availability-statistics/:id', async (req, res) => {
+    try {
+        const result = await query('DELETE FROM availability_statistics WHERE id = ?', [req.params.id]);
+
+        if (result.affectedRows === 0) {
+            res.status(404).json({ error: 'Record not found' });
+            return;
+        }
+
+        res.json({ message: 'Availability statistic deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete all availability statistics
+app.delete('/api/availability-statistics', async (req, res) => {
+    try {
+        const result = await query('DELETE FROM availability_statistics');
+        res.json({
+            message: 'All availability statistics deleted successfully',
+            deletedCount: result.affectedRows
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ==================== SERVE HTML PAGES ====================
 
 app.get('/', (req, res) => {
@@ -1886,6 +2402,14 @@ app.get('/project-statistics', (req, res) => {
 
 app.get('/performance-statistics', (req, res) => {
     res.sendFile(path.join(__dirname, 'performance-statistics.html'));
+});
+
+app.get('/availability-dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'availability-dashboard.html'));
+});
+
+app.get('/project-availability', (req, res) => {
+    res.sendFile(path.join(__dirname, 'project-availability.html'));
 });
 
 // Start server
