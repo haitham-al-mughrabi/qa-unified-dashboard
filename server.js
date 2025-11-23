@@ -2404,6 +2404,10 @@ app.get('/performance-statistics', (req, res) => {
     res.sendFile(path.join(__dirname, 'performance-statistics.html'));
 });
 
+app.get('/availability-statistics', (req, res) => {
+    res.sendFile(path.join(__dirname, 'availability-statistics.html'));
+});
+
 app.get('/availability-dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'availability-dashboard.html'));
 });
