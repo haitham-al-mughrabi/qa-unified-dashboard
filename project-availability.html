@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="src/static/dashboard.css">
     <link rel="stylesheet" href="src/static/project-statistics.css">
+    <link rel="stylesheet" href="/src/static/navbar.css">
     <link rel="stylesheet" href="/src/static/nav-dropdown.css">
     <link rel="stylesheet" href="src/static/footer.css">
     <link rel="stylesheet" href="/src/static/toast.css">
@@ -49,7 +50,7 @@
                         <a href="/portfolio-statistics.html" class="dropdown-item">
                             <i class="fas fa-briefcase"></i> Portfolio Details
                         </a>
-                        <a href="/project-availability" class="dropdown-item">
+                        <a href="/project-availability" class="dropdown-item active">
                             <i class="fas fa-server"></i> Availability Projects
                         </a>
                         <a href="/availability-dashboard" class="dropdown-item">
@@ -677,148 +678,7 @@
             }
         }
 
-        /* New Centered Navigation Styles */
-        .navbar-container-new {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: var(--spacing-lg) var(--spacing-xl);
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            gap: var(--spacing-xl);
-        }
 
-        .navbar-links-left {
-            display: flex;
-            gap: var(--spacing-sm);
-            align-items: center;
-            justify-content: flex-start;
-        }
-
-        .navbar-links-right {
-            display: flex;
-            gap: var(--spacing-sm);
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .navbar-brand-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            padding: var(--spacing-sm);
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-            border-radius: var(--radius-2xl);
-            border: 2px solid rgba(79, 70, 229, 0.2);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
-        }
-
-        .navbar-brand-center:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
-            border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-        }
-
-        .navbar-brand-center .navbar-brand-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            border-radius: var(--radius-xl);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.75rem;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .navbar-brand-center:hover .navbar-brand-icon {
-            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
-        }
-
-        .navbar-links-left .nav-btn,
-        .navbar-links-right .nav-btn {
-            padding: 0.875rem 1.5rem;
-            background: rgba(255, 255, 255, 0.7);
-            color: var(--gray-700);
-            border: 2px solid transparent;
-            border-radius: var(--radius-full);
-            cursor: pointer;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            white-space: nowrap;
-        }
-
-        .navbar-links-left .nav-btn:hover,
-        .navbar-links-right .nav-btn:hover {
-            background: white;
-            color: var(--primary);
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
-        }
-
-        .navbar-links-left .nav-btn.active,
-        .navbar-links-right .nav-btn.active {
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
-
-        .navbar-links-left .nav-btn i,
-        .navbar-links-right .nav-btn i {
-            font-size: 1rem;
-        }
-
-        /* Mobile Responsive for Navigation */
-        @media (max-width: 1024px) {
-            .navbar-container-new {
-                grid-template-columns: 1fr;
-                gap: var(--spacing-md);
-            }
-
-            .navbar-brand-center {
-                order: -1;
-                justify-content: center;
-                width: 100%;
-            }
-
-            .navbar-links-left,
-            .navbar-links-right {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .navbar-links-left .nav-btn span:not(.fas),
-            .navbar-links-right .nav-btn span:not(.fas) {
-                display: none;
-            }
-
-            .navbar-links-left .nav-btn,
-            .navbar-links-right .nav-btn {
-                padding: 0.75rem;
-                min-width: 44px;
-                justify-content: center;
-            }
-
-            .navbar-brand-center .navbar-brand-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.5rem;
-            }
-        }
     </style>
 
     <script>

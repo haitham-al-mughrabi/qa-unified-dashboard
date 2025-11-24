@@ -50,261 +50,10 @@ const NEW_NAV = `    <!-- Navigation -->
         </div>
     </nav>`;
 
-const NAV_STYLES = `
-        /* Redesigned Navigation Styles */
-        .navbar-container-redesigned {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: var(--spacing-md) var(--spacing-xl);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-xl);
-        }
+// CSS link to add
+const NAVBAR_CSS_LINK = '    <link rel="stylesheet" href="/src/static/navbar.css">';
 
-        .navbar-brand-left {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-            text-decoration: none;
-            padding: var(--spacing-sm) var(--spacing-md);
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-            border-radius: var(--radius-xl);
-            border: 2px solid rgba(79, 70, 229, 0.2);
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
-        }
-
-        .navbar-brand-left:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-            border-color: var(--primary);
-        }
-
-        .navbar-brand-left .navbar-brand-icon {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            border-radius: var(--radius-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
-        }
-
-        .navbar-brand-text {
-            font-size: 1.25rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .navbar-links-main {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            flex: 1;
-        }
-
-        .navbar-links-main .nav-btn {
-            padding: 0.75rem 1.25rem;
-            background: rgba(255, 255, 255, 0.7);
-            color: var(--gray-700);
-            border: 2px solid transparent;
-            border-radius: var(--radius-full);
-            cursor: pointer;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            white-space: nowrap;
-        }
-
-        .navbar-links-main .nav-btn:hover {
-            background: white;
-            color: var(--primary);
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
-        }
-
-        .navbar-links-main .nav-btn.active {
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
-
-        .nav-dropdown {
-            position: relative;
-        }
-
-        .dropdown-toggle {
-            background: rgba(255, 255, 255, 0.7) !important;
-        }
-
-        .dropdown-toggle:hover {
-            background: white !important;
-        }
-
-        .dropdown-menu {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            left: 0;
-            min-width: 260px;
-            background: white;
-            border-radius: var(--radius-xl);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            padding: var(--spacing-sm);
-            display: none;
-            z-index: 1000;
-            border: 2px solid var(--gray-100);
-        }
-
-        .nav-dropdown.active .dropdown-menu {
-            display: block;
-            animation: dropdownFadeIn 0.2s ease;
-        }
-
-        @keyframes dropdownFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-            padding: var(--spacing-md) var(--spacing-lg);
-            color: var(--gray-700);
-            text-decoration: none;
-            border-radius: var(--radius-lg);
-            transition: all 0.2s ease;
-            font-size: 0.9375rem;
-            font-weight: 600;
-        }
-
-        .dropdown-item:hover {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-            color: var(--primary);
-            transform: translateX(4px);
-        }
-
-        .dropdown-item.active {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .dropdown-item i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .dropdown-divider {
-            height: 1px;
-            background: var(--gray-200);
-            margin: var(--spacing-sm) 0;
-        }
-
-        @media (max-width: 1024px) {
-            .navbar-container-redesigned {
-                flex-direction: column;
-                gap: var(--spacing-md);
-            }
-
-            .navbar-links-main {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .navbar-brand-text {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .navbar-links-main .nav-btn span:not(.fas) {
-                display: none;
-            }
-
-            .navbar-links-main .nav-btn {
-                padding: 0.75rem;
-                min-width: 44px;
-                justify-content: center;
-            }
-
-            .dropdown-toggle .fa-chevron-down {
-                display: none;
-            }
-        }`;
-
-const DROPDOWN_SCRIPT = `
-    <script>
-        // Dropdown functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropdowns = document.querySelectorAll('.nav-dropdown');
-
-            dropdowns.forEach(dropdown => {
-                const toggle = dropdown.querySelector('.dropdown-toggle');
-
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    // Close other dropdowns
-                    dropdowns.forEach(d => {
-                        if (d !== dropdown) {
-                            d.classList.remove('active');
-                        }
-                    });
-
-                    // Toggle current dropdown
-                    dropdown.classList.toggle('active');
-                });
-            });
-
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function() {
-                dropdowns.forEach(dropdown => {
-                    dropdown.classList.remove('active');
-                });
-            });
-
-            // Prevent dropdown from closing when clicking inside it
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
-        });
-    </script>`;
-
-// Files to update (excluding dashboard.html and availability-dashboard.html which are already done)
-const files = [
-    'ticket-analyzer.html',
-    'performance-statistics.html',
-    'availability-statistics.html',
-    'project-statistics.html',
-    'portfolio-statistics.html',
-    'project-availability.html',
-    'projects.html',
-    'portfolios.html',
-    'settings.html',
-    'statistics.html'
-];
+// ... (files list) ...
 
 files.forEach(filename => {
     const filepath = path.join(__dirname, filename);
@@ -322,12 +71,20 @@ files.forEach(filename => {
         NEW_NAV
     );
 
-    // Add nav styles if not present
-    if (!content.includes('navbar-container-redesigned')) {
-        // Find the last </style> tag and add styles before it
-        const styleEndIndex = content.lastIndexOf('</style>');
-        if (styleEndIndex !== -1) {
-            content = content.slice(0, styleEndIndex) + NAV_STYLES + '\n' + content.slice(styleEndIndex);
+    // Add navbar.css link if not present
+    if (!content.includes('/src/static/navbar.css')) {
+        // Find the last link tag or the end of head
+        const headEndIndex = content.indexOf('</head>');
+        if (headEndIndex !== -1) {
+            // Try to insert after the last CSS link
+            const lastLinkIndex = content.lastIndexOf('<link rel="stylesheet"');
+            if (lastLinkIndex !== -1) {
+                const endOfLink = content.indexOf('>', lastLinkIndex) + 1;
+                content = content.slice(0, endOfLink) + '\n' + NAVBAR_CSS_LINK + content.slice(endOfLink);
+            } else {
+                // Insert before </head>
+                content = content.slice(0, headEndIndex) + NAVBAR_CSS_LINK + '\n' + content.slice(headEndIndex);
+            }
         }
     }
 
