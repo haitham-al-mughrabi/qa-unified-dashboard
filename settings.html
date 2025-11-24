@@ -105,7 +105,7 @@
                     <i class="fas fa-sitemap"></i> Projects
                 </button>
                 <button class="tab-btn" onclick="switchTab('data-management')">
-                    <i class="fas fa-trash-alt"></i> Data Management
+                    <i class="fas fa-database"></i> Data Management
                 </button>
             </div>
 
@@ -175,113 +175,7 @@
                 </div>
             </div>
 
-            <!-- Data Management Tab -->
-            <div id="data-management-tab" class="tab-content">
-                <div class="header-actions">
-                    <div class="section-header">
-                        <h2><i class="fas fa-trash-restore"></i> Performance Data Management</h2>
-                        <p>Delete performance statistics data by project and time period</p>
-                    </div>
-                </div>
 
-                <div class="data-management-section">
-                    <div class="data-management-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-filter"></i> Select Data to Delete</h3>
-                            <p>Choose a project and specify the time period for data deletion</p>
-                        </div>
-
-                        <form id="dataManagementForm" class="data-management-form">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-folder"></i>
-                                    Select Project *
-                                </label>
-                                <select id="deleteDataProject" class="form-input" required>
-                                    <option value="">-- Select Project --</option>
-                                </select>
-                                <small class="form-help">Choose the project whose data you want to delete</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    Delete Scope *
-                                </label>
-                                <select id="deleteScope" class="form-input" onchange="handleScopeChange()" required>
-                                    <option value="">-- Select Scope --</option>
-                                    <option value="all">All Data (Complete Project)</option>
-                                    <option value="year">Specific Year</option>
-                                    <option value="quarter">Specific Quarter</option>
-                                    <option value="month">Specific Month</option>
-                                </select>
-                                <small class="form-help">Choose what range of data to delete</small>
-                            </div>
-
-                            <!-- Year Selection -->
-                            <div id="yearSelection" class="form-group" style="display: none;">
-                                <label class="form-label">
-                                    <i class="fas fa-calendar"></i>
-                                    Select Year *
-                                </label>
-                                <select id="deleteYear" class="form-input">
-                                    <option value="">-- Select Year --</option>
-                                </select>
-                            </div>
-
-                            <!-- Quarter Selection -->
-                            <div id="quarterSelection" class="form-group" style="display: none;">
-                                <label class="form-label">
-                                    <i class="fas fa-calendar-check"></i>
-                                    Select Quarter *
-                                </label>
-                                <select id="deleteQuarter" class="form-input">
-                                    <option value="">-- Select Quarter --</option>
-                                    <option value="Q1">Q1 (Jan - Mar)</option>
-                                    <option value="Q2">Q2 (Apr - Jun)</option>
-                                    <option value="Q3">Q3 (Jul - Sep)</option>
-                                    <option value="Q4">Q4 (Oct - Dec)</option>
-                                </select>
-                            </div>
-
-                            <!-- Month Selection -->
-                            <div id="monthSelection" class="form-group" style="display: none;">
-                                <label class="form-label">
-                                    <i class="fas fa-calendar-day"></i>
-                                    Select Month *
-                                </label>
-                                <select id="deleteMonth" class="form-input">
-                                    <option value="">-- Select Month --</option>
-                                    <option value="january">January</option>
-                                    <option value="february">February</option>
-                                    <option value="march">March</option>
-                                    <option value="april">April</option>
-                                    <option value="may">May</option>
-                                    <option value="june">June</option>
-                                    <option value="july">July</option>
-                                    <option value="august">August</option>
-                                    <option value="september">September</option>
-                                    <option value="october">October</option>
-                                    <option value="november">November</option>
-                                    <option value="december">December</option>
-                                </select>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="btn-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                    Delete Data
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="data-preview-section" id="dataPreview" style="display: none;">
-                            <h4><i class="fas fa-info-circle"></i> Data to be Deleted</h4>
-                            <div id="dataPreviewContent"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -416,6 +310,111 @@
             </div>
         </div>
     </div>
+
+            <!-- Data Management Tab -->
+            <div id="data-management-tab" class="tab-content">
+                <div class="tab-inner-container">
+                    <div class="header-actions">
+                        <div class="section-header">
+                            <h2><i class="fas fa-database"></i> Data Management</h2>
+                            <p>Manage and clean up your system data</p>
+                        </div>
+                    </div>
+
+                    <div class="data-management-container">
+                        <!-- Info Banner -->
+                        <div class="info-card">
+                            <h3><i class="fas fa-info-circle"></i> About Data Deletion</h3>
+                            <ul class="info-list">
+                                <li><strong>Performance Data:</strong> Includes quarterly and monthly performance metrics derived from Jira tickets.</li>
+                                <li><strong>Analysis Records:</strong> Includes detailed ticket analysis reports and history.</li>
+                                <li><strong>Availability Data:</strong> Includes service uptime and availability statistics.</li>
+                                <li><strong>Scope:</strong> Deleting "All Projects" will remove data across the entire system matching your criteria.</li>
+                                <li><strong>Irreversible:</strong> Once data is deleted, it cannot be recovered. Please be certain before proceeding.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Control Card -->
+                        <div class="data-control-card">
+                            <div class="control-header">
+                                <h3><i class="fas fa-filter"></i> Data Selection</h3>
+                                <p>Select the type of data and the range you want to delete</p>
+                            </div>
+                            
+                            <div class="control-form">
+                                <!-- Data Type -->
+                                <div class="form-group">
+                                    <label class="form-label">Data Type</label>
+                                    <div class="select-wrapper">
+                                        <select id="dmDataType" class="form-select">
+                                            <option value="all">All Data Types</option>
+                                            <option value="performance">Performance Statistics</option>
+                                            <option value="analyzer">Ticket Analysis Records</option>
+                                            <option value="availability">Availability Statistics</option>
+                                        </select>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Scope -->
+                                <div class="form-group">
+                                    <label class="form-label">Scope</label>
+                                    <div class="select-wrapper">
+                                        <select id="dmScope" class="form-select" onchange="toggleScopeSelects()">
+                                            <option value="all">All Projects</option>
+                                            <option value="portfolio">Specific Portfolio</option>
+                                            <option value="project">Specific Project</option>
+                                        </select>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Dynamic Scope Selects -->
+                                <div class="form-group" id="dmPortfolioGroup" style="display: none;">
+                                    <label class="form-label">Select Portfolio</label>
+                                    <div class="select-wrapper">
+                                        <select id="dmPortfolioSelect" class="form-select">
+                                            <option value="">Select a portfolio...</option>
+                                        </select>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="dmProjectGroup" style="display: none;">
+                                    <label class="form-label">Select Project</label>
+                                    <div class="select-wrapper">
+                                        <select id="dmProjectSelect" class="form-select">
+                                            <option value="">Select a project...</option>
+                                        </select>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Date Range -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Start Date (Optional)</label>
+                                        <input type="date" id="dmStartDate" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">End Date (Optional)</label>
+                                        <input type="date" id="dmEndDate" class="form-input">
+                                    </div>
+                                </div>
+
+                                <!-- Action -->
+                                <div class="form-actions" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200);">
+                                    <button class="btn-delete-large" onclick="openDeleteDataModal()">
+                                        <i class="fas fa-trash-alt"></i> Delete Selected Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Close tabs-container -->
+    </div> <!-- Close main-container -->
 
     <!-- Footer -->
     <footer>
@@ -878,6 +877,136 @@
         // Messages
         // showSuccess and showError are now provided by toast.js
 
+        // ==================== DATA MANAGEMENT ====================
+
+        function toggleScopeSelects() {
+            const scope = document.getElementById('dmScope').value;
+            const portfolioGroup = document.getElementById('dmPortfolioGroup');
+            const projectGroup = document.getElementById('dmProjectGroup');
+
+            portfolioGroup.style.display = 'none';
+            projectGroup.style.display = 'none';
+
+            if (scope === 'portfolio') {
+                portfolioGroup.style.display = 'block';
+                loadDmPortfolios();
+            } else if (scope === 'project') {
+                projectGroup.style.display = 'block';
+                loadDmProjects();
+            }
+        }
+
+        async function loadDmPortfolios() {
+            try {
+                const data = await fetchJSON(`${API_URL}/portfolios`);
+                const select = document.getElementById('dmPortfolioSelect');
+                select.innerHTML = '<option value="">Select a portfolio...</option>' + 
+                    (data.portfolios || []).map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading portfolios:', error);
+            }
+        }
+
+        async function loadDmProjects() {
+            try {
+                const data = await fetchJSON(`${API_URL}/projects`);
+                const select = document.getElementById('dmProjectSelect');
+                select.innerHTML = '<option value="">Select a project...</option>' + 
+                    (data.projects || []).map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        function openDeleteDataModal() {
+            const type = document.getElementById('dmDataType');
+            const scope = document.getElementById('dmScope');
+            const startDate = document.getElementById('dmStartDate').value;
+            const endDate = document.getElementById('dmEndDate').value;
+            
+            let description = `You are about to delete <strong>${type.options[type.selectedIndex].text}</strong>`;
+            
+            if (scope.value === 'all') {
+                description += ` for <strong>All Projects</strong>`;
+            } else if (scope.value === 'portfolio') {
+                const portfolioSelect = document.getElementById('dmPortfolioSelect');
+                if (!portfolioSelect.value) {
+                    showError('Please select a portfolio');
+                    return;
+                }
+                description += ` for Portfolio: <strong>${portfolioSelect.options[portfolioSelect.selectedIndex].text}</strong>`;
+            } else if (scope.value === 'project') {
+                const projectSelect = document.getElementById('dmProjectSelect');
+                if (!projectSelect.value) {
+                    showError('Please select a project');
+                    return;
+                }
+                description += ` for Project: <strong>${projectSelect.options[projectSelect.selectedIndex].text}</strong>`;
+            }
+
+            if (startDate || endDate) {
+                description += ` from <strong>${startDate || 'Beginning'}</strong> to <strong>${endDate || 'Now'}</strong>`;
+            }
+
+            document.getElementById('deleteDataDescription').innerHTML = description;
+            document.getElementById('deleteDataConfirmInput').value = '';
+            document.getElementById('confirmDeleteDataBtn').disabled = true;
+            
+            document.getElementById('deleteDataModal').classList.add('active');
+        }
+
+        function closeDeleteDataModal() {
+            document.getElementById('deleteDataModal').classList.remove('active');
+        }
+
+        document.getElementById('deleteDataConfirmInput').addEventListener('input', function(e) {
+            document.getElementById('confirmDeleteDataBtn').disabled = e.target.value.toLowerCase() !== 'delete';
+        });
+
+        async function confirmDeleteData() {
+            try {
+                const type = document.getElementById('dmDataType').value;
+                const scope = document.getElementById('dmScope').value;
+                const startDate = document.getElementById('dmStartDate').value;
+                const endDate = document.getElementById('dmEndDate').value;
+                
+                let targetId = null;
+                if (scope === 'portfolio') {
+                    targetId = document.getElementById('dmPortfolioSelect').value;
+                } else if (scope === 'project') {
+                    targetId = document.getElementById('dmProjectSelect').value;
+                }
+
+                const btn = document.getElementById('confirmDeleteDataBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                btn.disabled = true;
+
+                await fetchJSON(`${API_URL}/data/management`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type,
+                        scope,
+                        targetId,
+                        startDate,
+                        endDate
+                    })
+                });
+
+                showSuccess('Data deleted successfully');
+                closeDeleteDataModal();
+            } catch (error) {
+                showError('Error deleting data: ' + error.message);
+            } finally {
+                const btn = document.getElementById('confirmDeleteDataBtn');
+                if (btn) {
+                    btn.innerHTML = '<i class="fas fa-trash-alt"></i> Delete Data';
+                    btn.disabled = false;
+                }
+            }
+        }
+
         // Helper functions
         function escapeHtml(text) {
             const div = document.createElement('div');
@@ -916,225 +1045,6 @@
         }
 
         // ==================== DATA MANAGEMENT ====================
-
-        // Load projects for data management
-        async function loadDataManagementProjects() {
-            try {
-                const response = await fetchJSON(`${API_URL}/projects`);
-                const select = document.getElementById('deleteDataProject');
-
-                select.innerHTML = '<option value="">-- Select Project --</option>';
-
-                if (response.projects && response.projects.length > 0) {
-                    response.projects.forEach(project => {
-                        const option = document.createElement('option');
-                        option.value = project.id;
-                        option.textContent = project.name;
-                        select.appendChild(option);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading projects:', error);
-            }
-        }
-
-        // Load available years for selected project
-        async function loadAvailableYears(projectId) {
-            try {
-                const response = await fetchJSON(`${API_URL}/projects/${projectId}/performance-statistics`);
-                const yearSelect = document.getElementById('deleteYear');
-
-                yearSelect.innerHTML = '<option value="">-- Select Year --</option>';
-
-                if (response.success && response.hasData && response.statistics && response.statistics.years) {
-                    const years = Object.keys(response.statistics.years).sort((a, b) => b - a);
-                    years.forEach(year => {
-                        const option = document.createElement('option');
-                        option.value = year;
-                        option.textContent = year;
-                        yearSelect.appendChild(option);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading years:', error);
-            }
-        }
-
-        // Handle scope change
-        function handleScopeChange() {
-            const scope = document.getElementById('deleteScope').value;
-            const projectId = document.getElementById('deleteDataProject').value;
-
-            // Hide all conditional fields
-            document.getElementById('yearSelection').style.display = 'none';
-            document.getElementById('quarterSelection').style.display = 'none';
-            document.getElementById('monthSelection').style.display = 'none';
-
-            // Show fields based on scope
-            if (scope === 'year' || scope === 'quarter' || scope === 'month') {
-                document.getElementById('yearSelection').style.display = 'block';
-                if (projectId) {
-                    loadAvailableYears(projectId);
-                }
-            }
-
-            if (scope === 'quarter' || scope === 'month') {
-                document.getElementById('quarterSelection').style.display = 'block';
-            }
-
-            if (scope === 'month') {
-                document.getElementById('monthSelection').style.display = 'block';
-            }
-        }
-
-        // Handle project selection change
-        document.getElementById('deleteDataProject')?.addEventListener('change', function() {
-            const projectId = this.value;
-            const scope = document.getElementById('deleteScope').value;
-
-            if (projectId && (scope === 'year' || scope === 'quarter' || scope === 'month')) {
-                loadAvailableYears(projectId);
-            }
-        });
-
-        // Store deletion parameters for modal confirmation
-        let pendingDeletion = null;
-
-        // Handle data management form submission
-        document.getElementById('dataManagementForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const projectId = document.getElementById('deleteDataProject').value;
-            const scope = document.getElementById('deleteScope').value;
-            const year = document.getElementById('deleteYear').value;
-            const quarter = document.getElementById('deleteQuarter').value;
-            const month = document.getElementById('deleteMonth').value;
-
-            if (!projectId || !scope) {
-                showError('Please select a project and scope');
-                return;
-            }
-
-            // Validate required fields based on scope
-            if ((scope === 'year' || scope === 'quarter' || scope === 'month') && !year) {
-                showError('Please select a year');
-                return;
-            }
-
-            if ((scope === 'quarter' || scope === 'month') && !quarter) {
-                showError('Please select a quarter');
-                return;
-            }
-
-            if (scope === 'month' && !month) {
-                showError('Please select a month');
-                return;
-            }
-
-            // Build description for confirmation
-            const projectName = document.getElementById('deleteDataProject').selectedOptions[0].text;
-            let description = `all data for project "${projectName}"`;
-
-            if (scope === 'year') {
-                description = `all data for year ${year} in project "${projectName}"`;
-            } else if (scope === 'quarter') {
-                description = `all data for ${quarter} ${year} in project "${projectName}"`;
-            } else if (scope === 'month') {
-                const monthName = document.getElementById('deleteMonth').selectedOptions[0].text;
-                description = `all data for ${monthName} ${year} (${quarter}) in project "${projectName}"`;
-            }
-
-            // Store deletion parameters
-            pendingDeletion = {
-                projectId,
-                scope,
-                year,
-                quarter,
-                month,
-                description
-            };
-
-            // Show confirmation modal
-            document.getElementById('deleteDataDescription').textContent = `Are you sure you want to delete ${description}?`;
-            document.getElementById('deleteDataConfirmInput').value = '';
-            document.getElementById('confirmDeleteDataBtn').disabled = true;
-            document.getElementById('deleteDataModal').classList.add('active');
-
-            // Focus on input after modal animation
-            setTimeout(() => {
-                document.getElementById('deleteDataConfirmInput').focus();
-            }, 100);
-        });
-
-        // Close delete data modal
-        function closeDeleteDataModal() {
-            document.getElementById('deleteDataModal').classList.remove('active');
-            document.getElementById('deleteDataConfirmInput').value = '';
-            document.getElementById('confirmDeleteDataBtn').disabled = true;
-            pendingDeletion = null;
-        }
-
-        // Enable/disable delete button based on input
-        document.addEventListener('DOMContentLoaded', () => {
-            const deleteDataConfirmInput = document.getElementById('deleteDataConfirmInput');
-            const confirmDeleteDataBtn = document.getElementById('confirmDeleteDataBtn');
-
-            if (deleteDataConfirmInput && confirmDeleteDataBtn) {
-                deleteDataConfirmInput.addEventListener('input', (e) => {
-                    const inputValue = e.target.value.trim();
-                    if (inputValue === 'delete') {
-                        confirmDeleteDataBtn.disabled = false;
-                    } else {
-                        confirmDeleteDataBtn.disabled = true;
-                    }
-                });
-            }
-        });
-
-        // Confirm and execute deletion
-        async function confirmDeleteData() {
-            if (!pendingDeletion) return;
-
-            const { projectId, scope, year, quarter, month, description } = pendingDeletion;
-
-            closeDeleteDataModal();
-
-            try {
-                showLoading();
-
-                const params = new URLSearchParams({
-                    scope: scope,
-                    projectId: projectId
-                });
-
-                if (year) params.append('year', year);
-                if (quarter) params.append('quarter', quarter);
-                if (month) params.append('month', month);
-
-                const response = await fetchJSON(`${API_URL}/performance-statistics/delete?${params}`, {
-                    method: 'DELETE'
-                });
-
-                hideLoading();
-
-                if (response.success) {
-                    showSuccess(`Successfully deleted ${description}`);
-
-                    // Reset form
-                    document.getElementById('dataManagementForm').reset();
-                    handleScopeChange();
-                } else {
-                    showError(response.error || 'Failed to delete data');
-                }
-            } catch (error) {
-                hideLoading();
-                console.error('Error deleting data:', error);
-                showError(error.message || 'Failed to delete data');
-            }
-
-            pendingDeletion = null;
-        }
-
         // Close modal when clicking outside
         window.addEventListener('click', function(event) {
             const deleteModal = document.getElementById('deleteDataModal');
@@ -1145,8 +1055,6 @@
 
         // Initialize data management when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            loadDataManagementProjects();
-
             // Set current year in footer
             document.getElementById('year').textContent = new Date().getFullYear();
         });
@@ -1697,6 +1605,198 @@
             box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
         }
 
+        /* Data Management Specific Styles */
+        .tab-inner-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .data-management-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .data-control-card {
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            padding: 2.5rem;
+            border: 1px solid var(--gray-200);
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .control-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .control-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .control-header h3 i {
+            color: var(--primary);
+            font-size: 1.75rem;
+        }
+
+        .control-header p {
+            color: var(--gray-600);
+            font-size: 0.9375rem;
+            margin: 0;
+        }
+
+        .control-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            pointer-events: none;
+            font-size: 0.875rem;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.875rem 2.5rem 0.875rem 1rem;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--gray-900);
+            background: white;
+            transition: all 0.3s ease;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .form-select:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-delete-large {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-xl);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-delete-large:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+        }
+
+        .btn-delete-large:active {
+            transform: translateY(0);
+        }
+
+        .btn-delete-large i {
+            font-size: 1.125rem;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            border: 2px solid #fbbf24;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+        }
+
+        .info-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .info-card h3 i {
+            color: #f59e0b;
+            font-size: 1.5rem;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-list li {
+            color: #78350f;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .info-list li::before {
+            content: '⚠️';
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .info-list strong {
+            color: #92400e;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1024px) {
+            .data-management-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
             .data-management-card {
                 padding: 1.5rem;
@@ -1720,6 +1820,15 @@
             .tabs-header .tab-btn {
                 padding: 1rem 1.5rem;
                 font-size: 0.9375rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .data-control-card,
+            .info-card {
+                padding: 1.5rem;
             }
         }
     </style>

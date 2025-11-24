@@ -237,7 +237,13 @@ app.get('/api/portfolios', async (req, res) => {
         const portfolios = await query(`
             SELECT
                 p.*,
-                COUNT(DISTINCT pr.id) as project_count
+                COUNT(DISTINCT pr.id) as project_count,
+                COALESCE(
+                    JSON_ARRAYAGG(
+                        IF(pr.id IS NOT NULL, JSON_OBJECT('id', pr.id, 'name', pr.name), NULL)
+                    ),
+                    JSON_ARRAY()
+                ) as projects
             FROM portfolios p
             LEFT JOIN projects pr ON p.id = pr.portfolio_id
             GROUP BY p.id
@@ -2414,6 +2420,289 @@ app.get('/availability-dashboard', (req, res) => {
 
 app.get('/project-availability', (req, res) => {
     res.sendFile(path.join(__dirname, 'project-availability.html'));
+});
+
+// ==================== DATA MANAGEMENT API ====================
+
+// Preview data deletion - count records that would be deleted
+app.post('/api/data/management/preview', async (req, res) => {
+    try {
+        const { type, scope, targetId, startDate, endDate } = req.body;
+
+        // Validate inputs
+        if (!type || !scope) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Type and scope are required' 
+            });
+        }
+
+        if ((scope === 'portfolio' || scope === 'project') && !targetId) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Target ID is required for the selected scope' 
+            });
+        }
+
+        // Validate date range
+        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Start date must be before or equal to end date' 
+            });
+        }
+
+        const connection = await pool.getConnection();
+        try {
+            // Helper to build count query
+            const buildCountQuery = async (tableName) => {
+                let sql = `SELECT COUNT(*) as count FROM ${tableName}`;
+                const params = [];
+                const conditions = [];
+
+                // Scope filter
+                if (scope === 'project') {
+                    conditions.push('project_id = ?');
+                    params.push(targetId);
+                } else if (scope === 'portfolio') {
+                    // Get all project IDs for this portfolio
+                    const [projects] = await connection.execute(
+                        'SELECT id FROM projects WHERE portfolio_id = ?',
+                        [targetId]
+                    );
+                    
+                    if (projects.length === 0) {
+                        return { sql: null, params: [], count: 0 };
+                    }
+                    
+                    const projectIds = projects.map(p => p.id);
+                    conditions.push(`project_id IN (${projectIds.join(',')})`);
+                }
+
+                // Date range filter
+                if (startDate) {
+                    conditions.push('DATE(created_at) >= ?');
+                    params.push(startDate);
+                }
+                if (endDate) {
+                    conditions.push('DATE(created_at) <= ?');
+                    params.push(endDate);
+                }
+
+                if (conditions.length > 0) {
+                    sql += ' WHERE ' + conditions.join(' AND ');
+                }
+
+                return { sql, params };
+            };
+
+            let counts = {};
+
+            // Count records based on type
+            if (type === 'performance' || type === 'all') {
+                const { sql, params } = await buildCountQuery('performance_statistics');
+                if (sql) {
+                    const [result] = await connection.execute(sql, params);
+                    counts.performance = result[0].count;
+                } else {
+                    counts.performance = 0;
+                }
+            }
+
+            if (type === 'analyzer' || type === 'all') {
+                const { sql, params } = await buildCountQuery('analysis_records');
+                if (sql) {
+                    const [result] = await connection.execute(sql, params);
+                    counts.analyzer = result[0].count;
+                } else {
+                    counts.analyzer = 0;
+                }
+            }
+
+            if (type === 'availability' || type === 'all') {
+                const { sql, params } = await buildCountQuery('availability_statistics');
+                if (sql) {
+                    const [result] = await connection.execute(sql, params);
+                    counts.availability = result[0].count;
+                } else {
+                    counts.availability = 0;
+                }
+            }
+
+            const totalCount = Object.values(counts).reduce((sum, count) => sum + count, 0);
+
+            res.json({ 
+                success: true,
+                counts,
+                totalCount,
+                message: totalCount > 0 
+                    ? `${totalCount} record(s) will be deleted` 
+                    : 'No records match the selected criteria'
+            });
+
+        } finally {
+            connection.release();
+        }
+
+    } catch (error) {
+        console.error('Preview data error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message 
+        });
+    }
+});
+
+// Delete data based on criteria
+app.delete('/api/data/management', async (req, res) => {
+    try {
+        const { type, scope, targetId, startDate, endDate } = req.body;
+
+        // Validate inputs
+        if (!type || !scope) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Type and scope are required' 
+            });
+        }
+
+        if ((scope === 'portfolio' || scope === 'project') && !targetId) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Target ID is required for the selected scope' 
+            });
+        }
+
+        // Validate date range
+        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Start date must be before or equal to end date' 
+            });
+        }
+
+        // Extra confirmation for "delete all" operations
+        if (scope === 'all' && type === 'all' && !startDate && !endDate) {
+            console.warn('WARNING: Deleting ALL data for ALL projects!');
+        }
+
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            // Helper to build delete query
+            const buildDeleteQuery = async (tableName) => {
+                let sql = `DELETE FROM ${tableName}`;
+                const params = [];
+                const conditions = [];
+
+                // Scope filter
+                if (scope === 'project') {
+                    conditions.push('project_id = ?');
+                    params.push(targetId);
+                } else if (scope === 'portfolio') {
+                    // Get all project IDs for this portfolio
+                    const [projects] = await connection.execute(
+                        'SELECT id FROM projects WHERE portfolio_id = ?',
+                        [targetId]
+                    );
+                    
+                    if (projects.length === 0) {
+                        return { sql: null, params: [] }; // No projects, nothing to delete
+                    }
+                    
+                    const projectIds = projects.map(p => p.id);
+                    conditions.push(`project_id IN (${projectIds.join(',')})`);
+                }
+                // scope === 'all' implies no project_id filter (delete for all projects)
+
+                // Date range filter (using created_at)
+                if (startDate) {
+                    conditions.push('DATE(created_at) >= ?');
+                    params.push(startDate);
+                }
+                if (endDate) {
+                    conditions.push('DATE(created_at) <= ?');
+                    params.push(endDate);
+                }
+
+                if (conditions.length > 0) {
+                    sql += ' WHERE ' + conditions.join(' AND ');
+                }
+
+                return { sql, params };
+            };
+
+            let deletedCounts = {};
+
+            // Execute deletes based on type
+            if (type === 'performance' || type === 'all') {
+                const { sql, params } = await buildDeleteQuery('performance_statistics');
+                if (sql) {
+                    const [result] = await connection.execute(sql, params);
+                    deletedCounts.performance = result.affectedRows;
+                } else {
+                    deletedCounts.performance = 0;
+                }
+            }
+
+            if (type === 'analyzer' || type === 'all') {
+                const { sql, params } = await buildDeleteQuery('analysis_records');
+                if (sql) {
+                    const [result] = await connection.execute(sql, params);
+                    deletedCounts.analyzer = result.affectedRows;
+                } else {
+                    deletedCounts.analyzer = 0;
+                }
+            }
+
+            if (type === 'availability' || type === 'all') {
+                const { sql, params } = await buildDeleteQuery('availability_statistics');
+                if (sql) {
+                    const [result] = await connection.execute(sql, params);
+                    deletedCounts.availability = result.affectedRows;
+                } else {
+                    deletedCounts.availability = 0;
+                }
+            }
+
+            await connection.commit();
+            
+            const totalDeleted = Object.values(deletedCounts).reduce((sum, count) => sum + count, 0);
+            
+            // Log the deletion for audit purposes
+            console.log('Data deletion completed:', {
+                timestamp: new Date().toISOString(),
+                type,
+                scope,
+                targetId,
+                startDate,
+                endDate,
+                deletedCounts,
+                totalDeleted
+            });
+
+            res.json({ 
+                success: true,
+                message: `Successfully deleted ${totalDeleted} record(s)`, 
+                deleted: deletedCounts,
+                totalDeleted
+            });
+
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+
+    } catch (error) {
+        console.error('Delete data error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message 
+        });
+    }
 });
 
 // Start server

@@ -14,6 +14,13 @@
     <link rel="stylesheet" href="/src/static/nav-dropdown.css">
     <link rel="stylesheet" href="/src/static/footer.css">
     <link rel="stylesheet" href="/src/static/toast.css">
+    <style>
+        .main-container {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: var(--spacing-2xl) var(--spacing-xl);
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -352,7 +359,7 @@
             allParsedData = [];
             processedDataByProject = {};
             document.getElementById('resultsContainer').innerHTML = '';
-            document.getElementById('saveBtn').style.display = 'none';
+            // document.getElementById('saveBtn').style.display = 'none'; // Removed as button is inside resultsContainer
         }
 
         async function processFileQueue() {
@@ -393,7 +400,7 @@
 
             hideLoading();
             displayResults();
-            document.getElementById('saveBtn').style.display = 'block';
+            // document.getElementById('saveBtn').style.display = 'block'; // Removed as button is created visible
             showSuccess(`Successfully processed ${fileQueue.length} file(s)`);
         }
 

@@ -276,6 +276,12 @@
                                     <i class="fas fa-project-diagram"></i>
                                     ${portfolio.project_count} Project${portfolio.project_count !== 1 ? 's' : ''}
                                 </span>
+                                ${portfolio.projects && portfolio.projects.length > 0 ? 
+                                    `<span class="project-names-display" style="margin-left: 8px; color: var(--gray-600); font-size: 0.9em; display: inline-flex; align-items: center;">
+                                        <i class="fas fa-chevron-right" style="font-size: 0.8em; margin-right: 6px; color: var(--gray-400);"></i>
+                                        ${portfolio.projects.map(p => typeof p === 'object' ? escapeHtml(p.name) : escapeHtml(p)).join(', ')}
+                                    </span>` 
+                                    : ''}
                                 <span class="meta-badge">
                                     <i class="fas fa-chart-line"></i>
                                     ${portfolio.total_data_points} Data Point${portfolio.total_data_points !== 1 ? 's' : ''}
