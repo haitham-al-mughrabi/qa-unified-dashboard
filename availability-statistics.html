@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/src/static/performance-statistics.css">
     <link rel="stylesheet" href="/src/static/navbar.css">
@@ -22,9 +24,10 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
-        <!-- Navigation -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="navbar-container-redesigned">
             <!-- Logo/Icon on the left -->
@@ -41,7 +44,7 @@
                         <i class="fas fa-chart-pie"></i> Analyzer <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="dropdown-menu">
-                         <a href="/dashboard.html" class="dropdown-item">
+                        <a href="/dashboard.html" class="dropdown-item">
                             <i class="fas fa-chart-bar"></i> Ticket Analysis
                         </a>
                         <a href="/" class="dropdown-item">
@@ -59,7 +62,7 @@
                         <a href="/performance-statistics" class="dropdown-item">
                             <i class="fas fa-trophy"></i> Performance Statistics
                         </a>
-                         <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
                         <a href="/project-statistics.html" class="dropdown-item">
                             <i class="fas fa-project-diagram"></i> Project Statistics
                         </a>
@@ -98,7 +101,8 @@
         <!-- Hero Section -->
         <div class="hero">
             <h1><i class="fas fa-server"></i> Availability Statistics</h1>
-            <p>Upload JSON or CSV files to analyze availability metrics by project and quarter (values as percentages)</p>
+            <p>Upload JSON or CSV files to analyze availability metrics by project and quarter (values as percentages)
+            </p>
         </div>
 
         <!-- Upload Card -->
@@ -108,7 +112,8 @@
                 <div class="upload-text">
                     <h3>Upload JSON or CSV Files</h3>
                     <p>Drag and drop one or more files here or click to browse</p>
-                    <small>Expected format: [{"title": "ProjectName - Month:", "value": 95.5}] (values as percentages)</small>
+                    <small>Expected format: [{"title": "ProjectName - Month:", "value": 95.5}] (values as
+                        percentages)</small>
                 </div>
                 <input type="file" id="fileInput" class="file-input" accept=".json, .csv" multiple>
                 <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
@@ -196,7 +201,61 @@
     <!-- Footer -->
     <footer>
         <div class="footer-container">
-            <div class="footer-content">
+            <div class="footer-top">
+                <!-- Brand Column -->
+                <div class="footer-column brand-column">
+                    <div class="footer-logo">
+                        <img src="src/logo/main_logo.png" alt="QA Analytics Logo">
+                    </div>
+                    <p class="footer-description">
+                        Comprehensive quality assurance analytics and reporting dashboard for Takamol Holding.
+                    </p>
+                </div>
+
+                <!-- Analyzer Column -->
+                <div class="footer-column">
+                    <h3>Analyzer</h3>
+                    <ul class="footer-links">
+                        <li><a href="/dashboard.html"><i class="fas fa-chart-bar"></i> Ticket Analysis</a></li>
+                        <li><a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a></li>
+                    </ul>
+                </div>
+
+                <!-- Statistics Column -->
+                <div class="footer-column">
+                    <h3>Statistics</h3>
+                    <ul class="footer-links">
+                        <li><a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Stats</a></li>
+                        <li><a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Stats</a>
+                        </li>
+                        <li><a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Stats</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Availability Column -->
+                <div class="footer-column">
+                    <h3>Availability</h3>
+                    <ul class="footer-links">
+                        <li><a href="/availability-statistics"><i class="fas fa-chart-area"></i> Availability Stats</a>
+                        </li>
+                        <li><a href="/project-availability"><i class="fas fa-project-diagram"></i> Availability
+                                Projects</a></li>
+                        <li><a href="/availability-dashboard"><i class="fas fa-briefcase"></i> Availability
+                                Portfolios</a></li>
+                    </ul>
+                </div>
+
+                <!-- Settings Column -->
+                <div class="footer-column">
+                    <h3>General</h3>
+                    <ul class="footer-links">
+                        <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
                 <div class="footer-copyright">
                     <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
                 </div>
@@ -209,7 +268,8 @@
                     <div class="footer-company-header">
                         <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
                     </div>
-                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality
+                        Assurance Unit</div>
                 </div>
             </div>
         </div>
@@ -250,7 +310,7 @@
         };
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             setupUploadHandlers();
         });
 
@@ -409,7 +469,7 @@
                 const reader = new FileReader();
                 const ext = file.name.split('.').pop().toLowerCase();
 
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     try {
                         let data;
 
@@ -480,7 +540,7 @@
                     }
                 };
 
-                reader.onerror = function() {
+                reader.onerror = function () {
                     reject(new Error('Failed to read file'));
                 };
 
@@ -522,7 +582,7 @@
             resultsContainer.innerHTML = '';
 
             const projectNames = Object.keys(processedDataByProject).sort();
-            
+
             if (projectNames.length === 0) {
                 return;
             }
@@ -534,7 +594,7 @@
             // Create Tabs Header
             const tabsHeader = document.createElement('div');
             tabsHeader.className = 'tabs-header';
-            
+
             // Create Tabs Content Area
             const tabsContent = document.createElement('div');
             tabsContent.className = 'tab-content';
@@ -553,7 +613,7 @@
                 const tabPane = document.createElement('div');
                 tabPane.className = `tab-pane ${index === 0 ? 'active' : ''}`;
                 tabPane.id = `tab-${projectName.replace(/\s+/g, '-')}`;
-                
+
                 // Generate content for the project
                 tabPane.appendChild(createProjectContent(projectName, projectData));
                 tabsContent.appendChild(tabPane);
@@ -617,7 +677,7 @@
 
         function createProjectContent(projectName, projectData) {
             const container = document.createElement('div');
-            
+
             // Sort months by month order
             projectData.months.sort((a, b) => {
                 if (a.year !== b.year) return a.year - b.year;
@@ -831,13 +891,13 @@
 
     <script>
         // Dropdown functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const dropdowns = document.querySelectorAll('.nav-dropdown');
 
             dropdowns.forEach(dropdown => {
                 const toggle = dropdown.querySelector('.dropdown-toggle');
 
-                toggle.addEventListener('click', function(e) {
+                toggle.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -854,7 +914,7 @@
             });
 
             // Close dropdowns when clicking outside
-            document.addEventListener('click', function() {
+            document.addEventListener('click', function () {
                 dropdowns.forEach(dropdown => {
                     dropdown.classList.remove('active');
                 });
@@ -862,11 +922,12 @@
 
             // Prevent dropdown from closing when clicking inside it
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.addEventListener('click', function(e) {
+                menu.addEventListener('click', function (e) {
                     e.stopPropagation();
                 });
             });
         });
     </script>
 </body>
+
 </html>

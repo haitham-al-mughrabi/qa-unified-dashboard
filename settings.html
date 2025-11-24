@@ -180,109 +180,109 @@
 
             <div id="data-management-tab" class="tab-content">
                 <!-- <div class="data-management-container"> -->
-                    <div class="header-actions" style="border-bottom: none; margin-bottom: 1rem; padding-bottom: 0;">
-                        <div class="section-header">
-                            <h2><i class="fas fa-database"></i> Data Management</h2>
-                            <p>Manage and clean up your system data</p>
-                        </div>
+                <div class="header-actions" style="border-bottom: none; margin-bottom: 1rem; padding-bottom: 0;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-database"></i> Data Management</h2>
+                        <p>Manage and clean up your system data</p>
                     </div>
-                    <!-- Info Banner -->
-                    <div class="info-card">
-                        <h3><i class="fas fa-info-circle"></i> About Data Deletion</h3>
-                        <ul class="info-list">
-                            <li><strong>Performance Data:</strong> Includes quarterly and monthly performance metrics
-                                derived
-                                from Jira tickets.</li>
-                            <li><strong>Analysis Records:</strong> Includes detailed ticket analysis reports and
-                                history.</li>
-                            <li><strong>Availability Data:</strong> Includes service uptime and availability statistics.
-                            </li>
-                            <li><strong>Scope:</strong> Deleting "All Projects" will remove data across the entire
-                                system
-                                matching your criteria.</li>
-                            <li><strong>Irreversible:</strong> Once data is deleted, it cannot be recovered. Please be
-                                certain
-                                before proceeding.</li>
-                        </ul>
+                </div>
+                <!-- Info Banner -->
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> About Data Deletion</h3>
+                    <ul class="info-list">
+                        <li><strong>Performance Data:</strong> Includes quarterly and monthly performance metrics
+                            derived
+                            from Jira tickets.</li>
+                        <li><strong>Analysis Records:</strong> Includes detailed ticket analysis reports and
+                            history.</li>
+                        <li><strong>Availability Data:</strong> Includes service uptime and availability statistics.
+                        </li>
+                        <li><strong>Scope:</strong> Deleting "All Projects" will remove data across the entire
+                            system
+                            matching your criteria.</li>
+                        <li><strong>Irreversible:</strong> Once data is deleted, it cannot be recovered. Please be
+                            certain
+                            before proceeding.</li>
+                    </ul>
+                </div>
+
+                <!-- Control Card -->
+                <div class="data-control-card">
+                    <div class="control-header">
+                        <h3><i class="fas fa-filter"></i> Data Selection</h3>
+                        <p>Select the type of data and the range you want to delete</p>
                     </div>
 
-                    <!-- Control Card -->
-                    <div class="data-control-card">
-                        <div class="control-header">
-                            <h3><i class="fas fa-filter"></i> Data Selection</h3>
-                            <p>Select the type of data and the range you want to delete</p>
+                    <div class="control-form">
+                        <!-- Data Type -->
+                        <div class="form-group">
+                            <label class="form-label">Data Type</label>
+                            <div class="select-wrapper">
+                                <select id="dmDataType" class="form-select">
+                                    <option value="all">All Data Types</option>
+                                    <option value="performance">Performance Statistics</option>
+                                    <option value="analyzer">Ticket Analysis Records</option>
+                                    <option value="availability">Availability Statistics</option>
+                                </select>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
                         </div>
 
-                        <div class="control-form">
-                            <!-- Data Type -->
+                        <!-- Scope -->
+                        <div class="form-group">
+                            <label class="form-label">Scope</label>
+                            <div class="select-wrapper">
+                                <select id="dmScope" class="form-select" onchange="toggleScopeSelects()">
+                                    <option value="all">All Projects</option>
+                                    <option value="portfolio">Specific Portfolio</option>
+                                    <option value="project">Specific Project</option>
+                                </select>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Scope Selects -->
+                        <div class="form-group" id="dmPortfolioGroup" style="display: none;">
+                            <label class="form-label">Select Portfolio</label>
+                            <div class="select-wrapper">
+                                <select id="dmPortfolioSelect" class="form-select">
+                                    <option value="">Select a portfolio...</option>
+                                </select>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="dmProjectGroup" style="display: none;">
+                            <label class="form-label">Select Project</label>
+                            <div class="select-wrapper">
+                                <select id="dmProjectSelect" class="form-select">
+                                    <option value="">Select a project...</option>
+                                </select>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Data Type</label>
-                                <div class="select-wrapper">
-                                    <select id="dmDataType" class="form-select">
-                                        <option value="all">All Data Types</option>
-                                        <option value="performance">Performance Statistics</option>
-                                        <option value="analyzer">Ticket Analysis Records</option>
-                                        <option value="availability">Availability Statistics</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down"></i>
-                                </div>
+                                <label class="form-label">Start Date (Optional)</label>
+                                <input type="date" id="dmStartDate" class="form-input">
                             </div>
-
-                            <!-- Scope -->
                             <div class="form-group">
-                                <label class="form-label">Scope</label>
-                                <div class="select-wrapper">
-                                    <select id="dmScope" class="form-select" onchange="toggleScopeSelects()">
-                                        <option value="all">All Projects</option>
-                                        <option value="portfolio">Specific Portfolio</option>
-                                        <option value="project">Specific Project</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down"></i>
-                                </div>
-                            </div>
-
-                            <!-- Dynamic Scope Selects -->
-                            <div class="form-group" id="dmPortfolioGroup" style="display: none;">
-                                <label class="form-label">Select Portfolio</label>
-                                <div class="select-wrapper">
-                                    <select id="dmPortfolioSelect" class="form-select">
-                                        <option value="">Select a portfolio...</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down"></i>
-                                </div>
-                            </div>
-
-                            <div class="form-group" id="dmProjectGroup" style="display: none;">
-                                <label class="form-label">Select Project</label>
-                                <div class="select-wrapper">
-                                    <select id="dmProjectSelect" class="form-select">
-                                        <option value="">Select a project...</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down"></i>
-                                </div>
-                            </div>
-
-                            <!-- Date Range -->
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Start Date (Optional)</label>
-                                    <input type="date" id="dmStartDate" class="form-input">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">End Date (Optional)</label>
-                                    <input type="date" id="dmEndDate" class="form-input">
-                                </div>
-                            </div>
-
-                            <!-- Action -->
-                            <div class="form-actions"
-                                style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200);">
-                                <button class="btn-delete-large" onclick="openDeleteDataModal()">
-                                    <i class="fas fa-trash-alt"></i> Delete Selected Data
-                                </button>
+                                <label class="form-label">End Date (Optional)</label>
+                                <input type="date" id="dmEndDate" class="form-input">
                             </div>
                         </div>
+
+                        <!-- Action -->
+                        <div class="form-actions"
+                            style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200);">
+                            <button class="btn-delete-large" onclick="openDeleteDataModal()">
+                                <i class="fas fa-trash-alt"></i> Delete Selected Data
+                            </button>
+                        </div>
                     </div>
+                </div>
                 <!-- </div> -->
             </div>
         </div>
@@ -428,7 +428,61 @@
     <!-- Footer -->
     <footer>
         <div class="footer-container">
-            <div class="footer-content">
+            <div class="footer-top">
+                <!-- Brand Column -->
+                <div class="footer-column brand-column">
+                    <div class="footer-logo">
+                        <img src="src/logo/main_logo.png" alt="QA Analytics Logo">
+                    </div>
+                    <p class="footer-description">
+                        Comprehensive quality assurance analytics and reporting dashboard for Takamol Holding.
+                    </p>
+                </div>
+
+                <!-- Analyzer Column -->
+                <div class="footer-column">
+                    <h3>Analyzer</h3>
+                    <ul class="footer-links">
+                        <li><a href="/dashboard.html"><i class="fas fa-chart-bar"></i> Ticket Analysis</a></li>
+                        <li><a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a></li>
+                    </ul>
+                </div>
+
+                <!-- Statistics Column -->
+                <div class="footer-column">
+                    <h3>Statistics</h3>
+                    <ul class="footer-links">
+                        <li><a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Stats</a></li>
+                        <li><a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Stats</a>
+                        </li>
+                        <li><a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Stats</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Availability Column -->
+                <div class="footer-column">
+                    <h3>Availability</h3>
+                    <ul class="footer-links">
+                        <li><a href="/availability-statistics"><i class="fas fa-chart-area"></i> Availability Stats</a>
+                        </li>
+                        <li><a href="/project-availability"><i class="fas fa-project-diagram"></i> Availability
+                                Projects</a></li>
+                        <li><a href="/availability-dashboard"><i class="fas fa-briefcase"></i> Availability
+                                Portfolios</a></li>
+                    </ul>
+                </div>
+
+                <!-- Settings Column -->
+                <div class="footer-column">
+                    <h3>General</h3>
+                    <ul class="footer-links">
+                        <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
                 <div class="footer-copyright">
                     <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
                 </div>

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolios - QA Analytics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="src/static/dashboard.css">
     <link rel="stylesheet" href="/src/static/projects.css">
@@ -15,9 +17,10 @@
     <link rel="stylesheet" href="/src/static/footer.css">
     <link rel="stylesheet" href="/src/static/toast.css">
 </head>
+
 <body>
     <!-- Navigation -->
-        <!-- Navigation -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="navbar-container-redesigned">
             <!-- Logo/Icon on the left -->
@@ -34,7 +37,7 @@
                         <i class="fas fa-chart-pie"></i> Analyzer <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="dropdown-menu">
-                         <a href="/dashboard.html" class="dropdown-item">
+                        <a href="/dashboard.html" class="dropdown-item">
                             <i class="fas fa-chart-bar"></i> Ticket Analysis
                         </a>
                         <a href="/" class="dropdown-item">
@@ -52,7 +55,7 @@
                         <a href="/performance-statistics" class="dropdown-item">
                             <i class="fas fa-trophy"></i> Performance Statistics
                         </a>
-                         <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
                         <a href="/project-statistics.html" class="dropdown-item">
                             <i class="fas fa-project-diagram"></i> Project Statistics
                         </a>
@@ -155,7 +158,8 @@
                         <i class="fas fa-tag"></i>
                         Portfolio Name *
                     </label>
-                    <input type="text" id="portfolioName" class="form-input" required placeholder="e.g., Enterprise Applications">
+                    <input type="text" id="portfolioName" class="form-input" required
+                        placeholder="e.g., Enterprise Applications">
                 </div>
 
                 <div class="form-group">
@@ -163,7 +167,8 @@
                         <i class="fas fa-align-left"></i>
                         Description
                     </label>
-                    <textarea id="portfolioDescription" class="form-textarea" placeholder="Brief description of the portfolio (optional)"></textarea>
+                    <textarea id="portfolioDescription" class="form-textarea"
+                        placeholder="Brief description of the portfolio (optional)"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -172,8 +177,10 @@
                         Color (optional)
                     </label>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <input type="color" id="portfolioColor" class="form-input" value="#4f46e5" style="width: 80px; height: 40px; padding: 2px;">
-                        <span id="colorPreview" style="padding: 0.5rem 1rem; background: #4f46e5; color: white; border-radius: 0.5rem; font-size: 0.875rem; display: flex; align-items: center;">#4f46e5</span>
+                        <input type="color" id="portfolioColor" class="form-input" value="#4f46e5"
+                            style="width: 80px; height: 40px; padding: 2px;">
+                        <span id="colorPreview"
+                            style="padding: 0.5rem 1rem; background: #4f46e5; color: white; border-radius: 0.5rem; font-size: 0.875rem; display: flex; align-items: center;">#4f46e5</span>
                     </div>
                 </div>
 
@@ -198,14 +205,17 @@
                 </div>
             </div>
             <div class="confirm-body">
-                <p>Are you sure you want to delete <span class="confirm-project-name" id="confirmPortfolioName"></span>?</p>
-                <p style="margin-top: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">Note: Portfolios with projects cannot be deleted. Please remove or reassign projects first.</p>
+                <p>Are you sure you want to delete <span class="confirm-project-name" id="confirmPortfolioName"></span>?
+                </p>
+                <p style="margin-top: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">Note: Portfolios with
+                    projects cannot be deleted. Please remove or reassign projects first.</p>
                 <div class="form-group" style="margin-top: 1.25rem;">
                     <label class="form-label" style="color: var(--gray-900); font-size: 0.875rem;">
                         <i class="fas fa-keyboard"></i>
                         Type <strong id="confirmPortfolioNameInput"></strong> to confirm
                     </label>
-                    <input type="text" id="deleteConfirmInput" class="form-input" placeholder="Enter portfolio name" autocomplete="off">
+                    <input type="text" id="deleteConfirmInput" class="form-input" placeholder="Enter portfolio name"
+                        autocomplete="off">
                 </div>
             </div>
             <div class="confirm-actions">
@@ -223,8 +233,51 @@
 
     <!-- Footer -->
     <footer>
-        <div class="footer-container">
-            <div class="footer-content">
+        <div class="footer-top">
+            <div class="footer-column brand-column">
+                <img src="src/logo/main_logo.png" alt="QA Analytics Logo" class="footer-logo">
+                <p class="footer-description">Comprehensive QA analytics and performance tracking for quality assurance
+                    teams.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Analyzer</h4>
+                <ul class="footer-links">
+                    <li><a href="/dashboard.html"><i class="fas fa-chart-bar"></i> Ticket Analysis</a></li>
+                    <li><a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Statistics</h4>
+                <ul class="footer-links">
+                    <li><a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Statistics</a></li>
+                    <li><a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Statistics</a>
+                    </li>
+                    <li><a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Statistics</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Availability</h4>
+                <ul class="footer-links">
+                    <li><a href="/availability-statistics"><i class="fas fa-chart-area"></i> Availability Statistics</a>
+                    </li>
+                    <li><a href="/project-availability"><i class="fas fa-project-diagram"></i> Availability Projects</a>
+                    </li>
+                    <li><a href="/availability-dashboard"><i class="fas fa-briefcase"></i> Availability Portfolios</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>General</h4>
+                <ul class="footer-links">
+                    <li><a href="/projects.html"><i class="fas fa-folder"></i> Projects</a></li>
+                    <li><a href="/portfolios"><i class="fas fa-briefcase"></i> Portfolios</a></li>
+                    <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
                 <div class="footer-copyright">
                     <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
                 </div>
@@ -237,7 +290,8 @@
                     <div class="footer-company-header">
                         <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
                     </div>
-                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality
+                        Assurance Unit</div>
                 </div>
             </div>
         </div>
@@ -249,13 +303,13 @@
         let portfolioToDelete = null;
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Set current year in footer
             document.getElementById('year').textContent = new Date().getFullYear();
             loadPortfolios();
 
             // Color picker change handler
-            document.getElementById('portfolioColor').addEventListener('input', function(e) {
+            document.getElementById('portfolioColor').addEventListener('input', function (e) {
                 const color = e.target.value;
                 document.getElementById('colorPreview').style.background = color;
                 document.getElementById('colorPreview').textContent = color;
@@ -425,7 +479,7 @@
         }
 
         // Delete confirmation input handler
-        document.getElementById('deleteConfirmInput').addEventListener('input', function(e) {
+        document.getElementById('deleteConfirmInput').addEventListener('input', function (e) {
             const confirmBtn = document.getElementById('confirmDeleteBtn');
             const inputValue = e.target.value.trim();
             const portfolioName = portfolioToDelete ? portfolioToDelete.name : '';
@@ -547,20 +601,18 @@
             color: var(--gray-400);
             font-style: italic;
         }
-
-
     </style>
     <script src="/src/static/toast.js"></script>
 
     <script>
         // Dropdown functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const dropdowns = document.querySelectorAll('.nav-dropdown');
 
             dropdowns.forEach(dropdown => {
                 const toggle = dropdown.querySelector('.dropdown-toggle');
 
-                toggle.addEventListener('click', function(e) {
+                toggle.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -577,7 +629,7 @@
             });
 
             // Close dropdowns when clicking outside
-            document.addEventListener('click', function() {
+            document.addEventListener('click', function () {
                 dropdowns.forEach(dropdown => {
                     dropdown.classList.remove('active');
                 });
@@ -585,11 +637,12 @@
 
             // Prevent dropdown from closing when clicking inside it
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.addEventListener('click', function(e) {
+                menu.addEventListener('click', function (e) {
                     e.stopPropagation();
                 });
             });
         });
     </script>
 </body>
+
 </html>

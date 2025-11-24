@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/src/static/ticket-analyzer.css">
     <link rel="stylesheet" href="/src/static/navbar.css">
@@ -15,9 +17,10 @@
     <link rel="stylesheet" href="/src/static/footer.css">
     <link rel="stylesheet" href="/src/static/toast.css">
 </head>
+
 <body>
     <!-- Navigation -->
-        <!-- Navigation -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="navbar-container-redesigned">
             <!-- Logo/Icon on the left -->
@@ -34,7 +37,7 @@
                         <i class="fas fa-chart-pie"></i> Analyzer <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="dropdown-menu">
-                         <a href="/dashboard.html" class="dropdown-item">
+                        <a href="/dashboard.html" class="dropdown-item">
                             <i class="fas fa-chart-bar"></i> Ticket Analysis
                         </a>
                         <a href="/" class="dropdown-item">
@@ -52,7 +55,7 @@
                         <a href="/performance-statistics" class="dropdown-item">
                             <i class="fas fa-trophy"></i> Performance Statistics
                         </a>
-                         <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
                         <a href="/project-statistics.html" class="dropdown-item">
                             <i class="fas fa-project-diagram"></i> Project Statistics
                         </a>
@@ -179,7 +182,8 @@
 
                 <div class="form-group">
                     <label class="form-label">Year *</label>
-                    <input type="number" id="yearInput" class="form-input" min="2000" max="2100" required placeholder="e.g., 2025">
+                    <input type="number" id="yearInput" class="form-input" min="2000" max="2100" required
+                        placeholder="e.g., 2025">
                 </div>
 
                 <div class="form-group">
@@ -190,7 +194,8 @@
                     <div class="months-grid" id="monthsGrid"></div>
                 </div>
 
-                <button type="submit" class="btn-primary" id="saveSubmitBtn"><i class="fas fa-database"></i> Save to Database</button>
+                <button type="submit" class="btn-primary" id="saveSubmitBtn"><i class="fas fa-database"></i> Save to
+                    Database</button>
             </form>
         </div>
     </div>
@@ -364,7 +369,7 @@
 
             const reader = new FileReader();
 
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array', cellDates: true });
@@ -384,8 +389,8 @@
         function extractMonthFromFileName(fileName) {
             // Try to extract month from file name patterns like "SLA -Aug-", "SLA -Jul-", etc.
             const monthNames = ['january', 'february', 'march', 'april', 'may', 'june',
-                              'july', 'august', 'september', 'october', 'november', 'december',
-                              'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+                'july', 'august', 'september', 'october', 'november', 'december',
+                'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
             const lowerFileName = fileName.toLowerCase();
 
@@ -466,25 +471,25 @@
                     totalTickets += sheetResult.totalTickets;
                     totalResolvedIn2Days += sheetResult.resolvedIn2Days;
 
-                // Use display name (which is typically the month name like "April", "May", etc)
-                const monthKey = sheetResult.displayName;
+                    // Use display name (which is typically the month name like "April", "May", etc)
+                    const monthKey = sheetResult.displayName;
 
-                if (!monthDataMap[monthKey]) {
-                    monthDataMap[monthKey] = {
-                        month: monthKey,
-                        displayName: monthKey,
-                        totalTickets: 0,
-                        resolvedIn2Days: 0,
-                        sourceFiles: []
-                    };
-                }
+                    if (!monthDataMap[monthKey]) {
+                        monthDataMap[monthKey] = {
+                            month: monthKey,
+                            displayName: monthKey,
+                            totalTickets: 0,
+                            resolvedIn2Days: 0,
+                            sourceFiles: []
+                        };
+                    }
 
-                monthDataMap[monthKey].totalTickets += sheetResult.totalTickets;
-                monthDataMap[monthKey].resolvedIn2Days += sheetResult.resolvedIn2Days;
-                if (sheetResult.fileName && !monthDataMap[monthKey].sourceFiles.includes(sheetResult.fileName)) {
-                    monthDataMap[monthKey].sourceFiles.push(sheetResult.fileName);
-                }
-            });
+                    monthDataMap[monthKey].totalTickets += sheetResult.totalTickets;
+                    monthDataMap[monthKey].resolvedIn2Days += sheetResult.resolvedIn2Days;
+                    if (sheetResult.fileName && !monthDataMap[monthKey].sourceFiles.includes(sheetResult.fileName)) {
+                        monthDataMap[monthKey].sourceFiles.push(sheetResult.fileName);
+                    }
+                });
             } catch (error) {
                 console.error('Error processing aggregated results:', error);
                 showError('Error processing file data: ' + error.message);
@@ -716,7 +721,7 @@
 
             currentAnalysisData.results.forEach((result, index) => {
                 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                                   'July', 'August', 'September', 'October', 'November', 'December'];
+                    'July', 'August', 'September', 'October', 'November', 'December'];
 
                 const monthItem = document.createElement('div');
                 monthItem.className = 'month-item';
@@ -836,7 +841,7 @@
                 selectedMonths.push(customName);
 
                 // Add the result with the custom display name
-                const result = {...currentAnalysisData.results[index]};
+                const result = { ...currentAnalysisData.results[index] };
                 result.displayName = customName;
                 filteredResults.push(result);
             });
@@ -882,7 +887,7 @@
         });
 
         // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('saveModal');
             if (event.target === modal) {
                 closeSaveModal();
@@ -893,7 +898,61 @@
     <!-- Footer -->
     <footer>
         <div class="footer-container">
-            <div class="footer-content">
+            <div class="footer-top">
+                <!-- Brand Column -->
+                <div class="footer-column brand-column">
+                    <div class="footer-logo">
+                        <img src="src/logo/main_logo.png" alt="QA Analytics Logo">
+                    </div>
+                    <p class="footer-description">
+                        Comprehensive quality assurance analytics and reporting dashboard for Takamol Holding.
+                    </p>
+                </div>
+
+                <!-- Analyzer Column -->
+                <div class="footer-column">
+                    <h3>Analyzer</h3>
+                    <ul class="footer-links">
+                        <li><a href="/dashboard.html"><i class="fas fa-chart-bar"></i> Ticket Analysis</a></li>
+                        <li><a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a></li>
+                    </ul>
+                </div>
+
+                <!-- Statistics Column -->
+                <div class="footer-column">
+                    <h3>Statistics</h3>
+                    <ul class="footer-links">
+                        <li><a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Stats</a></li>
+                        <li><a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Stats</a>
+                        </li>
+                        <li><a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Stats</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Availability Column -->
+                <div class="footer-column">
+                    <h3>Availability</h3>
+                    <ul class="footer-links">
+                        <li><a href="/availability-statistics"><i class="fas fa-chart-area"></i> Availability Stats</a>
+                        </li>
+                        <li><a href="/project-availability"><i class="fas fa-project-diagram"></i> Availability
+                                Projects</a></li>
+                        <li><a href="/availability-dashboard"><i class="fas fa-briefcase"></i> Availability
+                                Portfolios</a></li>
+                    </ul>
+                </div>
+
+                <!-- Settings Column -->
+                <div class="footer-column">
+                    <h3>General</h3>
+                    <ul class="footer-links">
+                        <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
                 <div class="footer-copyright">
                     <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
                 </div>
@@ -906,7 +965,8 @@
                     <div class="footer-company-header">
                         <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
                     </div>
-                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality
+                        Assurance Unit</div>
                 </div>
             </div>
         </div>
@@ -1043,6 +1103,7 @@
         }
 
         @media (max-width: 768px) {
+
             .navbar-links-left .nav-btn span:not(.fas),
             .navbar-links-right .nav-btn span:not(.fas) {
                 display: none;
@@ -1065,13 +1126,13 @@
 
     <script>
         // Dropdown functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const dropdowns = document.querySelectorAll('.nav-dropdown');
 
             dropdowns.forEach(dropdown => {
                 const toggle = dropdown.querySelector('.dropdown-toggle');
 
-                toggle.addEventListener('click', function(e) {
+                toggle.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -1088,7 +1149,7 @@
             });
 
             // Close dropdowns when clicking outside
-            document.addEventListener('click', function() {
+            document.addEventListener('click', function () {
                 dropdowns.forEach(dropdown => {
                     dropdown.classList.remove('active');
                 });
@@ -1096,11 +1157,12 @@
 
             // Prevent dropdown from closing when clicking inside it
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.addEventListener('click', function(e) {
+                menu.addEventListener('click', function (e) {
                     e.stopPropagation();
                 });
             });
         });
     </script>
 </body>
+
 </html>

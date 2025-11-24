@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="src/static/dashboard.css">
     <link rel="stylesheet" href="src/static/statistics.css">
@@ -16,9 +18,10 @@
     <link rel="stylesheet" href="/src/static/toast.css">
     <link rel="stylesheet" href="/src/static/navbar.css">
 </head>
+
 <body>
     <!-- Navigation -->
-        <!-- Navigation -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="navbar-container-redesigned">
             <!-- Logo/Icon on the left -->
@@ -35,7 +38,7 @@
                         <i class="fas fa-chart-pie"></i> Analyzer <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="dropdown-menu">
-                         <a href="/dashboard.html" class="dropdown-item">
+                        <a href="/dashboard.html" class="dropdown-item">
                             <i class="fas fa-chart-bar"></i> Ticket Analysis
                         </a>
                         <a href="/" class="dropdown-item">
@@ -53,7 +56,7 @@
                         <a href="/performance-statistics" class="dropdown-item">
                             <i class="fas fa-trophy"></i> Performance Statistics
                         </a>
-                         <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
                         <a href="/project-statistics.html" class="dropdown-item">
                             <i class="fas fa-project-diagram"></i> Project Statistics
                         </a>
@@ -92,11 +95,13 @@
         <!-- Hero -->
         <div class="hero">
             <h1><i class="fas fa-chart-pie"></i> <span id="heroTitle">Statistics & Analytics</span></h1>
-            <p id="heroSubtitle">Select a project to view detailed analytics and compare performance across different time periods</p>
+            <p id="heroSubtitle">Select a project to view detailed analytics and compare performance across different
+                time periods</p>
         </div>
 
         <!-- Selected Project Info -->
-        <div id="selectedProjectInfo" style="display: none; background: white; border-radius: var(--radius-2xl); padding: var(--spacing-lg); margin-bottom: var(--spacing-2xl); box-shadow: var(--shadow-md); border: 1px solid var(--gray-200);">
+        <div id="selectedProjectInfo"
+            style="display: none; background: white; border-radius: var(--radius-2xl); padding: var(--spacing-lg); margin-bottom: var(--spacing-2xl); box-shadow: var(--shadow-md); border: 1px solid var(--gray-200);">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <h3 style="margin: 0; color: var(--primary); font-size: 1.25rem;">
@@ -119,8 +124,10 @@
             </div>
 
             <!-- Primary Period -->
-            <div style="flex: 1; min-width: 100%; border: 2px solid var(--primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); background: rgba(79, 70, 229, 0.05);">
-                <h4 style="margin: 0 0 var(--spacing-md) 0; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.875rem;">
+            <div
+                style="flex: 1; min-width: 100%; border: 2px solid var(--primary); border-radius: var(--radius-xl); padding: var(--spacing-lg); background: rgba(79, 70, 229, 0.05);">
+                <h4
+                    style="margin: 0 0 var(--spacing-md) 0; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.875rem;">
                     <i class="fas fa-calendar-check"></i> Primary Period
                 </h4>
                 <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
@@ -170,14 +177,17 @@
             <!-- Comparison Toggle -->
             <div style="width: 100%; display: flex; align-items: center; gap: var(--spacing-md);">
                 <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
-                    <input type="checkbox" id="enableComparison" onchange="toggleComparison()" style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
+                    <input type="checkbox" id="enableComparison" onchange="toggleComparison()"
+                        style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
                     <span style="font-weight: 600; color: var(--gray-700);">Enable Comparison</span>
                 </label>
             </div>
 
             <!-- Comparison Period -->
-            <div id="comparisonPeriodSection" style="flex: 1; min-width: 100%; border: 2px solid var(--secondary); border-radius: var(--radius-xl); padding: var(--spacing-lg); background: rgba(16, 185, 129, 0.05); display: none;">
-                <h4 style="margin: 0 0 var(--spacing-md) 0; color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.875rem;">
+            <div id="comparisonPeriodSection"
+                style="flex: 1; min-width: 100%; border: 2px solid var(--secondary); border-radius: var(--radius-xl); padding: var(--spacing-lg); background: rgba(16, 185, 129, 0.05); display: none;">
+                <h4
+                    style="margin: 0 0 var(--spacing-md) 0; color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.875rem;">
                     <i class="fas fa-calendar-plus"></i> Comparison Period
                 </h4>
                 <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
@@ -346,7 +356,8 @@
                         </thead>
                         <tbody id="statsTableBody">
                             <tr>
-                                <td colspan="5" style="text-align: center; padding: var(--spacing-lg); color: var(--gray-500);">
+                                <td colspan="5"
+                                    style="text-align: center; padding: var(--spacing-lg); color: var(--gray-500);">
                                     No data available. Please select filters and load statistics.
                                 </td>
                             </tr>
@@ -389,8 +400,51 @@
 
     <!-- Footer -->
     <footer>
-        <div class="footer-container">
-            <div class="footer-content">
+        <div class="footer-top">
+            <div class="footer-column brand-column">
+                <img src="src/logo/main_logo.png" alt="QA Analytics Logo" class="footer-logo">
+                <p class="footer-description">Comprehensive QA analytics and performance tracking for quality assurance
+                    teams.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Analyzer</h4>
+                <ul class="footer-links">
+                    <li><a href="/dashboard.html"><i class="fas fa-chart-bar"></i> Ticket Analysis</a></li>
+                    <li><a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Statistics</h4>
+                <ul class="footer-links">
+                    <li><a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Statistics</a></li>
+                    <li><a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Statistics</a>
+                    </li>
+                    <li><a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Statistics</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Availability</h4>
+                <ul class="footer-links">
+                    <li><a href="/availability-statistics"><i class="fas fa-chart-area"></i> Availability Statistics</a>
+                    </li>
+                    <li><a href="/project-availability"><i class="fas fa-project-diagram"></i> Availability Projects</a>
+                    </li>
+                    <li><a href="/availability-dashboard"><i class="fas fa-briefcase"></i> Availability Portfolios</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>General</h4>
+                <ul class="footer-links">
+                    <li><a href="/projects.html"><i class="fas fa-folder"></i> Projects</a></li>
+                    <li><a href="/portfolios"><i class="fas fa-briefcase"></i> Portfolios</a></li>
+                    <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
                 <div class="footer-copyright">
                     <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
                 </div>
@@ -403,7 +457,8 @@
                     <div class="footer-company-header">
                         <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
                     </div>
-                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality
+                        Assurance Unit</div>
                 </div>
             </div>
         </div>
@@ -947,7 +1002,7 @@
                             max: 100,
                             grid: { color: 'rgba(0, 0, 0, 0.05)' },
                             ticks: {
-                                callback: function(value) {
+                                callback: function (value) {
                                     return value + '%';
                                 }
                             }
@@ -1077,7 +1132,7 @@
         });
 
         // Prevent closing modal by clicking outside when no project is selected
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('projectModal');
             if (event.target === modal && selectedProject) {
                 closeProjectModal();
@@ -1211,6 +1266,7 @@
         }
 
         @media (max-width: 768px) {
+
             .navbar-links-left .nav-btn span:not(.fas),
             .navbar-links-right .nav-btn span:not(.fas) {
                 display: none;
@@ -1233,13 +1289,13 @@
 
     <script>
         // Dropdown functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const dropdowns = document.querySelectorAll('.nav-dropdown');
 
             dropdowns.forEach(dropdown => {
                 const toggle = dropdown.querySelector('.dropdown-toggle');
 
-                toggle.addEventListener('click', function(e) {
+                toggle.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -1256,7 +1312,7 @@
             });
 
             // Close dropdowns when clicking outside
-            document.addEventListener('click', function() {
+            document.addEventListener('click', function () {
                 dropdowns.forEach(dropdown => {
                     dropdown.classList.remove('active');
                 });
@@ -1264,11 +1320,12 @@
 
             // Prevent dropdown from closing when clicking inside it
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.addEventListener('click', function(e) {
+                menu.addEventListener('click', function (e) {
                     e.stopPropagation();
                 });
             });
         });
     </script>
 </body>
+
 </html>

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Availability Dashboard - QA Analytics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="src/static/dashboard.css">
     <link rel="stylesheet" href="/src/static/navbar.css">
@@ -14,9 +16,10 @@
     <link rel="stylesheet" href="src/static/footer.css">
     <link rel="stylesheet" href="/src/static/toast.css">
 </head>
+
 <body>
     <!-- Navigation -->
-        <!-- Navigation -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="navbar-container-redesigned">
             <!-- Logo/Icon on the left -->
@@ -33,7 +36,7 @@
                         <i class="fas fa-chart-pie"></i> Analyzer <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="dropdown-menu">
-                         <a href="/dashboard.html" class="dropdown-item">
+                        <a href="/dashboard.html" class="dropdown-item">
                             <i class="fas fa-chart-bar"></i> Ticket Analysis
                         </a>
                         <a href="/" class="dropdown-item">
@@ -51,7 +54,7 @@
                         <a href="/performance-statistics" class="dropdown-item">
                             <i class="fas fa-trophy"></i> Performance Statistics
                         </a>
-                         <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
                         <a href="/project-statistics.html" class="dropdown-item">
                             <i class="fas fa-project-diagram"></i> Project Statistics
                         </a>
@@ -124,8 +127,51 @@
 
     <!-- Footer -->
     <footer>
-        <div class="footer-container">
-            <div class="footer-content">
+        <div class="footer-top">
+            <div class="footer-column brand-column">
+                <img src="src/logo/main_logo.png" alt="QA Analytics Logo" class="footer-logo">
+                <p class="footer-description">Comprehensive QA analytics and performance tracking for quality assurance
+                    teams.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Analyzer</h4>
+                <ul class="footer-links">
+                    <li><a href="/dashboard.html"><i class="fas fa-chart-bar"></i> Ticket Analysis</a></li>
+                    <li><a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Statistics</h4>
+                <ul class="footer-links">
+                    <li><a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Statistics</a></li>
+                    <li><a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Statistics</a>
+                    </li>
+                    <li><a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Statistics</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Availability</h4>
+                <ul class="footer-links">
+                    <li><a href="/availability-statistics"><i class="fas fa-chart-area"></i> Availability Statistics</a>
+                    </li>
+                    <li><a href="/project-availability"><i class="fas fa-project-diagram"></i> Availability Projects</a>
+                    </li>
+                    <li><a href="/availability-dashboard"><i class="fas fa-briefcase"></i> Availability Portfolios</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>General</h4>
+                <ul class="footer-links">
+                    <li><a href="/projects.html"><i class="fas fa-folder"></i> Projects</a></li>
+                    <li><a href="/portfolios"><i class="fas fa-briefcase"></i> Portfolios</a></li>
+                    <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
                 <div class="footer-copyright">
                     <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
                 </div>
@@ -138,7 +184,8 @@
                     <div class="footer-company-header">
                         <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
                     </div>
-                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality Assurance Unit</div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality
+                        Assurance Unit</div>
                 </div>
             </div>
         </div>
@@ -276,12 +323,12 @@
                                     <i class="fas fa-project-diagram"></i>
                                     ${portfolio.project_count} Project${portfolio.project_count !== 1 ? 's' : ''}
                                 </span>
-                                ${portfolio.projects && portfolio.projects.length > 0 ? 
-                                    `<span class="project-names-display" style="margin-left: 8px; color: var(--gray-600); font-size: 0.9em; display: inline-flex; align-items: center;">
+                                ${portfolio.projects && portfolio.projects.length > 0 ?
+                    `<span class="project-names-display" style="margin-left: 8px; color: var(--gray-600); font-size: 0.9em; display: inline-flex; align-items: center;">
                                         <i class="fas fa-chevron-right" style="font-size: 0.8em; margin-right: 6px; color: var(--gray-400);"></i>
                                         ${portfolio.projects.map(p => typeof p === 'object' ? escapeHtml(p.name) : escapeHtml(p)).join(', ')}
-                                    </span>` 
-                                    : ''}
+                                    </span>`
+                    : ''}
                                 <span class="meta-badge">
                                     <i class="fas fa-chart-line"></i>
                                     ${portfolio.total_data_points} Data Point${portfolio.total_data_points !== 1 ? 's' : ''}
@@ -834,6 +881,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -911,13 +959,13 @@
 
     <script>
         // Dropdown functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const dropdowns = document.querySelectorAll('.nav-dropdown');
 
             dropdowns.forEach(dropdown => {
                 const toggle = dropdown.querySelector('.dropdown-toggle');
 
-                toggle.addEventListener('click', function(e) {
+                toggle.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -934,7 +982,7 @@
             });
 
             // Close dropdowns when clicking outside
-            document.addEventListener('click', function() {
+            document.addEventListener('click', function () {
                 dropdowns.forEach(dropdown => {
                     dropdown.classList.remove('active');
                 });
@@ -942,11 +990,12 @@
 
             // Prevent dropdown from closing when clicking inside it
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.addEventListener('click', function(e) {
+                menu.addEventListener('click', function (e) {
                     e.stopPropagation();
                 });
             });
         });
     </script>
 </body>
+
 </html>
