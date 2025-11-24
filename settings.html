@@ -313,15 +313,13 @@
 
             <!-- Data Management Tab -->
             <div id="data-management-tab" class="tab-content">
-                <div class="tab-inner-container">
-                    <div class="header-actions">
-                        <div class="section-header">
-                            <h2><i class="fas fa-database"></i> Data Management</h2>
-                            <p>Manage and clean up your system data</p>
+                <div class="data-management-container">
+                        <div class="header-actions" style="border-bottom: none; margin-bottom: 1rem; padding-bottom: 0;">
+                            <div class="section-header">
+                                <h2><i class="fas fa-database"></i> Data Management</h2>
+                                <p>Manage and clean up your system data</p>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="data-management-container">
                         <!-- Info Banner -->
                         <div class="info-card">
                             <h3><i class="fas fa-info-circle"></i> About Data Deletion</h3>
@@ -1061,6 +1059,266 @@
     </script>
 
     <style>
+        /* Data Management Specific Styles */
+        .data-management-container {
+            padding: var(--spacing-2xl);
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--gray-200);
+        }
+
+        .data-management-container h2 {
+            font-size: 1.75rem;
+            color: var(--gray-800);
+            margin-bottom: var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .data-management-container h2 i {
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--gray-700);
+            font-size: 0.9375rem;
+        }
+
+        .form-group select,
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            color: var(--gray-800);
+            background-color: var(--gray-50);
+            transition: all 0.2s ease;
+            -webkit-appearance: none; /* Remove default arrow for select */
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .form-group select:focus,
+        .form-group input[type="date"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            outline: none;
+            background-color: white;
+        }
+
+        .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236B7280'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        .date-range-group {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .date-range-group .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .btn-delete-data {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--danger) 0%, #ef4444 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+        }
+
+        .btn-delete-data:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .btn-delete-data:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: var(--spacing-2xl);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-2xl);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            border-bottom: 1px solid var(--gray-200);
+            padding-bottom: var(--spacing-md);
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .modal-header h3 i {
+            color: var(--danger);
+        }
+
+        .modal-close-btn {
+            color: var(--gray-500);
+            font-size: 1.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--gray-700);
+        }
+
+        .modal-body {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .modal-body p {
+            font-size: 1rem;
+            color: var(--gray-700);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .modal-body p strong {
+            color: var(--gray-900);
+        }
+
+        .modal-body input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            color: var(--gray-800);
+            background-color: var(--gray-50);
+            transition: all 0.2s ease;
+        }
+
+        .modal-body input[type="text"]:focus {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+            outline: none;
+            background-color: white;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-md);
+        }
+
+        .modal-footer .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-footer .btn-cancel {
+            background-color: var(--gray-200);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+
+        .modal-footer .btn-cancel:hover {
+            background-color: var(--gray-300);
+            color: var(--gray-800);
+        }
+
+        .modal-footer .btn-confirm {
+            background: linear-gradient(135deg, var(--danger) 0%, #ef4444 100%);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .modal-footer .btn-confirm:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-footer .btn-confirm:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
         /* New Centered Navigation Styles */
         .navbar-container-new {
             max-width: 1400px;
@@ -1606,16 +1864,14 @@
         }
 
         /* Data Management Specific Styles */
-        .tab-inner-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
         .data-management-container {
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            gap: 1.5rem;
             margin-top: 2rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .data-control-card {
@@ -1624,8 +1880,6 @@
             box-shadow: var(--shadow-xl);
             padding: 2.5rem;
             border: 1px solid var(--gray-200);
-            max-width: 800px;
-            margin: 0 auto;
             width: 100%;
         }
 
