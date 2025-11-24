@@ -12,8 +12,20 @@ const NEW_NAV = `    <!-- Navigation -->
 
             <!-- Main Navigation Links -->
             <div class="navbar-links-main">
-                <a href="/dashboard.html" class="nav-btn"><i class="fas fa-chart-bar"></i> Dashboard</a>
-                <a href="/" class="nav-btn"><i class="fas fa-file-alt"></i> Ticket Analyzer</a>
+                <!-- Analyzer Dropdown -->
+                <div class="nav-dropdown">
+                    <button class="nav-btn dropdown-toggle">
+                        <i class="fas fa-chart-pie"></i> Analyzer <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                         <a href="/dashboard.html" class="dropdown-item">
+                            <i class="fas fa-chart-bar"></i> Ticket Analysis
+                        </a>
+                        <a href="/" class="dropdown-item">
+                            <i class="fas fa-file-alt"></i> Ticket Analyzer
+                        </a>
+                    </div>
+                </div>
 
                 <!-- Statistics Dropdown -->
                 <div class="nav-dropdown">
@@ -24,18 +36,28 @@ const NEW_NAV = `    <!-- Navigation -->
                         <a href="/performance-statistics" class="dropdown-item">
                             <i class="fas fa-trophy"></i> Performance Statistics
                         </a>
-                        <a href="/availability-statistics" class="dropdown-item">
-                            <i class="fas fa-server"></i> Availability Statistics
-                        </a>
-                        <div class="dropdown-divider"></div>
+                         <div class="dropdown-divider"></div>
                         <a href="/project-statistics.html" class="dropdown-item">
-                            <i class="fas fa-project-diagram"></i> Project Details
+                            <i class="fas fa-project-diagram"></i> Project Statistics
                         </a>
                         <a href="/portfolio-statistics.html" class="dropdown-item">
-                            <i class="fas fa-briefcase"></i> Portfolio Details
+                            <i class="fas fa-briefcase"></i> Portfolio Statistics
                         </a>
+                    </div>
+                </div>
+
+                <!-- Availability Dropdown -->
+                <div class="nav-dropdown">
+                    <button class="nav-btn dropdown-toggle">
+                        <i class="fas fa-server"></i> Availability <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/availability-statistics" class="dropdown-item">
+                            <i class="fas fa-chart-area"></i> Availability Statistics
+                        </a>
+                        <div class="dropdown-divider"></div>
                         <a href="/project-availability" class="dropdown-item">
-                            <i class="fas fa-server"></i> Availability Projects
+                            <i class="fas fa-project-diagram"></i> Availability Projects
                         </a>
                         <a href="/availability-dashboard" class="dropdown-item">
                             <i class="fas fa-briefcase"></i> Availability Portfolios
@@ -43,8 +65,6 @@ const NEW_NAV = `    <!-- Navigation -->
                     </div>
                 </div>
 
-                <a href="/projects" class="nav-btn"><i class="fas fa-folder-open"></i> Projects</a>
-                <a href="/portfolios" class="nav-btn"><i class="fas fa-briefcase"></i> Portfolios</a>
                 <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
             </div>
         </div>
@@ -53,7 +73,21 @@ const NEW_NAV = `    <!-- Navigation -->
 // CSS link to add
 const NAVBAR_CSS_LINK = '    <link rel="stylesheet" href="/src/static/navbar.css">';
 
-// ... (files list) ...
+// Files to update
+const files = [
+    'dashboard.html',
+    'availability-dashboard.html',
+    'ticket-analyzer.html',
+    'performance-statistics.html',
+    'availability-statistics.html',
+    'project-statistics.html',
+    'portfolio-statistics.html',
+    'project-availability.html',
+    'projects.html',
+    'portfolios.html',
+    'settings.html',
+    'statistics.html'
+];
 
 files.forEach(filename => {
     const filepath = path.join(__dirname, filename);
