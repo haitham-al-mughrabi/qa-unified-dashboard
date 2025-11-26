@@ -146,6 +146,65 @@
             color: var(--blue-700);
             font-size: 0.9rem;
         }
+
+        .progress-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .step {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--gray-300);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .step.active {
+            border-left-color: var(--blue-500);
+            background: var(--blue-50);
+        }
+
+        .step.completed {
+            border-left-color: var(--green-500);
+            background: var(--green-50);
+        }
+
+        .step-icon {
+            font-size: 1.5rem;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .step.active .step-icon {
+            color: var(--blue-500);
+            animation: pulse 2s infinite;
+        }
+
+        .step.completed .step-icon {
+            color: var(--green-500);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .step-text h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--gray-900);
+        }
+
+        .step-text p {
+            margin: 0.25rem 0 0 0;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+        }
     </style>
 </head>
 
@@ -253,7 +312,39 @@
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <h3 id="loadingTitle">Extracting metrics from your file...</h3>
-            <p id="loadingText">This may take a moment while we process the document with OCR</p>
+            <p id="loadingText">First run: downloading AI models (3-5 minutes). Subsequent runs will be faster.</p>
+
+            <!-- Progress Steps -->
+            <div class="progress-steps" id="progressSteps">
+                <div class="step active" id="step-upload">
+                    <div class="step-icon"><i class="fas fa-file-upload"></i></div>
+                    <div class="step-text">
+                        <h4>Uploading File</h4>
+                        <p>Sending your DOCX to the server...</p>
+                    </div>
+                </div>
+                <div class="step" id="step-extract">
+                    <div class="step-icon"><i class="fas fa-magic"></i></div>
+                    <div class="step-text">
+                        <h4>Extracting with OCR</h4>
+                        <p>Reading text from images...</p>
+                    </div>
+                </div>
+                <div class="step" id="step-process">
+                    <div class="step-icon"><i class="fas fa-cog"></i></div>
+                    <div class="step-text">
+                        <h4>Processing Results</h4>
+                        <p>Organizing extracted data...</p>
+                    </div>
+                </div>
+                <div class="step" id="step-complete">
+                    <div class="step-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="step-text">
+                        <h4>Complete</h4>
+                        <p>Ready to download or export</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Results Container -->
@@ -428,6 +519,25 @@
             return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
         }
 
+        function updateStep(stepId, status) {
+            // Remove active/completed from all steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+
+            // Mark steps before this one as completed
+            const steps = ['step-upload', 'step-extract', 'step-process', 'step-complete'];
+            const currentIndex = steps.indexOf(stepId);
+
+            steps.forEach((step, index) => {
+                if (index < currentIndex) {
+                    document.getElementById(step).classList.add('completed');
+                } else if (index === currentIndex) {
+                    document.getElementById(step).classList.add('active');
+                }
+            });
+        }
+
         async function extractMetrics() {
             if (!window.currentFile) {
                 showError('No file selected');
@@ -435,22 +545,36 @@
             }
 
             showLoading();
+            updateStep('step-upload', 'active');
 
             try {
                 const formData = new FormData();
                 formData.append('file', window.currentFile);
+
+                // Update progress
+                updateStep('step-upload', 'active');
 
                 const response = await fetch('/api/extract-metrics', {
                     method: 'POST',
                     body: formData
                 });
 
+                // Move to extraction step
+                updateStep('step-extract', 'active');
+
                 const result = await response.json();
+
+                // Move to processing step
+                updateStep('step-process', 'active');
 
                 hideLoading();
 
                 if (response.ok && result.success) {
                     extractedMetrics = result.metrics;
+
+                    // Mark as complete
+                    updateStep('step-complete', 'active');
+
                     displayResults();
                     showSuccess(`Successfully extracted ${result.count} metrics from the document`);
                 } else {

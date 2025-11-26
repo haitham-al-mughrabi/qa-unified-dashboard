@@ -2752,7 +2752,7 @@ app.post('/api/extract-metrics', upload.single('file'), async (req, res) => {
             // Call the Python metrics extraction service
             const response = await axios.post(`${metricsServiceUrl}/extract-simple`, formData, {
                 headers: formData.getHeaders(),
-                timeout: 120000 // 2 minute timeout for OCR processing
+                timeout: 600000 // 10 minute timeout for OCR processing (includes model download on first run)
             });
 
             if (response.data.success) {
