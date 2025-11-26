@@ -190,8 +190,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .step-text h4 {
@@ -314,7 +321,8 @@
             <h3 id="loadingTitle">Extracting metrics from your file...</h3>
             <p id="loadingText">Analyzing your document...</p>
             <p id="estimationText" style="color: var(--blue-600); font-weight: 600; margin-top: 0.5rem;"></p>
-            <p id="countdownText" style="color: var(--green-600); font-weight: 600; margin-top: 0.5rem; font-size: 1.25rem;"></p>
+            <p id="countdownText"
+                style="color: var(--green-600); font-weight: 600; margin-top: 0.5rem; font-size: 1.25rem;"></p>
 
             <!-- Progress Steps -->
             <div class="progress-steps" id="progressSteps">
@@ -381,9 +389,12 @@
                     <h3>Statistics</h3>
                     <ul class="footer-links">
                         <li><a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Stats</a></li>
-                        <li><a href="/performance-metrics-extractor.html"><i class="fas fa-file-export"></i> Metrics Extractor</a></li>
-                        <li><a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Stats</a></li>
-                        <li><a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Stats</a></li>
+                        <li><a href="/performance-metrics-extractor.html"><i class="fas fa-file-export"></i> Metrics
+                                Extractor</a></li>
+                        <li><a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Stats</a>
+                        </li>
+                        <li><a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Stats</a>
+                        </li>
                     </ul>
                 </div>
 
@@ -391,9 +402,12 @@
                 <div class="footer-column">
                     <h3>Availability</h3>
                     <ul class="footer-links">
-                        <li><a href="/availability-statistics"><i class="fas fa-chart-area"></i> Availability Stats</a></li>
-                        <li><a href="/project-availability"><i class="fas fa-project-diagram"></i> Availability Projects</a></li>
-                        <li><a href="/availability-dashboard"><i class="fas fa-briefcase"></i> Availability Portfolios</a></li>
+                        <li><a href="/availability-statistics"><i class="fas fa-chart-area"></i> Availability Stats</a>
+                        </li>
+                        <li><a href="/project-availability"><i class="fas fa-project-diagram"></i> Availability
+                                Projects</a></li>
+                        <li><a href="/availability-dashboard"><i class="fas fa-briefcase"></i> Availability
+                                Portfolios</a></li>
                     </ul>
                 </div>
 
@@ -575,16 +589,17 @@
             updateStep('step-upload', 'active');
 
             try {
-                const formData = new FormData();
-                formData.append('file', window.currentFile);
-
                 // First, estimate the processing time
                 document.getElementById('loadingText').textContent = 'Analyzing document...';
                 document.getElementById('estimationText').textContent = '';
 
+                // Create FormData for estimation request
+                const estimateFormData = new FormData();
+                estimateFormData.append('file', window.currentFile);
+
                 const estimateResponse = await fetch('/api/estimate-metrics', {
                     method: 'POST',
-                    body: formData.clone() // Clone because formData can't be reused
+                    body: estimateFormData
                 });
 
                 const estimateResult = await estimateResponse.json();
