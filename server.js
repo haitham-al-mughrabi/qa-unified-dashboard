@@ -2785,6 +2785,60 @@ app.post('/api/extract-metrics', upload.single('file'), async (req, res) => {
     }
 });
 
+// Estimate metrics extraction time
+app.post('/api/estimate-metrics', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const metricsServiceUrl = process.env.METRICS_SERVICE_URL || 'http://localhost:5000';
+
+        const formData = new FormData();
+        formData.append('file', req.file.buffer, {
+            filename: req.file.originalname,
+            contentType: req.file.mimetype
+        });
+
+        try {
+            const response = await axios.post(`${metricsServiceUrl}/estimate`, formData, {
+                headers: formData.getHeaders(),
+                timeout: 30000 // 30 seconds for estimation (just counts images)
+            });
+
+            if (response.data.success) {
+                return res.json({
+                    success: true,
+                    image_count: response.data.image_count,
+                    estimated_time_seconds: response.data.estimated_time_seconds,
+                    message: response.data.message
+                });
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    error: response.data.error || 'Failed to estimate processing time'
+                });
+            }
+        } catch (pythonError) {
+            console.error('Error calling metrics estimation service:', pythonError.message);
+            // Return a default estimate on error
+            return res.json({
+                success: true,
+                image_count: 1,
+                estimated_time_seconds: 45,
+                message: 'Using default estimation (could not analyze document)'
+            });
+        }
+
+    } catch (error) {
+        console.error('Error in estimate-metrics endpoint:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Health check for metrics service
 app.get('/api/metrics-service-health', async (req, res) => {
     try {

@@ -312,7 +312,9 @@
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <h3 id="loadingTitle">Extracting metrics from your file...</h3>
-            <p id="loadingText">First run: downloading AI models (3-5 minutes). Subsequent runs will be faster.</p>
+            <p id="loadingText">Analyzing your document...</p>
+            <p id="estimationText" style="color: var(--blue-600); font-weight: 600; margin-top: 0.5rem;"></p>
+            <p id="countdownText" style="color: var(--green-600); font-weight: 600; margin-top: 0.5rem; font-size: 1.25rem;"></p>
 
             <!-- Progress Steps -->
             <div class="progress-steps" id="progressSteps">
@@ -320,14 +322,14 @@
                     <div class="step-icon"><i class="fas fa-file-upload"></i></div>
                     <div class="step-text">
                         <h4>Uploading File</h4>
-                        <p>Sending your DOCX to the server...</p>
+                        <p id="upload-text">Sending your DOCX to the server...</p>
                     </div>
                 </div>
                 <div class="step" id="step-extract">
                     <div class="step-icon"><i class="fas fa-magic"></i></div>
                     <div class="step-text">
                         <h4>Extracting with OCR</h4>
-                        <p>Reading text from images...</p>
+                        <p id="extract-text">Reading <span id="imageCount">-</span> image(s) from document...</p>
                     </div>
                 </div>
                 <div class="step" id="step-process">
@@ -519,6 +521,8 @@
             return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
         }
 
+        let countdownInterval = null;
+
         function updateStep(stepId, status) {
             // Remove active/completed from all steps
             document.querySelectorAll('.step').forEach(step => {
@@ -538,7 +542,30 @@
             });
         }
 
-        async function extractMetrics() {
+        function startCountdown(seconds) {
+            let remaining = seconds;
+            const countdownText = document.getElementById('countdownText');
+
+            // Update immediately
+            function updateCountdown() {
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownText.textContent = 'Processing...';
+                    return;
+                }
+
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                const display = mins > 0 ? `${mins}m ${secs}s remaining` : `${secs}s remaining`;
+                countdownText.textContent = '⏱️ ' + display;
+                remaining--;
+            }
+
+            updateCountdown();
+            countdownInterval = setInterval(updateCountdown, 1000);
+        }
+
+        async function estimateAndExtract() {
             if (!window.currentFile) {
                 showError('No file selected');
                 return;
@@ -551,21 +578,50 @@
                 const formData = new FormData();
                 formData.append('file', window.currentFile);
 
-                // Update progress
-                updateStep('step-upload', 'active');
+                // First, estimate the processing time
+                document.getElementById('loadingText').textContent = 'Analyzing document...';
+                document.getElementById('estimationText').textContent = '';
 
-                const response = await fetch('/api/extract-metrics', {
+                const estimateResponse = await fetch('/api/estimate-metrics', {
                     method: 'POST',
-                    body: formData
+                    body: formData.clone() // Clone because formData can't be reused
                 });
+
+                const estimateResult = await estimateResponse.json();
+
+                let imageCount = 1;
+                let estimatedTime = 45;
+
+                if (estimateResponse.ok && estimateResult.success) {
+                    imageCount = estimateResult.image_count;
+                    estimatedTime = estimateResult.estimated_time_seconds;
+
+                    document.getElementById('imageCount').textContent = imageCount;
+                    document.getElementById('estimationText').textContent =
+                        `📊 Found ${imageCount} image(s) | Estimated time: ~${estimatedTime}s`;
+                }
 
                 // Move to extraction step
                 updateStep('step-extract', 'active');
+                document.getElementById('loadingText').textContent = `Processing ${imageCount} image(s) with OCR...`;
 
-                const result = await response.json();
+                // Start countdown
+                startCountdown(estimatedTime);
+
+                // Now extract
+                const formData2 = new FormData();
+                formData2.append('file', window.currentFile);
+
+                const response = await fetch('/api/extract-metrics', {
+                    method: 'POST',
+                    body: formData2
+                });
 
                 // Move to processing step
                 updateStep('step-process', 'active');
+                document.getElementById('loadingText').textContent = 'Organizing results...';
+
+                const result = await response.json();
 
                 hideLoading();
 
@@ -576,7 +632,7 @@
                     updateStep('step-complete', 'active');
 
                     displayResults();
-                    showSuccess(`Successfully extracted ${result.count} metrics from the document`);
+                    showSuccess(`✅ Successfully extracted ${result.count} metrics from ${imageCount} image(s)`);
                 } else {
                     showError(result.error || 'Failed to extract metrics. Please try again.');
                 }
@@ -584,6 +640,11 @@
                 hideLoading();
                 showError('Error extracting metrics: ' + error.message);
             }
+        }
+
+        // Alias for backwards compatibility
+        async function extractMetrics() {
+            await estimateAndExtract();
         }
 
         function displayResults() {
