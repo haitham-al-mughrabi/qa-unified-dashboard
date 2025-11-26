@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Metrics Extractor - QA Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/src/static/performance-statistics.css">
+    <link rel="stylesheet" href="/src/static/navbar.css">
+    <link rel="stylesheet" href="/src/static/nav-dropdown.css">
+    <link rel="stylesheet" href="/src/static/footer.css">
+    <link rel="stylesheet" href="/src/static/toast.css">
+    <style>
+        .main-container {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding: var(--spacing-2xl) var(--spacing-xl);
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-table thead {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .results-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border: none;
+        }
+
+        .results-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .results-table tbody tr:hover {
+            background: var(--gray-50);
+        }
+
+        .results-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .value-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-download-json {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-download-json:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-download-csv {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-download-csv:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-to-statistics {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-to-statistics:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .extraction-info {
+            background: var(--blue-50);
+            border-left: 4px solid var(--blue-500);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .extraction-info i {
+            color: var(--blue-500);
+            font-size: 1.5rem;
+        }
+
+        .extraction-info-text h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--blue-900);
+        }
+
+        .extraction-info-text p {
+            margin: 0;
+            color: var(--blue-700);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container-redesigned">
+            <!-- Logo/Icon on the left -->
+            <a href="/dashboard.html" class="navbar-brand-left">
+                <div class="navbar-brand-icon"><i class="fas fa-line-chart"></i></div>
+                <span class="navbar-brand-text">QA Analytics</span>
+            </a>
+
+            <!-- Main Navigation Links -->
+            <div class="navbar-links-main">
+                <!-- Analyzer Dropdown -->
+                <div class="nav-dropdown">
+                    <button class="nav-btn dropdown-toggle">
+                        <i class="fas fa-chart-pie"></i> Analyzer <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/dashboard.html" class="dropdown-item">
+                            <i class="fas fa-chart-bar"></i> Ticket Analysis
+                        </a>
+                        <a href="/" class="dropdown-item">
+                            <i class="fas fa-file-alt"></i> Ticket Analyzer
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Statistics Dropdown -->
+                <div class="nav-dropdown">
+                    <button class="nav-btn dropdown-toggle">
+                        <i class="fas fa-chart-line"></i> Statistics <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/performance-statistics" class="dropdown-item">
+                            <i class="fas fa-trophy"></i> Performance Statistics
+                        </a>
+                        <a href="/performance-metrics-extractor.html" class="dropdown-item">
+                            <i class="fas fa-file-export"></i> Metrics Extractor
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/project-statistics.html" class="dropdown-item">
+                            <i class="fas fa-project-diagram"></i> Project Statistics
+                        </a>
+                        <a href="/portfolio-statistics.html" class="dropdown-item">
+                            <i class="fas fa-briefcase"></i> Portfolio Statistics
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Availability Dropdown -->
+                <div class="nav-dropdown">
+                    <button class="nav-btn dropdown-toggle">
+                        <i class="fas fa-server"></i> Availability <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/availability-statistics" class="dropdown-item">
+                            <i class="fas fa-chart-area"></i> Availability Statistics
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/project-availability" class="dropdown-item">
+                            <i class="fas fa-project-diagram"></i> Availability Projects
+                        </a>
+                        <a href="/availability-dashboard" class="dropdown-item">
+                            <i class="fas fa-briefcase"></i> Availability Portfolios
+                        </a>
+                    </div>
+                </div>
+
+                <a href="/settings" class="nav-btn"><i class="fas fa-cog"></i> Settings</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1><i class="fas fa-file-export"></i> Performance Metrics Extractor</h1>
+            <p>Extract metrics from DOCX files using OCR technology and process them for performance analysis</p>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="upload-card">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon"><i class="fas fa-file-word"></i></div>
+                <div class="upload-text">
+                    <h3>Upload DOCX File</h3>
+                    <p>Drag and drop a DOCX file here or click to browse</p>
+                    <small>We'll extract metrics using OCR and return results as JSON or CSV</small>
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept=".docx" single>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-upload"></i> Choose File
+                </button>
+            </div>
+
+            <!-- File Display -->
+            <div class="file-name" id="fileName"></div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <h3 id="loadingTitle">Extracting metrics from your file...</h3>
+            <p id="loadingText">This may take a moment while we process the document with OCR</p>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-top">
+                <!-- Brand Column -->
+                <div class="footer-column brand-column">
+                    <div class="footer-logo">
+                        <img src="src/logo/main_logo.png" alt="QA Analytics Logo">
+                    </div>
+                    <p class="footer-description">
+                        Comprehensive quality assurance analytics and reporting dashboard for Takamol Holding.
+                    </p>
+                </div>
+
+                <!-- Analyzer Column -->
+                <div class="footer-column">
+                    <h3>Analyzer</h3>
+                    <ul class="footer-links">
+                        <li><a href="/dashboard.html"><i class="fas fa-chart-bar"></i> Ticket Analysis</a></li>
+                        <li><a href="/"><i class="fas fa-file-alt"></i> Ticket Analyzer</a></li>
+                    </ul>
+                </div>
+
+                <!-- Statistics Column -->
+                <div class="footer-column">
+                    <h3>Statistics</h3>
+                    <ul class="footer-links">
+                        <li><a href="/performance-statistics"><i class="fas fa-trophy"></i> Performance Stats</a></li>
+                        <li><a href="/performance-metrics-extractor.html"><i class="fas fa-file-export"></i> Metrics Extractor</a></li>
+                        <li><a href="/project-statistics.html"><i class="fas fa-project-diagram"></i> Project Stats</a></li>
+                        <li><a href="/portfolio-statistics.html"><i class="fas fa-briefcase"></i> Portfolio Stats</a></li>
+                    </ul>
+                </div>
+
+                <!-- Availability Column -->
+                <div class="footer-column">
+                    <h3>Availability</h3>
+                    <ul class="footer-links">
+                        <li><a href="/availability-statistics"><i class="fas fa-chart-area"></i> Availability Stats</a></li>
+                        <li><a href="/project-availability"><i class="fas fa-project-diagram"></i> Availability Projects</a></li>
+                        <li><a href="/availability-dashboard"><i class="fas fa-briefcase"></i> Availability Portfolios</a></li>
+                    </ul>
+                </div>
+
+                <!-- Settings Column -->
+                <div class="footer-column">
+                    <h3>General</h3>
+                    <ul class="footer-links">
+                        <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <i class="fas fa-copyright"></i> <span id="year"></span> All Rights Reserved
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-developer">
+                    <i class="fas fa-user-tie"></i> Developed by: <strong>Haitham Al Mughrabi</strong>
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-company">
+                    <div class="footer-company-header">
+                        <i class="fas fa-building"></i> <span class="footer-company-name">Takamol Holding</span>
+                    </div>
+                    <div class="footer-department"><i class="fas fa-check-circle"></i> Integrated Solutions | Quality
+                        Assurance Unit</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Set current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Global variables
+        let extractedMetrics = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            setupUploadHandlers();
+        });
+
+        function setupUploadHandlers() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-active'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-active'), false);
+            });
+
+            // Handle dropped files
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            // Handle file input change
+            fileInput.addEventListener('change', handleFileSelect, false);
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+
+            const file = files[0];
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (ext !== 'docx') {
+                showError('Please select a valid DOCX file');
+                return;
+            }
+
+            // Display file name
+            const fileNameDiv = document.getElementById('fileName');
+            fileNameDiv.innerHTML = `
+                <div class="file-item" style="padding: 1rem; background: var(--green-50); border-left: 4px solid var(--green-500); border-radius: 6px; margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: var(--green-700);">${file.name}</strong>
+                            <p style="margin: 0.5rem 0 0 0; color: var(--green-600); font-size: 0.9rem;">
+                                ${formatFileSize(file.size)}
+                            </p>
+                        </div>
+                        <button class="upload-btn" onclick="extractMetrics()">
+                            <i class="fas fa-play"></i> Extract Metrics
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Store the file
+            window.currentFile = file;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        async function extractMetrics() {
+            if (!window.currentFile) {
+                showError('No file selected');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const formData = new FormData();
+                formData.append('file', window.currentFile);
+
+                const response = await fetch('/api/extract-metrics', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                hideLoading();
+
+                if (response.ok && result.success) {
+                    extractedMetrics = result.metrics;
+                    displayResults();
+                    showSuccess(`Successfully extracted ${result.count} metrics from the document`);
+                } else {
+                    showError(result.error || 'Failed to extract metrics. Please try again.');
+                }
+            } catch (error) {
+                hideLoading();
+                showError('Error extracting metrics: ' + error.message);
+            }
+        }
+
+        function displayResults() {
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '';
+
+            if (extractedMetrics.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="extraction-info">
+                        <i class="fas fa-info-circle"></i>
+                        <div class="extraction-info-text">
+                            <h4>No metrics extracted</h4>
+                            <p>The OCR process did not find any readable metrics in the document.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Create results section
+            const resultsHTML = `
+                <div class="extraction-info">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="extraction-info-text">
+                        <h4>Extraction Complete</h4>
+                        <p>Found ${extractedMetrics.length} metrics. You can download the results or send them to Performance Statistics.</p>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Metric Title</th>
+                                <th>Extracted Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${extractedMetrics.map((metric, idx) => `
+                                <tr>
+                                    <td><strong>${idx + 1}</strong></td>
+                                    <td>${metric.title}</td>
+                                    <td>
+                                        <span class="value-badge">
+                                            ${metric.value !== null ? metric.value.toFixed(2) : 'N/A'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="results-actions">
+                    <button class="action-btn btn-download-json" onclick="downloadJSON()">
+                        <i class="fas fa-file-json"></i> Download JSON
+                    </button>
+                    <button class="action-btn btn-download-csv" onclick="downloadCSV()">
+                        <i class="fas fa-file-csv"></i> Download CSV
+                    </button>
+                    <button class="action-btn btn-to-statistics" onclick="redirectToPerformanceStats()">
+                        <i class="fas fa-arrow-right"></i> Send to Performance Statistics
+                    </button>
+                </div>
+            `;
+
+            resultsContainer.innerHTML = resultsHTML;
+        }
+
+        function downloadJSON() {
+            const data = extractedMetrics.map(m => ({
+                title: m.title,
+                value: m.value
+            }));
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            downloadFile(dataBlob, 'extracted-metrics.json');
+
+            showSuccess('JSON file downloaded successfully');
+        }
+
+        function downloadCSV() {
+            let csv = 'Title,Value\n';
+            extractedMetrics.forEach(m => {
+                const title = `"${m.title.replace(/"/g, '""')}"`;
+                const value = m.value !== null ? m.value.toFixed(2) : 'N/A';
+                csv += `${title},${value}\n`;
+            });
+
+            const dataBlob = new Blob([csv], { type: 'text/csv' });
+            downloadFile(dataBlob, 'extracted-metrics.csv');
+
+            showSuccess('CSV file downloaded successfully');
+        }
+
+        function downloadFile(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function redirectToPerformanceStats() {
+            // Store metrics in sessionStorage for transfer to Performance Statistics
+            sessionStorage.setItem('extractedMetrics', JSON.stringify(extractedMetrics));
+
+            // Redirect to Performance Statistics
+            window.location.href = '/performance-statistics?mode=extracted';
+        }
+
+        // Utility Functions
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+    </script>
+    <script src="/src/static/toast.js"></script>
+
+    <script>
+        // Dropdown functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdowns = document.querySelectorAll('.nav-dropdown');
+
+            dropdowns.forEach(dropdown => {
+                const toggle = dropdown.querySelector('.dropdown-toggle');
+
+                toggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Close other dropdowns
+                    dropdowns.forEach(d => {
+                        if (d !== dropdown) {
+                            d.classList.remove('active');
+                        }
+                    });
+
+                    // Toggle current dropdown
+                    dropdown.classList.toggle('active');
+                });
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function () {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            });
+
+            // Prevent dropdown from closing when clicking inside it
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

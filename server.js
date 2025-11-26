@@ -3,6 +3,9 @@ const mysql = require('mysql2/promise');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const multer = require('multer');
+const axios = require('axios');
+const FormData = require('form-data');
 
 const app = express();
 const PORT = 3000;
@@ -12,6 +15,21 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(__dirname));
+
+// Multer configuration for file uploads
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+    fileFilter: (req, file, cb) => {
+        // Only allow DOCX files
+        if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+            file.originalname.endsWith('.docx')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only .docx files are allowed'), false);
+        }
+    }
+});
 
 // Database configuration
 const dbConfig = {
@@ -2410,6 +2428,10 @@ app.get('/performance-statistics', (req, res) => {
     res.sendFile(path.join(__dirname, 'performance-statistics.html'));
 });
 
+app.get('/performance-metrics-extractor', (req, res) => {
+    res.sendFile(path.join(__dirname, 'performance-metrics-extractor.html'));
+});
+
 app.get('/availability-statistics', (req, res) => {
     res.sendFile(path.join(__dirname, 'availability-statistics.html'));
 });
@@ -2701,6 +2723,86 @@ app.delete('/api/data/management', async (req, res) => {
         res.status(500).json({ 
             success: false,
             error: error.message 
+        });
+    }
+});
+
+// ====================
+// METRICS EXTRACTION API (calls Python service)
+// ====================
+
+// Extract metrics from DOCX file
+app.post('/api/extract-metrics', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        // Get metrics service URL from environment or default
+        const metricsServiceUrl = process.env.METRICS_SERVICE_URL || 'http://localhost:5000';
+
+        // Create form data to send to Python service
+        const formData = new FormData();
+        formData.append('file', req.file.buffer, {
+            filename: req.file.originalname,
+            contentType: req.file.mimetype
+        });
+
+        try {
+            // Call the Python metrics extraction service
+            const response = await axios.post(`${metricsServiceUrl}/extract-simple`, formData, {
+                headers: formData.getHeaders(),
+                timeout: 120000 // 2 minute timeout for OCR processing
+            });
+
+            if (response.data.success) {
+                return res.json({
+                    success: true,
+                    metrics: response.data.metrics,
+                    count: response.data.count
+                });
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    error: response.data.error || 'Extraction failed'
+                });
+            }
+        } catch (pythonError) {
+            console.error('Error calling metrics service:', pythonError.message);
+            return res.status(503).json({
+                success: false,
+                error: 'Metrics extraction service is unavailable',
+                details: pythonError.message
+            });
+        }
+
+    } catch (error) {
+        console.error('Error in extract-metrics endpoint:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Health check for metrics service
+app.get('/api/metrics-service-health', async (req, res) => {
+    try {
+        const metricsServiceUrl = process.env.METRICS_SERVICE_URL || 'http://localhost:5000';
+
+        const response = await axios.get(`${metricsServiceUrl}/health`, {
+            timeout: 5000
+        });
+
+        res.json({
+            status: 'healthy',
+            metricsService: response.data
+        });
+    } catch (error) {
+        res.status(503).json({
+            status: 'unhealthy',
+            error: 'Metrics service is not responding',
+            details: error.message
         });
     }
 });

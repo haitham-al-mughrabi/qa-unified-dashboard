@@ -34,8 +34,11 @@ services:
       - DB_USER=qa_user
       - DB_PASSWORD=qa_password
       - DB_NAME=qa_dashboard
+      - METRICS_SERVICE_URL=http://metrics-service:5000
     depends_on:
       mysql:
+        condition: service_healthy
+      metrics-service:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -44,6 +47,23 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  metrics-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    container_name: metrics-extraction-service
+    ports:
+      - "7500:5000"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   mysql_data:
