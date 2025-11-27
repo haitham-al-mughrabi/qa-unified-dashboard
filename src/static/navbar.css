@@ -40,6 +40,14 @@
     box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
 }
 
+.navbar-brand-left img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    display: block;
+    transform: scale(3);
+}
+
 .navbar-brand-text {
     font-size: 1.25rem;
     font-weight: 800;
