@@ -16,6 +16,21 @@
     <link rel="stylesheet" href="/src/static/footer.css">
     <link rel="stylesheet" href="/src/static/toast.css">
     <style>
+        :root {
+            /* Blue colors */
+            --blue-50: #eff6ff;
+            --blue-500: #3b82f6;
+            --blue-600: #2563eb;
+            --blue-700: #1d4ed8;
+            --blue-900: #1e3a8a;
+
+            /* Green colors */
+            --green-50: #f0fdf4;
+            --green-500: #10b981;
+            --green-600: #059669;
+            --green-700: #047857;
+        }
+
         .main-container {
             max-width: 1400px !important;
             margin: 0 auto !important;
@@ -121,8 +136,8 @@
         }
 
         .extraction-info {
-            background: var(--blue-50);
-            border-left: 4px solid var(--blue-500);
+            background: var(--blue-50) !important;
+            border-left: 4px solid var(--blue-500) !important;
             padding: 1rem;
             border-radius: 6px;
             margin: 1.5rem 0;
@@ -132,18 +147,18 @@
         }
 
         .extraction-info i {
-            color: var(--blue-500);
+            color: var(--blue-500) !important;
             font-size: 1.5rem;
         }
 
         .extraction-info-text h4 {
             margin: 0 0 0.5rem 0;
-            color: var(--blue-900);
+            color: var(--blue-900) !important;
         }
 
         .extraction-info-text p {
             margin: 0;
-            color: var(--blue-700);
+            color: var(--blue-700) !important;
             font-size: 0.9rem;
         }
 
@@ -155,38 +170,40 @@
         }
 
         .step {
-            background: white;
+            background: white !important;
             padding: 1rem;
             border-radius: 8px;
-            border-left: 4px solid var(--gray-300);
+            border-left: 4px solid var(--gray-300) !important;
             display: flex;
             align-items: center;
             gap: 1rem;
+            transition: all 0.3s ease;
         }
 
         .step.active {
-            border-left-color: var(--blue-500);
-            background: var(--blue-50);
+            border-left-color: var(--blue-500) !important;
+            background: var(--blue-50) !important;
         }
 
         .step.completed {
-            border-left-color: var(--green-500);
-            background: var(--green-50);
+            border-left-color: var(--green-500) !important;
+            background: var(--green-50) !important;
         }
 
         .step-icon {
             font-size: 1.5rem;
             min-width: 40px;
             text-align: center;
+            color: var(--gray-600) !important;
         }
 
         .step.active .step-icon {
-            color: var(--blue-500);
+            color: var(--blue-500) !important;
             animation: pulse 2s infinite;
         }
 
         .step.completed .step-icon {
-            color: var(--green-500);
+            color: var(--green-500) !important;
         }
 
         @keyframes pulse {
@@ -204,13 +221,13 @@
         .step-text h4 {
             margin: 0;
             font-size: 0.95rem;
-            color: var(--gray-900);
+            color: var(--gray-900) !important;
         }
 
         .step-text p {
             margin: 0.25rem 0 0 0;
             font-size: 0.8rem;
-            color: var(--gray-600);
+            color: var(--gray-600) !important;
         }
     </style>
 </head>
@@ -538,6 +555,8 @@
         let countdownInterval = null;
 
         function updateStep(stepId, status) {
+            console.log(`updateStep called with stepId: ${stepId}, status: ${status}`);
+
             // Remove active/completed from all steps
             document.querySelectorAll('.step').forEach(step => {
                 step.classList.remove('active', 'completed');
@@ -546,12 +565,18 @@
             // Mark steps before this one as completed
             const steps = ['step-upload', 'step-extract', 'step-process', 'step-complete'];
             const currentIndex = steps.indexOf(stepId);
+            console.log(`Current index: ${currentIndex}, Total steps: ${steps.length}`);
 
             steps.forEach((step, index) => {
+                const stepElement = document.getElementById(step);
                 if (index < currentIndex) {
-                    document.getElementById(step).classList.add('completed');
+                    stepElement.classList.add('completed');
+                    console.log(`Added 'completed' to ${step}`);
                 } else if (index === currentIndex) {
-                    document.getElementById(step).classList.add('active');
+                    stepElement.classList.add('active');
+                    console.log(`Added 'active' to ${step}`);
+                    // Verify the class was actually added
+                    console.log(`${step} classes after add:`, stepElement.className);
                 }
             });
         }
@@ -604,6 +629,13 @@
 
                 const estimateResult = await estimateResponse.json();
 
+                console.log('=== ESTIMATION RESPONSE ===');
+                console.log('Estimate Response OK:', estimateResponse.ok);
+                console.log('Estimate Result:', estimateResult);
+                console.log('Image Count:', estimateResult.image_count);
+                console.log('Estimated Time:', estimateResult.estimated_time_seconds);
+                console.log('===========================');
+
                 let imageCount = 1;
                 let estimatedTime = 45;
 
@@ -614,6 +646,8 @@
                     document.getElementById('imageCount').textContent = imageCount;
                     document.getElementById('estimationText').textContent =
                         `📊 Found ${imageCount} image(s) | Estimated time: ~${estimatedTime}s`;
+                } else {
+                    console.error('Estimation failed:', estimateResult);
                 }
 
                 // Move to extraction step
@@ -638,10 +672,23 @@
 
                 const result = await response.json();
 
+                // Debug logging
+                console.log('=== EXTRACTION RESPONSE DEBUG ===');
+                console.log('Response OK:', response.ok);
+                console.log('Response Status:', response.status);
+                console.log('Result Object:', result);
+                console.log('Result Success:', result.success);
+                console.log('Result Metrics:', result.metrics);
+                console.log('Result Count:', result.count);
+                console.log('================================');
+
                 hideLoading();
 
                 if (response.ok && result.success) {
                     extractedMetrics = result.metrics;
+
+                    console.log('Extracted Metrics Array:', extractedMetrics);
+                    console.log('First metric sample:', extractedMetrics[0]);
 
                     // Mark as complete
                     updateStep('step-complete', 'active');
@@ -699,17 +746,32 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${extractedMetrics.map((metric, idx) => `
+                            ${extractedMetrics.map((metric, idx) => {
+                // Debug each metric
+                console.log(`Metric ${idx + 1}:`, metric);
+
+                // Format value - show decimals only if needed
+                let displayValue = 'N/A';
+                if (metric.value !== null && metric.value !== undefined) {
+                    // Check if it's a whole number
+                    if (Number.isInteger(metric.value)) {
+                        displayValue = metric.value.toString();
+                    } else {
+                        displayValue = metric.value.toFixed(2);
+                    }
+                }
+
+                return `
                                 <tr>
                                     <td><strong>${idx + 1}</strong></td>
-                                    <td>${metric.title}</td>
+                                    <td>${metric.title || 'Untitled'}</td>
                                     <td>
                                         <span class="value-badge">
-                                            ${metric.value !== null ? metric.value.toFixed(2) : 'N/A'}
+                                            ${displayValue}
                                         </span>
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `}).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -769,11 +831,22 @@
         }
 
         function redirectToPerformanceStats() {
-            // Store metrics in sessionStorage for transfer to Performance Statistics
-            sessionStorage.setItem('extractedMetrics', JSON.stringify(extractedMetrics));
+            // Validate that we have metrics to send
+            if (!extractedMetrics || extractedMetrics.length === 0) {
+                showError('No metrics available to send to Performance Statistics');
+                return;
+            }
 
-            // Redirect to Performance Statistics
-            window.location.href = '/performance-statistics?mode=extracted';
+            // Show confirmation dialog
+            if (confirm(`Do you want to navigate to Performance Statistics with ${extractedMetrics.length} extracted metrics?\n\nNote: You can also download the metrics as JSON or CSV files first.`)) {
+                // Store metrics in sessionStorage for transfer to Performance Statistics
+                sessionStorage.setItem('extractedMetrics', JSON.stringify(extractedMetrics));
+
+                console.log('Navigating to Performance Statistics with metrics:', extractedMetrics);
+
+                // Redirect to Performance Statistics
+                window.location.href = '/performance-statistics?mode=extracted';
+            }
         }
 
         // Utility Functions

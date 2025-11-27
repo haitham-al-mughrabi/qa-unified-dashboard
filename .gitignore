@@ -2,3 +2,4 @@ node_modules/
 qa_dashboard.db
 *.log
 .DS_Store
+extracted_data/*

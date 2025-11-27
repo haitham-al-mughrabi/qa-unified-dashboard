@@ -28,16 +28,27 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def count_images_in_docx(filepath):
-    """Count the number of images in a DOCX file"""
+    """Count the number of images in a DOCX file using multiple methods"""
     try:
         doc = Document(filepath)
         image_count = 0
-
-        # Count inline images in paragraphs
+        
+        # Method 1: Count images via document relationships (most reliable)
+        # This counts actual image files embedded in the document
+        image_parts = []
+        for rel in doc.part.rels.values():
+            if "image" in rel.target_ref:
+                image_parts.append(rel.target_ref)
+        
+        relationship_count = len(image_parts)
+        print(f"Method 1 (Relationships): Found {relationship_count} images")
+        
+        # Method 2: Count inline images in paragraphs via blip elements
+        blip_count = 0
         for paragraph in doc.paragraphs:
             for run in paragraph.runs:
-                if run._element.xml.find(b'blip') != -1:
-                    image_count += 1
+                if 'blip' in run._element.xml:
+                    blip_count += 1
 
         # Count images in tables
         for table in doc.tables:
@@ -45,13 +56,23 @@ def count_images_in_docx(filepath):
                 for cell in row.cells:
                     for paragraph in cell.paragraphs:
                         for run in paragraph.runs:
-                            if run._element.xml.find(b'blip') != -1:
-                                image_count += 1
-
+                            if 'blip' in run._element.xml:
+                                blip_count += 1
+        
+        print(f"Method 2 (Blip elements): Found {blip_count} images")
+        
+        # Use the maximum count from both methods
+        image_count = max(relationship_count, blip_count)
+        
+        print(f"Final image count: {image_count}")
+        
         return image_count if image_count > 0 else 1  # Minimum 1 if no images found
     except Exception as e:
         print(f"Error counting images: {e}")
+        import traceback
+        traceback.print_exc()
         return 1
+
 
 def estimate_processing_time(image_count):
     """Estimate processing time in seconds based on image count"""
@@ -158,6 +179,11 @@ def estimate():
             # Count images
             image_count = count_images_in_docx(filepath)
             estimated_time = estimate_processing_time(image_count)
+            
+            print(f"=== ESTIMATION RESPONSE ===")
+            print(f"Image count: {image_count}")
+            print(f"Estimated time: {estimated_time}s")
+            print(f"===========================")
 
             return jsonify({
                 'success': True,
@@ -208,14 +234,28 @@ def extract_simple():
             output_dir = os.path.join(app.config['UPLOAD_FOLDER'], f'extraction_{os.getpid()}')
 
             # Process the document
+            print(f"=== STARTING EXTRACTION ===")
+            print(f"File: {filename}")
+            print(f"Image count: {image_count}")
+            
             extractor = UniversalExtractorWithReport(filepath, output_dir)
             results = extractor.process_document()
+            
+            print(f"Extraction complete. Results count: {len(results)}")
+            
+            # Debug: Print first few results
+            for i, r in enumerate(results[:3]):
+                print(f"Result {i+1}: title='{r['title']}', value={r['value']}, type={type(r['value'])}")
 
             # Return only title and value pairs (simpler format)
             metrics = [
                 {'title': r['title'], 'value': r['value']}
                 for r in results
             ]
+            
+            print(f"Formatted metrics count: {len(metrics)}")
+            print(f"First metric: {metrics[0] if metrics else 'None'}")
+            print(f"=== EXTRACTION COMPLETE ===")
 
             return jsonify({
                 'success': True,

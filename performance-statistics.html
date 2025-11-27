@@ -313,7 +313,116 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function () {
             setupUploadHandlers();
+
+            // Check if we have extracted metrics from the metrics extractor
+            checkForExtractedMetrics();
         });
+
+        function checkForExtractedMetrics() {
+            // Check URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+
+            if (mode === 'extracted') {
+                // Try to get metrics from sessionStorage
+                const extractedMetricsJson = sessionStorage.getItem('extractedMetrics');
+
+                if (extractedMetricsJson) {
+                    try {
+                        const extractedMetrics = JSON.parse(extractedMetricsJson);
+
+                        console.log('=== LOADED EXTRACTED METRICS ===');
+                        console.log('Metrics count:', extractedMetrics.length);
+                        console.log('First metric:', extractedMetrics[0]);
+                        console.log('================================');
+
+                        // Clear from sessionStorage
+                        sessionStorage.removeItem('extractedMetrics');
+
+                        // Convert to file-like format and process
+                        processExtractedMetrics(extractedMetrics);
+                    } catch (error) {
+                        console.error('Error loading extracted metrics:', error);
+                        showError('Failed to load extracted metrics: ' + error.message);
+                    }
+                } else {
+                    showError('No extracted metrics found. Please extract metrics first.');
+                }
+            }
+        }
+
+        function processExtractedMetrics(metrics) {
+            showLoading();
+            document.getElementById('loadingTitle').textContent = 'Processing extracted metrics...';
+            document.getElementById('loadingText').textContent = `Processing ${metrics.length} metrics`;
+
+            // Reset data
+            allParsedData = [];
+            processedDataByProject = {};
+
+            // Process each metric
+            metrics.forEach(item => {
+                if (!item.title || item.value === undefined || item.value === null) {
+                    console.warn('Skipping invalid metric:', item);
+                    return;
+                }
+
+                // Parse title to extract project and month
+                const parsed = parseTitle(item.title);
+                if (!parsed) {
+                    console.warn('Could not parse title:', item.title);
+                    return;
+                }
+
+                const { project, month, year } = parsed;
+                const quarter = getQuarter(month);
+                const value = parseFloat(item.value);
+
+                if (!processedDataByProject[project]) {
+                    processedDataByProject[project] = {
+                        projectName: project,
+                        months: [],
+                        quarters: { 'Q1': [], 'Q2': [], 'Q3': [], 'Q4': [] },
+                        years: {}
+                    };
+                }
+
+                processedDataByProject[project].months.push({
+                    month,
+                    quarter,
+                    year,
+                    value,
+                    filename: 'extracted-metrics.json'
+                });
+
+                processedDataByProject[project].quarters[quarter].push(value);
+
+                if (!processedDataByProject[project].years[year]) {
+                    processedDataByProject[project].years[year] = {
+                        months: [],
+                        quarters: { 'Q1': [], 'Q2': [], 'Q3': [], 'Q4': [] }
+                    };
+                }
+
+                processedDataByProject[project].years[year].months.push({
+                    month,
+                    quarter,
+                    value
+                });
+
+                processedDataByProject[project].years[year].quarters[quarter].push(value);
+            });
+
+            hideLoading();
+
+            const projectCount = Object.keys(processedDataByProject).length;
+            if (projectCount > 0) {
+                displayResults();
+                showSuccess(`Successfully loaded ${metrics.length} metrics from ${projectCount} project(s)`);
+            } else {
+                showError('No valid metrics could be processed from the extracted data');
+            }
+        }
 
         function setupUploadHandlers() {
             const uploadArea = document.getElementById('uploadArea');
