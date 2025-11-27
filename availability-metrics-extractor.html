@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Metrics Extractor - QA Dashboard</title>
+    <title>Availability Metrics Extractor - QA Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -313,8 +313,8 @@
     <div class="main-container">
         <!-- Hero Section -->
         <div class="hero">
-            <h1><i class="fas fa-file-export"></i> Performance Metrics Extractor</h1>
-            <p>Extract metrics from DOCX files using OCR technology and process them for performance analysis</p>
+            <h1><i class="fas fa-file-export"></i> Availability Metrics Extractor</h1>
+            <p>Extract availability metrics from DOCX files using OCR technology for precise data analysis</p>
         </div>
 
         <!-- Upload Card -->
@@ -739,7 +739,7 @@
                     <i class="fas fa-check-circle"></i>
                     <div class="extraction-info-text">
                         <h4>Extraction Complete</h4>
-                        <p>Found ${extractedMetrics.length} metrics. You can download the results or send them to Performance Statistics.</p>
+                        <p>Found ${extractedMetrics.length} metrics. You can download the results or send them to Availability Statistics.</p>
                     </div>
                 </div>
 
@@ -790,8 +790,9 @@
                     <button class="action-btn btn-download-csv" onclick="downloadCSV()">
                         <i class="fas fa-file-csv"></i> Download CSV
                     </button>
-                    <button class="action-btn btn-to-statistics" onclick="redirectToPerformanceStats()">
-                        <i class="fas fa-arrow-right"></i> Send to Performance Statistics
+                        <button class="btn-send-stats" onclick="redirectToPerformanceStats()">
+                            <i class="fas fa-paper-plane"></i> Send to Availability Statistics
+                        </button>
                 </div>
             `;
 
@@ -859,14 +860,14 @@
             }
 
             // Show confirmation dialog
-            if (confirm(`Do you want to navigate to Performance Statistics with ${extractedMetrics.length} extracted metrics?\n\nNote: You can also download the metrics as JSON or CSV files first.`)) {
+            if (confirm(`Do you want to navigate to Availability Statistics with ${extractedMetrics.length} extracted metrics?\n\nNote: You can also download the metrics as JSON or CSV files first.`)) {
                 // Store metrics in sessionStorage for transfer to Performance Statistics
-                sessionStorage.setItem('extractedMetrics', JSON.stringify(extractedMetrics));
+                sessionStorage.setItem('availabilityExtractedMetrics', JSON.stringify(extractedMetrics));
 
-                console.log('Navigating to Performance Statistics with metrics:', extractedMetrics);
+                console.log('Navigating to Availability Statistics with metrics:', extractedMetrics);
 
                 // Redirect to Performance Statistics
-                window.location.href = '/performance-statistics?mode=extracted';
+                window.location.href = '/availability-statistics?mode=extracted';
             }
         }
 

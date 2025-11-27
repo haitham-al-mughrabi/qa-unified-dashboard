@@ -247,14 +247,33 @@ def extract_simple():
             for i, r in enumerate(results[:3]):
                 print(f"Result {i+1}: title='{r['title']}', value={r['value']}, type={type(r['value'])}")
 
-            # Return only title and value pairs (simpler format)
-            metrics = [
-                {'title': r['title'], 'value': r['value']}
-                for r in results
-            ]
+            # Return title, value, and debug information
+            metrics = []
+            for r in results:
+                debug_info = r.get('debug_info', {})
+                candidates = debug_info.get('candidates', [])
+                
+                # Calculate confidence from best candidate
+                confidence = candidates[0].get('conf', 0) if candidates else 0
+                
+                # Get raw OCR text
+                ocr_texts = debug_info.get('ocr_text', [])
+                raw_text = ' | '.join([f"{t['text']} ({t['conf']:.0f}%)" for t in ocr_texts[:3]]) if ocr_texts else ''
+                
+                metrics.append({
+                    'title': r['title'],
+                    'value': r['value'],
+                    'debug': {
+                        'confidence': round(confidence, 1),
+                        'raw_text': raw_text,
+                        'selection_reason': debug_info.get('selection_reason', ''),
+                        'candidates_count': len(candidates),
+                        'image_index': r.get('id', 0)
+                    }
+                })
             
             print(f"Formatted metrics count: {len(metrics)}")
-            print(f"First metric: {metrics[0] if metrics else 'None'}")
+            print(f"First metric: {metrics[0] if metrics else 'None'}\")")
             print(f"=== EXTRACTION COMPLETE ===")
 
             return jsonify({
@@ -262,7 +281,8 @@ def extract_simple():
                 'metrics': metrics,
                 'count': len(metrics),
                 'image_count': image_count,
-                'estimated_time_seconds': estimated_time
+                'estimated_time_seconds': estimated_time,
+                'successful_extractions': sum(1 for m in metrics if m['value'] is not None)
             }), 200
 
         finally:

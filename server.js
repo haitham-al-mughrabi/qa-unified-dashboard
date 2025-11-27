@@ -2432,6 +2432,10 @@ app.get('/performance-metrics-extractor', (req, res) => {
     res.sendFile(path.join(__dirname, 'performance-metrics-extractor.html'));
 });
 
+app.get('/availability-metrics-extractor', (req, res) => {
+    res.sendFile(path.join(__dirname, 'availability-metrics-extractor.html'));
+});
+
 app.get('/availability-statistics', (req, res) => {
     res.sendFile(path.join(__dirname, 'availability-statistics.html'));
 });
