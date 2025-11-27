@@ -8,6 +8,9 @@ from flask_cors import CORS
 import os
 import sys
 import tempfile
+import time
+import json
+import base64
 from werkzeug.utils import secure_filename
 from extract_metrics_new import UniversalExtractorWithReport
 from docx import Document
@@ -260,6 +263,25 @@ def extract_simple():
                 ocr_texts = debug_info.get('ocr_text', [])
                 raw_text = ' | '.join([f"{t['text']} ({t['conf']:.0f}%)" for t in ocr_texts[:3]]) if ocr_texts else ''
                 
+                # Encode images to base64
+                original_image_b64 = None
+                processed_image_b64 = None
+                
+                try:
+                    # Original image
+                    img_path = os.path.join(output_dir, 'images', r['image_file'])
+                    if os.path.exists(img_path):
+                        with open(img_path, "rb") as image_file:
+                            original_image_b64 = base64.b64encode(image_file.read()).decode('utf-8')
+                            
+                    # Processed image
+                    proc_img_path = os.path.join(output_dir, debug_info.get('processed_image', ''))
+                    if os.path.exists(proc_img_path):
+                        with open(proc_img_path, "rb") as image_file:
+                            processed_image_b64 = base64.b64encode(image_file.read()).decode('utf-8')
+                except Exception as e:
+                    print(f"Error encoding images: {e}")
+
                 metrics.append({
                     'title': r['title'],
                     'value': r['value'],
@@ -268,7 +290,10 @@ def extract_simple():
                         'raw_text': raw_text,
                         'selection_reason': debug_info.get('selection_reason', ''),
                         'candidates_count': len(candidates),
-                        'image_index': r.get('id', 0)
+                        'candidates': candidates[:5], # Top 5 candidates
+                        'image_index': r.get('id', 0),
+                        'original_image': original_image_b64,
+                        'processed_image': processed_image_b64
                     }
                 })
             

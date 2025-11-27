@@ -52,11 +52,11 @@
                         <i class="fas fa-chart-line"></i> Statistics <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="dropdown-menu">
-                        <a href="/performance-metrics-extractor" class="dropdown-item">
-                            <i class="fas fa-file-export"></i> Metrics Extractor
-                        </a>
                         <a href="/performance-statistics" class="dropdown-item">
                             <i class="fas fa-trophy"></i> Performance Statistics
+                        </a>
+                        <a href="/performance-metrics-extractor" class="dropdown-item">
+                            <i class="fas fa-file-export"></i> Performance Metrics Extractor
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="/project-statistics.html" class="dropdown-item">
@@ -76,6 +76,9 @@
                     <div class="dropdown-menu">
                         <a href="/availability-statistics" class="dropdown-item">
                             <i class="fas fa-chart-area"></i> Availability Statistics
+                        </a>
+                        <a href="/availability-metrics-extractor" class="dropdown-item">
+                            <i class="fas fa-file-export"></i> Availability Metrics Extractor
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="/project-availability" class="dropdown-item">
@@ -875,12 +878,12 @@
                                     <h4 style="color: ${defaultColor}"><i class="fas fa-calendar-week"></i> Monthly Breakdown</h4>
                                     <div class="monthly-tabs">
                                         ${Object.keys(quarterData.months)
-                                            .map((monthKey, index) => {
-                                                const monthData = quarterData.months[monthKey];
-                                                const monthSuccessRate = parseFloat(monthData.success_rate || 0);
-                                                const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
-                                                const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
-                                                return `
+                        .map((monthKey, index) => {
+                            const monthData = quarterData.months[monthKey];
+                            const monthSuccessRate = parseFloat(monthData.success_rate || 0);
+                            const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
+                            const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
+                            return `
                                                     <button class="month-tab-btn ${index === 0 ? 'active' : ''}"
                                                             style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};"
                                                             onclick="switchMonth('${monthKey}')">
@@ -888,16 +891,16 @@
                                                         ${monthKey}
                                                     </button>
                                                 `;
-                                            }).join('')}
+                        }).join('')}
                                     </div>
                                     <div class="months-grid">
                                         ${Object.keys(quarterData.months)
-                                            .map((monthKey, index) => {
-                                                const monthData = quarterData.months[monthKey];
-                                                const monthSuccessRate = parseFloat(monthData.success_rate || 0);
-                                                const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
-                                                const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
-                                                return `
+                        .map((monthKey, index) => {
+                            const monthData = quarterData.months[monthKey];
+                            const monthSuccessRate = parseFloat(monthData.success_rate || 0);
+                            const monthColor = monthSuccessRate >= 80 ? '#10b981' : monthSuccessRate >= 60 ? '#f59e0b' : '#ef4444';
+                            const monthColorLight = monthSuccessRate >= 80 ? '#34d399' : monthSuccessRate >= 60 ? '#fbbf24' : '#f87171';
+                            return `
                                                     <div class="month-card ${index === 0 ? 'active' : ''}" id="month-${monthKey.replace(/\s+/g, '-')}" style="--month-color: ${monthColor}; --month-color-light: ${monthColorLight};">
                                                         <div class="month-header">
                                                             <div class="month-title">
@@ -936,7 +939,7 @@
                                                         </div>
                                                     </div>
                                                 `;
-                                            }).join('')}
+                        }).join('')}
                                     </div>
                                 </div>
                             ` : ''}
@@ -956,7 +959,7 @@
                             </div>
                             <div class="records-content" id="records-content">
                                 ${quarterData.records.map(record => {
-                                    return `
+                            return `
                                         <div class="record-item" id="record-${record.id}">
                                             <div class="record-checkbox">
                                                 <input type="checkbox"
@@ -985,7 +988,7 @@
                                             </div>
                                         </div>
                                     `;
-                                }).join('')}
+                        }).join('')}
                             </div>
                         </div>
                     </div>
@@ -1198,7 +1201,7 @@
         }
 
         // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
+        window.addEventListener('click', function (event) {
             const deleteModal = document.getElementById('deleteConfirmModal');
             if (event.target === deleteModal) {
                 closeDeleteConfirmModal();
@@ -1256,7 +1259,7 @@
         }
 
         // Close delete all modal when clicking outside
-        window.addEventListener('click', function(event) {
+        window.addEventListener('click', function (event) {
             const deleteAllModal = document.getElementById('deleteAllConfirmModal');
             if (deleteAllModal && event.target === deleteAllModal) {
                 closeDeleteAllModal();
